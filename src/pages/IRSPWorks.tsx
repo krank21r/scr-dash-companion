@@ -1,11 +1,40 @@
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 
+interface WorkItem {
+  id: number;
+  type: "rsp" | "irsp";
+  description: string;
+  yearOfSanction: string;
+  pbNo: string;
+  rbSanctionedCost: string;
+  qtySanctioned: string;
+  qtyAllotted: string;
+  deTotalValue: string;
+  remarks: string;
+  status: string;
+}
+
+const getStatusLabel = (status: string) => {
+  const statusMap: Record<string, string> = {
+    de_process: "DE under process",
+    de_finance: "DE Sent to Finance",
+    de_hqrs: "DE sent to HQrs",
+    work_process: "Work under process",
+    tender: "Tender stage",
+    completed: "Work Completed",
+  };
+  return statusMap[status] || status;
+};
+
 const IRSPWorks = () => {
-  const works = [
-    { id: 1, title: "Railway Track Electrification", status: "Active", location: "Section A" },
-    { id: 2, title: "Platform Extension", status: "Planning", location: "Station B" },
-    { id: 3, title: "Signal System Upgrade", status: "Review", location: "Junction C" },
-  ];
+  const [works, setWorks] = useState<WorkItem[]>([]);
+
+  useEffect(() => {
+    const allWorks = JSON.parse(localStorage.getItem('works') || '[]');
+    const irspWorks = allWorks.filter((work: WorkItem) => work.type === 'irsp');
+    setWorks(irspWorks);
+  }, []);
 
   return (
     <div className="page-transition container pt-24">
@@ -21,19 +50,52 @@ const IRSPWorks = () => {
 
       <div className="grid gap-6">
         {works.map((work) => (
-          <Card key={work.id} className="card-hover p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">{work.title}</h3>
-                <p className="text-sm text-muted-foreground">{work.location}</p>
+          <Card key={work.id} className="p-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold">#{work.id} - {work.description}</h3>
+                <span className={`rounded-full px-3 py-1 text-sm font-medium ${
+                  work.status === "completed" ? "bg-green-100 text-green-800" :
+                  work.status === "work_process" ? "bg-blue-100 text-blue-800" :
+                  "bg-yellow-100 text-yellow-800"
+                }`}>
+                  {getStatusLabel(work.status)}
+                </span>
               </div>
-              <span className={`rounded-full px-3 py-1 text-sm font-medium ${
-                work.status === "Active" ? "bg-green-100 text-green-800" :
-                work.status === "Planning" ? "bg-purple-100 text-purple-800" :
-                "bg-orange-100 text-orange-800"
-              }`}>
-                {work.status}
-              </span>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Year of Sanction</p>
+                  <p className="font-medium">{work.yearOfSanction}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">P.B No</p>
+                  <p className="font-medium">{work.pbNo}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">RB Sanctioned Cost</p>
+                  <p className="font-medium">{work.rbSanctionedCost}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Quantity Sanctioned</p>
+                  <p className="font-medium">{work.qtySanctioned}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Quantity Allotted</p>
+                  <p className="font-medium">{work.qtyAllotted}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">DE Total Value</p>
+                  <p className="font-medium">{work.deTotalValue}</p>
+                </div>
+              </div>
+
+              {work.remarks && (
+                <div>
+                  <p className="text-muted-foreground">Remarks</p>
+                  <p className="mt-1">{work.remarks}</p>
+                </div>
+              )}
             </div>
           </Card>
         ))}
