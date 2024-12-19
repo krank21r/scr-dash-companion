@@ -5,13 +5,11 @@ interface WorkItem {
   id: number;
   type: "rsp" | "irsp";
   description: string;
+  lawNo: string;
   yearOfSanction: string;
-  pbNo: string;
-  rbSanctionedCost: string;
+  rate: string;
   qtySanctioned: string;
-  qtyAllotted: string;
-  deTotalValue: string;
-  remarks: string;
+  totalValue: string;
   status: string;
 }
 
@@ -20,8 +18,8 @@ const getStatusLabel = (status: string) => {
     de_process: "DE under process",
     de_finance: "DE Sent to Finance",
     de_hqrs: "DE sent to HQrs",
+    indents_placed: "Indents placed",
     work_process: "Work under process",
-    tender: "Tender stage",
     completed: "Work Completed",
   };
   return statusMap[status] || status;
@@ -50,14 +48,12 @@ const IRSPWorks = () => {
             <TableRow>
               <TableHead>Sl.No</TableHead>
               <TableHead>Description</TableHead>
+              <TableHead>LAW No</TableHead>
               <TableHead>Year of Sanction</TableHead>
-              <TableHead>P.B No</TableHead>
-              <TableHead>RB Sanctioned Cost</TableHead>
+              <TableHead>Rate</TableHead>
               <TableHead>Qty Sanctioned</TableHead>
-              <TableHead>Qty Allotted</TableHead>
-              <TableHead>DE Total Value</TableHead>
+              <TableHead>Total Value</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Remarks</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -65,12 +61,11 @@ const IRSPWorks = () => {
               <TableRow key={work.id}>
                 <TableCell>{work.id}</TableCell>
                 <TableCell>{work.description}</TableCell>
+                <TableCell>{work.lawNo}</TableCell>
                 <TableCell>{work.yearOfSanction}</TableCell>
-                <TableCell>{work.pbNo}</TableCell>
-                <TableCell>{work.rbSanctionedCost}</TableCell>
+                <TableCell>{work.rate}</TableCell>
                 <TableCell>{work.qtySanctioned}</TableCell>
-                <TableCell>{work.qtyAllotted}</TableCell>
-                <TableCell>{work.deTotalValue}</TableCell>
+                <TableCell>{work.totalValue}</TableCell>
                 <TableCell>
                   <span className={`rounded-full px-2 py-1 text-xs font-medium ${
                     work.status === "completed" ? "bg-green-100 text-green-800" :
@@ -80,7 +75,6 @@ const IRSPWorks = () => {
                     {getStatusLabel(work.status)}
                   </span>
                 </TableCell>
-                <TableCell>{work.remarks}</TableCell>
               </TableRow>
             ))}
           </TableBody>
