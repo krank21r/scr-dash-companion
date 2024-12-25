@@ -8,6 +8,8 @@ import Home from "./pages/Home";
 import RSPWorks from "./pages/RSPWorks";
 import IRSPWorks from "./pages/IRSPWorks";
 import AddWorks from "./pages/AddWorks";
+import UnitCost from "./pages/UnitCost";
+import Reviews from "./pages/Reviews";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +27,8 @@ const App = () => (
               <Route path="/rsp-works" element={<RSPWorks />} />
               <Route path="/irsp-works" element={<IRSPWorks />} />
               <Route path="/add-works" element={<AddWorks />} />
+              <Route path="/unit-cost" element={<UnitCost />} />
+              <Route path="/reviews" element={<Reviews />} />
             </Routes>
           </main>
         </BrowserRouter>

@@ -39,6 +39,12 @@ const Navbar = () => {
           <Link to="/irsp-works" className={`nav-item ${isActive("/irsp-works") ? "active" : ""}`}>
             IRSP Works
           </Link>
+          <Link to="/unit-cost" className={`nav-item ${isActive("/unit-cost") ? "active" : ""}`}>
+            Unit Cost
+          </Link>
+          <Link to="/reviews" className={`nav-item ${isActive("/reviews") ? "active" : ""}`}>
+            Reviews
+          </Link>
           <Link to="/add-works" className={`nav-item ${isActive("/add-works") ? "active" : ""}`}>
             Add Works
           </Link>
@@ -66,6 +72,20 @@ const Navbar = () => {
             onClick={toggleMenu}
           >
             IRSP Works
+          </Link>
+          <Link 
+            to="/unit-cost" 
+            className={`p-4 hover:bg-gray-50 ${isActive("/unit-cost") ? "text-primary" : ""}`}
+            onClick={toggleMenu}
+          >
+            Unit Cost
+          </Link>
+          <Link 
+            to="/reviews" 
+            className={`p-4 hover:bg-gray-50 ${isActive("/reviews") ? "text-primary" : ""}`}
+            onClick={toggleMenu}
+          >
+            Reviews
           </Link>
           <Link 
             to="/add-works" 
