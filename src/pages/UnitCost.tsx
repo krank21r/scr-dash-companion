@@ -21,16 +21,35 @@ const UnitCost = () => {
   const [unitCostData, setUnitCostData] = useState<UnitCostData[]>([]);
 
   const validateUnitCostData = (data: any[]): { isValid: boolean; errors?: string[] } => {
-    const requiredFields = ['itemCode', 'description', 'unit', 'rate'];
     const errors: string[] = [];
+    const requiredFields = ['itemCode', 'description', 'unit', 'rate'];
 
-    // Check if all required fields are present
+    // Check if data array is empty
+    if (!data || data.length === 0) {
+      errors.push('No data found in the Excel file');
+      return { isValid: false, errors };
+    }
+
+    // Check for missing required fields
     const missingFields = requiredFields.filter(field => 
-      !data.every(item => item[field])
+      !data.every(item => {
+        const value = item[field] || item[field.charAt(0).toUpperCase() + field.slice(1)];
+        return value !== undefined && value !== '';
+      })
     );
 
     if (missingFields.length > 0) {
       errors.push(`Missing required fields: ${missingFields.join(', ')}`);
+    }
+
+    // Validate rate values
+    const invalidRates = data.some(item => {
+      const rate = Number(item.rate || item.Rate);
+      return isNaN(rate) || rate < 0;
+    });
+
+    if (invalidRates) {
+      errors.push('All rates must be valid positive numbers');
     }
 
     return {
@@ -62,7 +81,7 @@ const UnitCost = () => {
       setUnitCostData(transformedData);
     } catch (error) {
       console.error('Error parsing Excel file:', error);
-      throw new Error('Failed to parse Excel file. Please check the file format.');
+      throw error;
     }
   };
 
