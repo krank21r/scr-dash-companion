@@ -4,7 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
 
 interface ExcelUploaderProps {
-  onFileUpload: (data: any[]) => void;
+  onFileUpload: (file: File) => Promise<void>;
   validateData: (data: any[]) => { isValid: boolean; errors?: string[] };
   acceptedFileTypes?: string[];
 }
@@ -54,32 +54,16 @@ const ExcelUploader = ({
     }
 
     try {
-      // Here you would typically use a library like xlsx to parse the Excel file
-      // For now, we'll just simulate the parsing
-      const mockData = [
-        { id: 1, data: "Sample data" }
-      ];
-
-      const validation = validateData(mockData);
-      if (!validation.isValid) {
-        toast({
-          variant: "destructive",
-          title: "Invalid data format",
-          description: validation.errors?.join('\n')
-        });
-        return;
-      }
-
-      onFileUpload(mockData);
+      await onFileUpload(file);
       toast({
         title: "Success",
-        description: "File uploaded successfully"
+        description: "File uploaded and processed successfully"
       });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to process the file. Please try again."
+        description: error instanceof Error ? error.message : "Failed to process the file. Please try again."
       });
     }
   };
