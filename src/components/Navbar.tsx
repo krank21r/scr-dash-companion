@@ -14,10 +14,10 @@ const Navbar = () => {
 
   return (
     <nav className="fixed top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
-      <div className="container flex h-16 items-center justify-between px-4 md:px-6">
-        <Link to="/" className="text-lg font-semibold">
-          SCR Organisation
-        </Link>
+      <div className="container flex h-16 items-center px-4 md:px-6">
+        <Link to="/" className="text-lg font-semibold md:mr-auto">
+          Carriage Workshop LGDS
+        </Link> 
         
         {/* Mobile menu button */}
         <button 
@@ -29,7 +29,7 @@ const Navbar = () => {
         </button>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex space-x-4">
+        <div className="hidden md:flex md:items-center md:space-x-4 justify-center flex-1">
           <Link to="/" className={`nav-item ${isActive("/") ? "active" : ""}`}>
             Home
           </Link>
@@ -38,9 +38,6 @@ const Navbar = () => {
           </Link>
           <Link to="/irsp-works" className={`nav-item ${isActive("/irsp-works") ? "active" : ""}`}>
             IRSP Works
-          </Link>
-          <Link to="/unit-cost" className={`nav-item ${isActive("/unit-cost") ? "active" : ""}`}>
-            Unit Cost
           </Link>
           <Link to="/reviews" className={`nav-item ${isActive("/reviews") ? "active" : ""}`}>
             Reviews
@@ -51,7 +48,7 @@ const Navbar = () => {
         </div>
 
         {/* Mobile menu */}
-        <div className={`${isMenuOpen ? 'flex' : 'hidden'} absolute top-16 left-0 right-0 flex-col bg-white border-b shadow-lg md:hidden`}>
+        <div className={`${isMenuOpen ? 'flex' : 'hidden'} absolute top-16 left-0 right-0 flex-col items-center bg-white border-b shadow-lg w-full md:hidden`}>
           <Link 
             to="/" 
             className={`p-4 hover:bg-gray-50 ${isActive("/") ? "text-primary" : ""}`}
@@ -72,13 +69,6 @@ const Navbar = () => {
             onClick={toggleMenu}
           >
             IRSP Works
-          </Link>
-          <Link 
-            to="/unit-cost" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/unit-cost") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            Unit Cost
           </Link>
           <Link 
             to="/reviews" 

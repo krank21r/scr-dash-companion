@@ -26,9 +26,9 @@ const Home = () => {
         <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
           Dashboard
         </span>
-        <h1 className="mt-4 text-2xl md:text-4xl font-bold">Welcome to SCR Organisation</h1>
+        <h1 className="mt-4 text-2xl md:text-4xl font-bold">Budget Section Portal</h1>
         <p className="mt-2 text-muted-foreground">
-          Monitor and manage your works efficiently
+          
         </p>
       </div>
 
