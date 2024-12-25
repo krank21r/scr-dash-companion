@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import * as XLSX from 'xlsx';
 import ExcelUploader from '@/components/ExcelUploader';
 import {
   Table,
@@ -38,8 +39,31 @@ const UnitCost = () => {
     };
   };
 
-  const handleFileUpload = (data: UnitCostData[]) => {
-    setUnitCostData(data);
+  const handleFileUpload = async (file: File) => {
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data);
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      // Transform the data to match our UnitCostData interface
+      const transformedData = jsonData.map((row: any) => ({
+        itemCode: row.itemCode || row['Item Code'] || '',
+        description: row.description || row.Description || '',
+        unit: row.unit || row.Unit || '',
+        rate: Number(row.rate || row.Rate || 0),
+      }));
+
+      const validation = validateUnitCostData(transformedData);
+      if (!validation.isValid) {
+        throw new Error(validation.errors?.join('\n'));
+      }
+
+      setUnitCostData(transformedData);
+    } catch (error) {
+      console.error('Error parsing Excel file:', error);
+      throw new Error('Failed to parse Excel file. Please check the file format.');
+    }
   };
 
   return (

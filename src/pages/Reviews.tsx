@@ -17,6 +17,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
 
 interface ReviewData {
   projectName: string;
@@ -75,6 +76,11 @@ const Reviews = () => {
         rating: Number(row.rating || row.Rating || 0),
       }));
 
+      const validation = validateReviewData(transformedData);
+      if (!validation.isValid) {
+        throw new Error(validation.errors?.join('\n'));
+      }
+
       setReviewData(transformedData);
       setCurrentPage(1);
     } catch (error) {
@@ -88,6 +94,18 @@ const Reviews = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = reviewData.slice(startIndex, endIndex);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
 
   return (
     <div className="container py-8">
@@ -133,10 +151,14 @@ const Reviews = () => {
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    <Button 
+                      variant="outline" 
+                      onClick={handlePreviousPage}
                       disabled={currentPage === 1}
-                    />
+                      className="gap-1 pl-2.5"
+                    >
+                      Previous
+                    </Button>
                   </PaginationItem>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <PaginationItem key={page}>
@@ -149,10 +171,14 @@ const Reviews = () => {
                     </PaginationItem>
                   ))}
                   <PaginationItem>
-                    <PaginationNext
-                      onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    <Button 
+                      variant="outline"
+                      onClick={handleNextPage}
                       disabled={currentPage === totalPages}
-                    />
+                      className="gap-1 pr-2.5"
+                    >
+                      Next
+                    </Button>
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
