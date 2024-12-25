@@ -14,17 +14,21 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/rsp-works" element={<RSPWorks />} />
-          <Route path="/irsp-works" element={<IRSPWorks />} />
-          <Route path="/add-works" element={<AddWorks />} />
-        </Routes>
-      </BrowserRouter>
+      <div className="min-h-screen bg-background">
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Navbar />
+          <main className="min-h-screen pt-16">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/rsp-works" element={<RSPWorks />} />
+              <Route path="/irsp-works" element={<IRSPWorks />} />
+              <Route path="/add-works" element={<AddWorks />} />
+            </Routes>
+          </main>
+        </BrowserRouter>
+      </div>
     </TooltipProvider>
   </QueryClientProvider>
 );

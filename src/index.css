@@ -34,29 +34,106 @@
  
     --radius: 0.5rem;
   }
-}
- 
-@layer base {
+
+  html {
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground min-h-screen;
+    touch-action: manipulation;
+  }
+
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground;
+}
+
+/* Mobile-first responsive classes */
+@layer components {
+  .container {
+    @apply px-4 mx-auto w-full;
+    max-width: 100%;
+    
+    @screen sm {
+      max-width: 640px;
+    }
+    
+    @screen md {
+      max-width: 768px;
+    }
+    
+    @screen lg {
+      max-width: 1024px;
+    }
+    
+    @screen xl {
+      max-width: 1280px;
+    }
+  }
+
+  .page-transition {
+    @apply animate-fadeIn;
+  }
+
+  .nav-item {
+    @apply relative px-4 py-2 text-sm font-medium transition-colors hover:text-primary;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-item.active {
+    @apply text-primary before:absolute before:bottom-0 before:left-0 before:h-0.5 before:w-full before:bg-primary before:content-[''];
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+
+  /* Touch-friendly buttons and interactive elements */
+  button, 
+  [role="button"],
+  a {
+    @apply min-h-[44px] min-w-[44px];
+    touch-action: manipulation;
+  }
+
+  /* Responsive table containers */
+  .table-container {
+    @apply w-full overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Responsive images */
+  img {
+    @apply max-w-full h-auto;
+    content-visibility: auto;
+  }
+
+  /* Responsive grid layouts */
+  .responsive-grid {
+    @apply grid gap-4;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   }
 }
 
-.page-transition {
-  @apply animate-fadeIn;
+/* Custom breakpoint styles */
+@media (min-width: 320px) {
+  .container {
+    @apply px-4;
+  }
 }
 
-.nav-item {
-  @apply relative px-4 py-2 text-sm font-medium transition-colors hover:text-primary;
+@media (min-width: 768px) {
+  .container {
+    @apply px-6;
+  }
 }
 
-.nav-item.active {
-  @apply text-primary before:absolute before:bottom-0 before:left-0 before:h-0.5 before:w-full before:bg-primary before:content-[''];
-}
-
-.card-hover {
-  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+@media (min-width: 1024px) {
+  .container {
+    @apply px-8;
+  }
 }
