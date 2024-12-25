@@ -58,10 +58,10 @@ const UnitCost = () => {
     };
   };
 
-  const handleFileUpload = async (file: File) => {
+  const handleFileUpload = async (file: File): Promise<void> => {
     try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
