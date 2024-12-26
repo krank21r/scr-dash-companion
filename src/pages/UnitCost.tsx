@@ -1,125 +1,118 @@
-import { useState } from 'react';
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import ExcelUploader from "@/components/ExcelUploader";
+import { DataTable } from "@/components/ui/table";
+import { toast } from "@/components/ui/use-toast";
 import * as XLSX from 'xlsx';
-import ExcelUploader from '@/components/ExcelUploader';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 interface UnitCostData {
-  itemCode: string;
-  description: string;
-  unit: string;
+  id: number;
+  item: string;
   rate: number;
+  unit: string;
 }
 
 const UnitCost = () => {
-  const [unitCostData, setUnitCostData] = useState<UnitCostData[]>([]);
+  const [unitCosts, setUnitCosts] = useState<UnitCostData[]>([]);
 
-  const validateUnitCostData = (data: any[]): { isValid: boolean; errors?: string[] } => {
-    const errors: string[] = [];
-    const requiredFields = ['itemCode', 'description', 'unit', 'rate'];
+  const validateUnitCostData = (data: any[]): UnitCostData[] => {
+    return data.map((item, index) => {
+      if (!item.item || !item.rate || !item.unit) {
+        throw new Error(`Row ${index + 1} is missing required fields`);
+      }
+      
+      const rate = Number(item.rate);
+      if (isNaN(rate) || rate <= 0) {
+        throw new Error(`Invalid rate in row ${index + 1}`);
+      }
 
-    // Check if data array is empty
-    if (!data || data.length === 0) {
-      errors.push('No data found in the Excel file');
-      return { isValid: false, errors };
-    }
-
-    // Check for missing required fields
-    const missingFields = requiredFields.filter(field => 
-      !data.every(item => {
-        const value = item[field] || item[field.charAt(0).toUpperCase() + field.slice(1)];
-        return value !== undefined && value !== '';
-      })
-    );
-
-    if (missingFields.length > 0) {
-      errors.push(`Missing required fields: ${missingFields.join(', ')}`);
-    }
-
-    // Validate rate values
-    const invalidRates = data.some(item => {
-      const rate = Number(item.rate || item.Rate);
-      return isNaN(rate) || rate < 0;
+      return {
+        id: index + 1,
+        item: String(item.item),
+        rate: rate,
+        unit: String(item.unit)
+      };
     });
-
-    if (invalidRates) {
-      errors.push('All rates must be valid positive numbers');
-    }
-
-    return {
-      isValid: errors.length === 0,
-      errors
-    };
   };
 
   const handleFileUpload = async (file: File): Promise<void> => {
     try {
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        try {
+          if (!event.target?.result) {
+            throw new Error("Failed to read file");
+          }
 
-      // Transform the data to match our UnitCostData interface
-      const transformedData = jsonData.map((row: any) => ({
-        itemCode: row.itemCode || row['Item Code'] || '',
-        description: row.description || row.Description || '',
-        unit: row.unit || row.Unit || '',
-        rate: Number(row.rate || row.Rate || 0),
-      }));
+          const workbook = XLSX.read(event.target.result, { type: 'binary' });
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          
+          const validatedData = validateUnitCostData(jsonData);
+          setUnitCosts(validatedData);
+          
+          toast({
+            title: "Success",
+            description: "Unit cost data uploaded successfully",
+          });
+        } catch (error) {
+          console.error("Error processing Excel file:", error);
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: error instanceof Error ? error.message : "Failed to process Excel file",
+          });
+        }
+      };
 
-      const validation = validateUnitCostData(transformedData);
-      if (!validation.isValid) {
-        throw new Error(validation.errors?.join('\n'));
-      }
+      reader.onerror = () => {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to read the file",
+        });
+      };
 
-      setUnitCostData(transformedData);
+      reader.readAsBinaryString(file);
     } catch (error) {
-      console.error('Error parsing Excel file:', error);
-      throw error;
+      console.error("Error handling file upload:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to handle file upload",
+      });
     }
   };
 
   return (
-    <div className="container py-8">
-      <h1 className="text-2xl font-bold mb-6">Unit Cost Data</h1>
-      
+    <div className="page-transition container pt-24">
       <div className="mb-8">
-        <ExcelUploader
-          onFileUpload={handleFileUpload}
-          validateData={validateUnitCostData}
-        />
+        <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
+          Unit Cost
+        </span>
+        <h1 className="mt-4 text-4xl font-bold">Unit Cost Management</h1>
       </div>
 
-      {unitCostData.length > 0 && (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Item Code</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead className="text-right">Rate</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {unitCostData.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.itemCode}</TableCell>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell>{item.unit}</TableCell>
-                  <TableCell className="text-right">{item.rate}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      <Card className="p-6">
+        <div className="mb-6">
+          <ExcelUploader onFileUpload={handleFileUpload} />
         </div>
-      )}
+
+        {unitCosts.length > 0 && (
+          <div className="mt-6">
+            <h2 className="text-xl font-semibold mb-4">Unit Costs</h2>
+            <DataTable
+              columns={[
+                { header: "Item", accessorKey: "item" },
+                { header: "Rate", accessorKey: "rate" },
+                { header: "Unit", accessorKey: "unit" },
+              ]}
+              data={unitCosts}
+            />
+          </div>
+        )}
+      </Card>
     </div>
   );
 };
