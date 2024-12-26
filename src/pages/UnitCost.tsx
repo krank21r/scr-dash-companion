@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import ExcelUploader from "@/components/ExcelUploader";
-import { DataTable } from "@/components/ui/table";
+import { DataTable } from "@/components/ui/data-table";
 import { toast } from "@/components/ui/use-toast";
 import * as XLSX from 'xlsx';
 
@@ -15,24 +15,24 @@ interface UnitCostData {
 const UnitCost = () => {
   const [unitCosts, setUnitCosts] = useState<UnitCostData[]>([]);
 
-  const validateUnitCostData = (data: any[]): UnitCostData[] => {
-    return data.map((item, index) => {
+  const validateUnitCostData = (data: any[]): { isValid: boolean; errors?: string[] } => {
+    const errors: string[] = [];
+    
+    data.forEach((item, index) => {
       if (!item.item || !item.rate || !item.unit) {
-        throw new Error(`Row ${index + 1} is missing required fields`);
+        errors.push(`Row ${index + 1} is missing required fields`);
       }
       
       const rate = Number(item.rate);
       if (isNaN(rate) || rate <= 0) {
-        throw new Error(`Invalid rate in row ${index + 1}`);
+        errors.push(`Invalid rate in row ${index + 1}`);
       }
-
-      return {
-        id: index + 1,
-        item: String(item.item),
-        rate: rate,
-        unit: String(item.unit)
-      };
     });
+
+    return {
+      isValid: errors.length === 0,
+      errors: errors.length > 0 ? errors : undefined
+    };
   };
 
   const handleFileUpload = async (file: File): Promise<void> => {
@@ -49,7 +49,19 @@ const UnitCost = () => {
           const worksheet = workbook.Sheets[workbook.SheetNames[0]];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
           
-          const validatedData = validateUnitCostData(jsonData);
+          const validationResult = validateUnitCostData(jsonData);
+          
+          if (!validationResult.isValid) {
+            throw new Error(validationResult.errors?.join('\n'));
+          }
+
+          const validatedData = jsonData.map((item: any, index: number) => ({
+            id: index + 1,
+            item: String(item.item),
+            rate: Number(item.rate),
+            unit: String(item.unit)
+          }));
+
           setUnitCosts(validatedData);
           
           toast({
@@ -96,7 +108,10 @@ const UnitCost = () => {
 
       <Card className="p-6">
         <div className="mb-6">
-          <ExcelUploader onFileUpload={handleFileUpload} />
+          <ExcelUploader 
+            onFileUpload={handleFileUpload} 
+            validateData={validateUnitCostData}
+          />
         </div>
 
         {unitCosts.length > 0 && (
