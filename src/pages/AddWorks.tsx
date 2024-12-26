@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
-import RSPWorkForm from "@/components/forms/RSPWorkForm";
-import IRSPWorkForm from "@/components/forms/IRSPWorkForm";
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { useToast } from '../hooks/use-toast';
+import RSPWorkForm from '../components/forms/RSPWorkForm';
+import IRSPWorkForm from '../components/forms/IRSPWorkForm';
 import { useNavigate } from "react-router-dom";
+import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
+import { db } from '../main';
 
 const AddWorks = () => {
   const { toast } = useToast();
@@ -12,57 +14,65 @@ const AddWorks = () => {
   const [showForm, setShowForm] = useState(false);
   const [workType, setWorkType] = useState<"rsp" | "irsp" | "">("");
   const [formData, setFormData] = useState<any>({
+    id: null, // Add an id field to formData
     type: "",
     description: "",
     yearOfSanction: "",
     status: "",
   });
 
-  // Check for edit mode on component mount
   useEffect(() => {
-    const editWork = localStorage.getItem('editWork');
-    if (editWork) {
-      const workData = JSON.parse(editWork);
-      setWorkType(workData.type);
-      setFormData(workData);
+    const storedWork = localStorage.getItem('editWork');
+    if (storedWork) {
+      const parsedWork = JSON.parse(storedWork);
+      setFormData(parsedWork);
+      setWorkType(parsedWork.type);
       setShowForm(true);
-      // Clear the editWork from localStorage
-      localStorage.removeItem('editWork');
     }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const allWorks = JSON.parse(localStorage.getItem('works') || '[]');
-    
+
     if (formData.id) {
-      // Edit mode - update existing work
-      const updatedWorks = allWorks.map((work: any) => 
-        work.id === formData.id ? formData : work
-      );
-      localStorage.setItem('works', JSON.stringify(updatedWorks));
-      
-      toast({
-        title: "Work Updated",
-        description: `${workType.toUpperCase()} work has been updated successfully.`,
-      });
+      // Edit mode - update existing work in Firestore
+      try {
+        const workDocRef = doc(db, "works", formData.id);
+        await updateDoc(workDocRef, formData);
+        toast({
+          title: "Work Updated",
+          description: `${workType.toUpperCase()} work has been updated successfully.`,
+        });
+        localStorage.removeItem('editWork'); // Clear localStorage after successful edit
+      } catch (error: any) {
+        toast({
+          title: "Error updating work",
+          description: `Failed to update work: ${error.message}`,
+          variant: "destructive",
+        });
+        console.error("Error updating document in Firestore:", error);
+        return;
+      }
     } else {
-      // Add mode - create new work
-      const newWork = {
-        ...formData,
-        id: allWorks.length + 1,
-        type: workType,
-      };
-      
-      localStorage.setItem('works', JSON.stringify([...allWorks, newWork]));
-      
-      toast({
-        title: "Work Added",
-        description: `New ${workType.toUpperCase()} work has been added.`,
-      });
+      // Add mode - create new work in Firestore
+      try {
+        const worksCollection = collection(db, "works");
+        await addDoc(worksCollection, formData);
+        toast({
+          title: "Work Added",
+          description: `New ${workType.toUpperCase()} work has been added to Firestore.`,
+        });
+      } catch (error: any) {
+        toast({
+          title: "Error adding work",
+          description: `Failed to add new work: ${error.message}`,
+          variant: "destructive",
+        });
+        console.error("Error adding document to Firestore:", error);
+        return;
+      }
     }
-    
+
     // Navigate back to the appropriate works page
     navigate(workType === 'rsp' ? '/rsp-works' : '/irsp-works');
   };
@@ -117,6 +127,7 @@ const AddWorks = () => {
                   setShowForm(false);
                   setWorkType("");
                   setFormData({
+                    id: null,
                     type: "",
                     description: "",
                     yearOfSanction: "",

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../components/ui/table';
+import { Button } from '../components/ui/button';
 import { Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -12,12 +12,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+} from '../components/ui/alert-dialog';
+import { useToast } from '../hooks/use-toast';
 import { useNavigate } from "react-router-dom";
+import { db } from '../main'; // Import the db instance
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"; // Import Firestore functions
 
 interface WorkItem {
-  id: number;
+  id: string; // Assuming Firebase document ID is a string
   type: "rsp" | "irsp";
   description: string;
   yearOfSanction: string;
@@ -47,33 +49,53 @@ const RSPWorks = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const loadWorks = () => {
-    const allWorks = JSON.parse(localStorage.getItem('works') || '[]');
-    const rspWorks = allWorks.filter((work: WorkItem) => work.type === 'rsp');
-    setWorks(rspWorks);
+  const loadWorks = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "works"));
+      const fetchedWorks: WorkItem[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.type === 'rsp') {
+          fetchedWorks.push({ id: doc.id, ...data } as WorkItem);
+        }
+      });
+      setWorks(fetchedWorks);
+    } catch (error: any) {
+      console.error("Error fetching works:", error);
+      toast({
+        title: "Error fetching works",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
     loadWorks();
   }, []);
 
-  const handleDelete = (id: number) => {
-    const allWorks = JSON.parse(localStorage.getItem('works') || '[]');
-    const updatedWorks = allWorks.filter((work: WorkItem) => work.id !== id);
-    localStorage.setItem('works', JSON.stringify(updatedWorks));
-    
-    loadWorks(); // Refresh the works list after deletion
-    
-    toast({
-      title: "Work Deleted",
-      description: "The work has been successfully deleted.",
-    });
+  const handleDelete = async (id: string) => { // Changed id type to string
+    console.log("Deleting work with ID:", id);
+    try {
+      await deleteDoc(doc(db, "works", id));
+      const allWorks = works.filter((work: WorkItem) => work.id !== id);
+      setWorks(allWorks);
+      toast({
+        title: "Work Deleted",
+        description: "The work has been successfully deleted.",
+      });
+    } catch (error: any) {
+      console.error("Error deleting work:", error);
+      toast({
+        title: "Error deleting work",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEdit = (work: WorkItem) => {
-    // Store the work to be edited in localStorage
     localStorage.setItem('editWork', JSON.stringify(work));
-    // Navigate to AddWorks page
     navigate('/add-works');
   };
 
@@ -89,7 +111,6 @@ const RSPWorks = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sl.No</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Year of Sanction</TableHead>
               <TableHead>P.B No</TableHead>
@@ -105,7 +126,6 @@ const RSPWorks = () => {
           <TableBody>
             {works.map((work) => (
               <TableRow key={work.id}>
-                <TableCell>{work.id}</TableCell>
                 <TableCell>{work.description}</TableCell>
                 <TableCell>{work.yearOfSanction}</TableCell>
                 <TableCell>{work.pbNo}</TableCell>
@@ -158,7 +178,7 @@ const RSPWorks = () => {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+</Table>
       </div>
     </div>
   );

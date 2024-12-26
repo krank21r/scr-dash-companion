@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "../components/ui/table";
+import { Button } from "../components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
@@ -12,12 +12,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useToast } from "@/hooks/use-toast";
+} from "../components/ui/alert-dialog";
+import { useToast } from "../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { db } from "../main";
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 interface WorkItem {
-  id: number;
+  id: string;
   type: "rsp" | "irsp";
   description: string;
   lawNo: string;
@@ -26,6 +28,8 @@ interface WorkItem {
   qtySanctioned: string;
   totalValue: string;
   status: string;
+  nameOfWork?: string;
+  fileNo?: string;
 }
 
 const getStatusLabel = (status: string) => {
@@ -45,33 +49,53 @@ const IRSPWorks = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const loadWorks = () => {
-    const allWorks = JSON.parse(localStorage.getItem('works') || '[]');
-    const irspWorks = allWorks.filter((work: WorkItem) => work.type === 'irsp');
-    setWorks(irspWorks);
+  const loadWorks = async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "works"));
+      const fetchedWorks: WorkItem[] = [];
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (data.type === 'irsp') {
+          fetchedWorks.push({ id: doc.id, ...data } as WorkItem);
+        }
+      });
+      setWorks(fetchedWorks);
+    } catch (error: any) {
+      console.error("Error fetching works:", error);
+      toast({
+        title: "Error fetching works",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
     loadWorks();
   }, []);
 
-  const handleDelete = (id: number) => {
-    const allWorks = JSON.parse(localStorage.getItem('works') || '[]');
-    const updatedWorks = allWorks.filter((work: WorkItem) => work.id !== id);
-    localStorage.setItem('works', JSON.stringify(updatedWorks));
-    
-    loadWorks(); // Refresh the works list after deletion
-    
-    toast({
-      title: "Work Deleted",
-      description: "The work has been successfully deleted.",
-    });
+  const handleDelete = async (id: string) => {
+    console.log("Deleting work with ID:", id);
+    try {
+      await deleteDoc(doc(db, "works", id));
+      const updatedWorks = works.filter((work) => work.id !== id);
+      setWorks(updatedWorks);
+      toast({
+        title: "Work Deleted",
+        description: "The work has been successfully deleted.",
+      });
+    } catch (error: any) {
+      console.error("Error deleting work:", error);
+      toast({
+        title: "Error deleting work",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEdit = (work: WorkItem) => {
-    // Store the work to be edited in localStorage
     localStorage.setItem('editWork', JSON.stringify(work));
-    // Navigate to AddWorks page
     navigate('/add-works');
   };
 
@@ -87,27 +111,22 @@ const IRSPWorks = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sl.No</TableHead>
               <TableHead>Description</TableHead>
-              <TableHead>LAW No</TableHead>
               <TableHead>Year of Sanction</TableHead>
+              <TableHead>LAW No</TableHead>
               <TableHead>Rate</TableHead>
-              <TableHead>Qty Sanctioned</TableHead>
-              <TableHead>Total Value</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Total Value</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {works.map((work) => (
               <TableRow key={work.id}>
-                <TableCell>{work.id}</TableCell>
                 <TableCell>{work.description}</TableCell>
-                <TableCell>{work.lawNo}</TableCell>
                 <TableCell>{work.yearOfSanction}</TableCell>
+                <TableCell>{work.lawNo}</TableCell>
                 <TableCell>{work.rate}</TableCell>
-                <TableCell>{work.qtySanctioned}</TableCell>
-                <TableCell>{work.totalValue}</TableCell>
                 <TableCell>
                   <span className={`rounded-full px-2 py-1 text-xs font-medium ${
                     work.status === "completed" ? "bg-green-100 text-green-800" :
@@ -117,6 +136,7 @@ const IRSPWorks = () => {
                     {getStatusLabel(work.status)}
                   </span>
                 </TableCell>
+                <TableCell>{work.totalValue}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">
                     <Button
@@ -152,7 +172,7 @@ const IRSPWorks = () => {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+</Table>
       </div>
     </div>
   );

@@ -1,6 +1,8 @@
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { db } from "../../main";
+import { collection, addDoc } from "firebase/firestore";
 
 interface IRSPWorkFormProps {
   formData: any;
@@ -8,6 +10,17 @@ interface IRSPWorkFormProps {
 }
 
 const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
+  const saveData = async () => {
+    try {
+      const docRef = await addDoc(collection(db, "works"), formData);
+      console.log("Document written with ID: ", docRef.id);
+      alert("Data saved successfully!");
+    } catch (e) {
+      console.error("Error adding document: ", e);
+      alert("Failed to save data.");
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -95,6 +108,9 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
           </SelectContent>
         </Select>
       </div>
+      <button type="button" onClick={saveData}>
+        Save
+      </button>
     </div>
   );
 };

@@ -2,10 +2,12 @@ import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 
+import "./Navbar.css";
+
 const Navbar = () => {
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
+
   const isActive = (path: string) => location.pathname === path;
 
   const toggleMenu = () => {
@@ -13,12 +15,11 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm">
+    <nav className="fixed top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm navbar-background">
       <div className="container flex h-16 items-center px-4 md:px-6">
         <Link to="/" className="text-lg font-semibold md:mr-auto">
-          Carriage Workshop LGDS
-        </Link> 
-        
+          {/* Application Name removed - left blank */}
+        </Link>
         {/* Mobile menu button */}
         <button 
           className="md:hidden p-2 rounded-md hover:bg-gray-100"
