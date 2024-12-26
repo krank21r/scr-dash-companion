@@ -1,5 +1,12 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { DataTable } from "@/components/ui/data-table";
 
 interface WorkItem {
   id: number;
@@ -11,6 +18,8 @@ interface WorkItem {
 
 const Home = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const allWorks = JSON.parse(localStorage.getItem('works') || '[]');
@@ -45,6 +54,21 @@ const Home = () => {
   };
 
   const statusCounts = getStatusCounts();
+
+  const handleStatusClick = (status: string) => {
+    setSelectedStatus(status);
+    setDialogOpen(true);
+  };
+
+  const columns = [
+    { header: "Type", accessorKey: "type" },
+    { header: "Description", accessorKey: "description" },
+    { header: "Year of Sanction", accessorKey: "yearOfSanction" },
+  ];
+
+  const filteredWorks = selectedStatus
+    ? works.filter((work) => work.status === selectedStatus)
+    : [];
 
   return (
     <div className="page-transition container pt-24">
@@ -85,7 +109,11 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {Object.entries(statusCounts).map(([status, count]) => (
             count > 0 && (
-              <Card key={status} className="p-4">
+              <Card 
+                key={status} 
+                className="p-4 cursor-pointer hover:bg-accent transition-colors"
+                onClick={() => handleStatusClick(status)}
+              >
                 <h4 className="font-medium text-sm text-muted-foreground">{statusLabels[status]}</h4>
                 <p className="text-2xl font-bold mt-1">{count}</p>
               </Card>
@@ -93,6 +121,19 @@ const Home = () => {
           ))}
         </div>
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedStatus && statusLabels[selectedStatus]} Works
+            </DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <DataTable columns={columns} data={filteredWorks} />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
