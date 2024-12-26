@@ -13,7 +13,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface WorkItem {
   id: number;
@@ -42,11 +43,16 @@ const getStatusLabel = (status: string) => {
 const IRSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  useEffect(() => {
+  const loadWorks = () => {
     const allWorks = JSON.parse(localStorage.getItem('works') || '[]');
     const irspWorks = allWorks.filter((work: WorkItem) => work.type === 'irsp');
     setWorks(irspWorks);
+  };
+
+  useEffect(() => {
+    loadWorks();
   }, []);
 
   const handleDelete = (id: number) => {
@@ -54,7 +60,8 @@ const IRSPWorks = () => {
     const updatedWorks = allWorks.filter((work: WorkItem) => work.id !== id);
     localStorage.setItem('works', JSON.stringify(updatedWorks));
     
-    setWorks(works.filter(work => work.id !== id));
+    loadWorks(); // Refresh the works list after deletion
+    
     toast({
       title: "Work Deleted",
       description: "The work has been successfully deleted.",
@@ -64,8 +71,8 @@ const IRSPWorks = () => {
   const handleEdit = (work: WorkItem) => {
     // Store the work to be edited in localStorage
     localStorage.setItem('editWork', JSON.stringify(work));
-    // Navigate to AddWorks page with the work data
-    window.location.href = '/add-works';
+    // Navigate to AddWorks page
+    navigate('/add-works');
   };
 
   return (
