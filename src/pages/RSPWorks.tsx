@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '../components/ui/table';
 import { Button } from '../components/ui/button';
 import { Pencil, Trash2 } from "lucide-react";
@@ -17,6 +16,7 @@ import { useToast } from '../hooks/use-toast';
 import { useNavigate } from "react-router-dom";
 import { db } from '../main';
 import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
+import { useState, useEffect } from "react";
 
 interface WorkItem {
   id: string;
@@ -48,7 +48,6 @@ const RSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [deleteWorkId, setDeleteWorkId] = useState<string | null>(null);
 
   const loadWorks = async () => {
     try {
@@ -73,15 +72,20 @@ const RSPWorks = () => {
     loadWorks();
   }, []);
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (workId: string) => {
+    if (!workId) {
+      console.error("No work ID provided for deletion");
+      return;
+    }
+
     try {
-      const workRef = doc(db, "works", id);
+      const workRef = doc(db, "works", workId);
       await deleteDoc(workRef);
       toast({
         title: "Success",
         description: "Work deleted successfully",
       });
-      await loadWorks(); // Reload the works after deletion
+      await loadWorks();
     } catch (error: any) {
       console.error("Error deleting work:", error);
       toast({
@@ -93,10 +97,14 @@ const RSPWorks = () => {
   };
 
   const handleEdit = (work: WorkItem) => {
-    // Store the complete work object including the id
+    if (!work || !work.id) {
+      console.error("Invalid work data for editing");
+      return;
+    }
+
     localStorage.setItem('editWork', JSON.stringify({
       ...work,
-      id: work.id // Ensure the ID is included
+      id: work.id
     }));
     navigate('/add-works');
   };

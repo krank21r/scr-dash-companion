@@ -24,10 +24,16 @@ const AddWorks = () => {
   useEffect(() => {
     const storedWork = localStorage.getItem('editWork');
     if (storedWork) {
-      const parsedWork = JSON.parse(storedWork);
-      setFormData(parsedWork);
-      setWorkType(parsedWork.type);
-      setShowForm(true);
+      try {
+        const parsedWork = JSON.parse(storedWork);
+        if (parsedWork && parsedWork.id) {
+          setFormData(parsedWork);
+          setWorkType(parsedWork.type);
+          setShowForm(true);
+        }
+      } catch (error) {
+        console.error("Error parsing stored work:", error);
+      }
     }
   }, []);
 
@@ -38,7 +44,7 @@ const AddWorks = () => {
       if (formData.id) {
         // Edit mode - update existing work
         const workRef = doc(db, "works", formData.id);
-        const { id, ...updateData } = formData; // Remove id from the data to be updated
+        const { id, ...updateData } = formData;
         await updateDoc(workRef, updateData);
         toast({
           title: "Success",
@@ -46,10 +52,10 @@ const AddWorks = () => {
         });
       } else {
         // Add mode - create new work
-        const { id, ...newWorkData } = formData; // Remove any potential id field
+        const { id, ...newWorkData } = formData;
         await addDoc(collection(db, "works"), {
           ...newWorkData,
-          type: workType, // Ensure type is set correctly
+          type: workType,
         });
         toast({
           title: "Success",
