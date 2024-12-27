@@ -41,16 +41,19 @@ const AddWorks = () => {
         const { id, ...updateData } = formData; // Remove id from the data to be updated
         await updateDoc(workRef, updateData);
         toast({
-          title: "Work Updated",
-          description: `${workType.toUpperCase()} work has been updated successfully.`,
+          title: "Success",
+          description: "Work updated successfully",
         });
       } else {
         // Add mode - create new work
         const { id, ...newWorkData } = formData; // Remove any potential id field
-        await addDoc(collection(db, "works"), newWorkData);
+        await addDoc(collection(db, "works"), {
+          ...newWorkData,
+          type: workType, // Ensure type is set correctly
+        });
         toast({
-          title: "Work Added",
-          description: `New ${workType.toUpperCase()} work has been added successfully.`,
+          title: "Success",
+          description: "Work added successfully",
         });
       }
 

@@ -16,7 +16,7 @@ import {
 import { useToast } from '../hooks/use-toast';
 import { useNavigate } from "react-router-dom";
 import { db } from '../main';
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
 
 interface WorkItem {
   id: string;
@@ -48,16 +48,15 @@ const RSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [deleteWorkId, setDeleteWorkId] = useState<string | null>(null);
 
   const loadWorks = async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "works"));
+      const worksQuery = query(collection(db, "works"), where("type", "==", "rsp"));
+      const querySnapshot = await getDocs(worksQuery);
       const fetchedWorks: WorkItem[] = [];
       querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.type === 'rsp') {
-          fetchedWorks.push({ id: doc.id, ...data } as WorkItem);
-        }
+        fetchedWorks.push({ id: doc.id, ...doc.data() } as WorkItem);
       });
       setWorks(fetchedWorks);
     } catch (error: any) {
@@ -75,34 +74,30 @@ const RSPWorks = () => {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (!id) {
-      toast({
-        title: "Error",
-        description: "Invalid work ID",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
-      await deleteDoc(doc(db, "works", id));
-      await loadWorks(); // Reload the works after deletion
+      const workRef = doc(db, "works", id);
+      await deleteDoc(workRef);
       toast({
-        title: "Work Deleted",
-        description: "The work has been successfully deleted.",
+        title: "Success",
+        description: "Work deleted successfully",
       });
+      await loadWorks(); // Reload the works after deletion
     } catch (error: any) {
       console.error("Error deleting work:", error);
       toast({
-        title: "Error deleting work",
-        description: error.message,
+        title: "Error",
+        description: "Failed to delete work: " + error.message,
         variant: "destructive",
       });
     }
   };
 
   const handleEdit = (work: WorkItem) => {
-    localStorage.setItem('editWork', JSON.stringify(work));
+    // Store the complete work object including the id
+    localStorage.setItem('editWork', JSON.stringify({
+      ...work,
+      id: work.id // Ensure the ID is included
+    }));
     navigate('/add-works');
   };
 
