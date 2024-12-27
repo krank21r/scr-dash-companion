@@ -14,7 +14,6 @@ const AddWorks = () => {
   const [showForm, setShowForm] = useState(false);
   const [workType, setWorkType] = useState<"rsp" | "irsp" | "">("");
   const [formData, setFormData] = useState<any>({
-    id: "",
     type: "",
     description: "",
     yearOfSanction: "",
@@ -26,13 +25,18 @@ const AddWorks = () => {
     if (storedWork) {
       try {
         const parsedWork = JSON.parse(storedWork);
-        if (parsedWork && parsedWork.id) {
+        if (parsedWork) {
           setFormData(parsedWork);
           setWorkType(parsedWork.type);
           setShowForm(true);
         }
       } catch (error) {
         console.error("Error parsing stored work:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load work data for editing",
+          variant: "destructive",
+        });
       }
     }
   }, []);
@@ -126,7 +130,6 @@ const AddWorks = () => {
                   setShowForm(false);
                   setWorkType("");
                   setFormData({
-                    id: "",
                     type: "",
                     description: "",
                     yearOfSanction: "",

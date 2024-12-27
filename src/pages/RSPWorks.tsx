@@ -55,9 +55,14 @@ const RSPWorks = () => {
       const querySnapshot = await getDocs(worksQuery);
       const fetchedWorks: WorkItem[] = [];
       querySnapshot.forEach((doc) => {
-        fetchedWorks.push({ id: doc.id, ...doc.data() } as WorkItem);
+        // Include the document ID in the work item
+        fetchedWorks.push({ 
+          ...doc.data(), 
+          id: doc.id 
+        } as WorkItem);
       });
       setWorks(fetchedWorks);
+      console.log("Fetched works:", fetchedWorks);
     } catch (error: any) {
       console.error("Error fetching works:", error);
       toast({
@@ -73,18 +78,19 @@ const RSPWorks = () => {
   }, []);
 
   const handleDelete = async (workId: string) => {
-    if (!workId) {
-      console.error("No work ID provided for deletion");
-      return;
-    }
-
     try {
+      if (!workId) {
+        throw new Error("Work ID is required for deletion");
+      }
+      
       const workRef = doc(db, "works", workId);
       await deleteDoc(workRef);
+      
       toast({
         title: "Success",
         description: "Work deleted successfully",
       });
+      
       await loadWorks();
     } catch (error: any) {
       console.error("Error deleting work:", error);
@@ -97,16 +103,21 @@ const RSPWorks = () => {
   };
 
   const handleEdit = (work: WorkItem) => {
-    if (!work || !work.id) {
-      console.error("Invalid work data for editing");
-      return;
-    }
+    try {
+      if (!work || !work.id) {
+        throw new Error("Invalid work data for editing");
+      }
 
-    localStorage.setItem('editWork', JSON.stringify({
-      ...work,
-      id: work.id
-    }));
-    navigate('/add-works');
+      localStorage.setItem('editWork', JSON.stringify(work));
+      navigate('/add-works');
+    } catch (error: any) {
+      console.error("Error preparing work for edit:", error);
+      toast({
+        title: "Error",
+        description: "Failed to edit work: " + error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   return (
