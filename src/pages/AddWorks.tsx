@@ -14,7 +14,7 @@ const AddWorks = () => {
   const [showForm, setShowForm] = useState(false);
   const [workType, setWorkType] = useState<"rsp" | "irsp" | "">("");
   const [formData, setFormData] = useState<any>({
-    id: null, // Add an id field to formData
+    id: "",
     type: "",
     description: "",
     yearOfSanction: "",
@@ -34,47 +34,37 @@ const AddWorks = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (formData.id) {
-      // Edit mode - update existing work in Firestore
-      try {
-        const workDocRef = doc(db, "works", formData.id);
-        await updateDoc(workDocRef, formData);
+    try {
+      if (formData.id) {
+        // Edit mode - update existing work
+        const workRef = doc(db, "works", formData.id);
+        const { id, ...updateData } = formData; // Remove id from the data to be updated
+        await updateDoc(workRef, updateData);
         toast({
           title: "Work Updated",
           description: `${workType.toUpperCase()} work has been updated successfully.`,
         });
-        localStorage.removeItem('editWork'); // Clear localStorage after successful edit
-      } catch (error: any) {
-        toast({
-          title: "Error updating work",
-          description: `Failed to update work: ${error.message}`,
-          variant: "destructive",
-        });
-        console.error("Error updating document in Firestore:", error);
-        return;
-      }
-    } else {
-      // Add mode - create new work in Firestore
-      try {
-        const worksCollection = collection(db, "works");
-        await addDoc(worksCollection, formData);
+      } else {
+        // Add mode - create new work
+        const { id, ...newWorkData } = formData; // Remove any potential id field
+        await addDoc(collection(db, "works"), newWorkData);
         toast({
           title: "Work Added",
-          description: `New ${workType.toUpperCase()} work has been added to Firestore.`,
+          description: `New ${workType.toUpperCase()} work has been added successfully.`,
         });
-      } catch (error: any) {
-        toast({
-          title: "Error adding work",
-          description: `Failed to add new work: ${error.message}`,
-          variant: "destructive",
-        });
-        console.error("Error adding document to Firestore:", error);
-        return;
       }
-    }
 
-    // Navigate back to the appropriate works page
-    navigate(workType === 'rsp' ? '/rsp-works' : '/irsp-works');
+      // Clear localStorage and navigate back
+      localStorage.removeItem('editWork');
+      navigate(workType === 'rsp' ? '/rsp-works' : '/irsp-works');
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: `Failed to ${formData.id ? 'update' : 'add'} work: ${error.message}`,
+        variant: "destructive",
+      });
+      console.error("Error:", error);
+    }
   };
 
   return (
@@ -127,12 +117,13 @@ const AddWorks = () => {
                   setShowForm(false);
                   setWorkType("");
                   setFormData({
-                    id: null,
+                    id: "",
                     type: "",
                     description: "",
                     yearOfSanction: "",
                     status: "",
                   });
+                  localStorage.removeItem('editWork');
                 }}
               >
                 Cancel

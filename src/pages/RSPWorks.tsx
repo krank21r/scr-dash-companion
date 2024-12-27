@@ -15,11 +15,11 @@ import {
 } from '../components/ui/alert-dialog';
 import { useToast } from '../hooks/use-toast';
 import { useNavigate } from "react-router-dom";
-import { db } from '../main'; // Import the db instance
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore"; // Import Firestore functions
+import { db } from '../main';
+import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 
 interface WorkItem {
-  id: string; // Assuming Firebase document ID is a string
+  id: string;
   type: "rsp" | "irsp";
   description: string;
   yearOfSanction: string;
@@ -74,12 +74,19 @@ const RSPWorks = () => {
     loadWorks();
   }, []);
 
-  const handleDelete = async (id: string) => { // Changed id type to string
-    console.log("Deleting work with ID:", id);
+  const handleDelete = async (id: string) => {
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Invalid work ID",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await deleteDoc(doc(db, "works", id));
-      const allWorks = works.filter((work: WorkItem) => work.id !== id);
-      setWorks(allWorks);
+      await loadWorks(); // Reload the works after deletion
       toast({
         title: "Work Deleted",
         description: "The work has been successfully deleted.",
@@ -178,7 +185,7 @@ const RSPWorks = () => {
               </TableRow>
             ))}
           </TableBody>
-</Table>
+        </Table>
       </div>
     </div>
   );

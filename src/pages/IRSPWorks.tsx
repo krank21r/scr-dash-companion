@@ -28,8 +28,6 @@ interface WorkItem {
   qtySanctioned: string;
   totalValue: string;
   status: string;
-  nameOfWork?: string;
-  fileNo?: string;
 }
 
 const getStatusLabel = (status: string) => {
@@ -75,11 +73,18 @@ const IRSPWorks = () => {
   }, []);
 
   const handleDelete = async (id: string) => {
-    console.log("Deleting work with ID:", id);
+    if (!id) {
+      toast({
+        title: "Error",
+        description: "Invalid work ID",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await deleteDoc(doc(db, "works", id));
-      const updatedWorks = works.filter((work) => work.id !== id);
-      setWorks(updatedWorks);
+      await loadWorks(); // Reload the works after deletion
       toast({
         title: "Work Deleted",
         description: "The work has been successfully deleted.",
@@ -172,7 +177,7 @@ const IRSPWorks = () => {
               </TableRow>
             ))}
           </TableBody>
-</Table>
+        </Table>
       </div>
     </div>
   );
