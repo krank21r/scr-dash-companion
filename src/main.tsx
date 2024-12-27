@@ -9,13 +9,12 @@ import { getFirestore } from 'firebase/firestore';
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: 'AIzaSyDmOkmg7X_756H98Wzi4doU1FZjhEBZad8',
+  apiKey: 'AIzaSyABTn_9NGFMXRvBoDQoM25PAtb6UAkXVV',
   authDomain: 'budget-section-portal-dbms.firebaseapp.com',
   projectId: 'budget-section-portal-dbms',
-  storageBucket: 'budget-section-portal-dbms.firebasestorage.app',
+  storageBucket: 'budget-section-portal-dbms.appspot.com',
   messagingSenderId: '789197743276',
   appId: '1:789197743276:web:d01f8f65cd32e92c1aab09',
-  measurementId: 'G-17NTYMP3DB',
 };
 
 // Initialize Firebase if no app exists
