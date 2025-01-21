@@ -43,6 +43,15 @@ const Navbar = () => {
           <Link to="/reviews" className={`nav-item ${isActive("/reviews") ? "active" : ""}`}>
             Reviews
           </Link>
+          <Link to="/proposals" className={`nav-item ${isActive("/proposals") ? "active" : ""}`}>
+            Proposals
+          </Link>
+          <Link to="/unit-cost" className={`nav-item ${isActive("/unit-cost") ? "active" : ""}`}>
+            Unit Cost
+          </Link>
+          <Link to="/to-do" className={`nav-item ${isActive("/to-do") ? "active" : ""}`}>
+            To-do
+          </Link>
           <Link to="/add-works" className={`nav-item ${isActive("/add-works") ? "active" : ""}`}>
             Add Works
           </Link>
@@ -77,6 +86,27 @@ const Navbar = () => {
             onClick={toggleMenu}
           >
             Reviews
+          </Link>
+          <Link 
+            to="/proposals" 
+            className={`p-4 hover:bg-gray-50 ${isActive("/proposals") ? "text-primary" : ""}`}
+            onClick={toggleMenu}
+          >
+            Proposals
+          </Link>
+          <Link 
+            to="/unit-cost" 
+            className={`p-4 hover:bg-gray-50 ${isActive("/unit-cost") ? "text-primary" : ""}`}
+            onClick={toggleMenu}
+          >
+            Unit Cost
+          </Link>
+          <Link 
+            to="/to-do" 
+            className={`p-4 hover:bg-gray-50 ${isActive("/to-do") ? "text-primary" : ""}`}
+            onClick={toggleMenu}
+          >
+            To-do
           </Link>
           <Link 
             to="/add-works" 
