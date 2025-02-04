@@ -150,7 +150,6 @@ const Home = () => {
 
     const notesColumns = [
     { header: "Note", accessorKey: "text" },
-    { header: "Created At", accessorKey: "createdAt" },
     {
       header: "Actions",
       accessorKey: "actions",
@@ -215,7 +214,7 @@ const Home = () => {
       </div>
 
       <div className="mt-8 px-4 md:px-0">
-        <h2 className="text-xl font-semibold mb-4">Notes</h2>
+        <h2 className="text-xl font-semibold mb-4">To-Do</h2>
         <DataTable columns={notesColumns} data={notes} />
       </div>
 
