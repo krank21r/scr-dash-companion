@@ -10,6 +10,8 @@ import IRSPWorks from './pages/IRSPWorks';
 import AddWorks from './pages/AddWorks';
 import UnitCost from './pages/UnitCost';
 import Reviews from './pages/Reviews';
+import AddNote from './pages/AddNote';
+import EditNote from './pages/EditNote';
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,8 @@ const App = () => (
               <Route path="/add-works" element={<AddWorks />} />
               <Route path="/unit-cost" element={<UnitCost />} />
               <Route path="/reviews" element={<Reviews />} />
+              <Route path="/add-note" element={<AddNote />} />
+              <Route path="/edit-note/:id" element={<EditNote />} />
             </Routes>
           </main>
       </div>

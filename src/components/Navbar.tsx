@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 import "./Navbar.css";
 
@@ -49,12 +50,24 @@ const Navbar = () => {
           <Link to="/unit-cost" className={`nav-item ${isActive("/unit-cost") ? "active" : ""}`}>
             Unit Cost
           </Link>
-          <Link to="/to-do" className={`nav-item ${isActive("/to-do") ? "active" : ""}`}>
-            To-do
-          </Link>
           <Link to="/add-works" className={`nav-item ${isActive("/add-works") ? "active" : ""}`}>
             Add Works
           </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Link to="/to-do" className={`nav-item ${isActive("/to-do") ? "active" : ""}`}>
+                To-do
+              </Link>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuItem asChild>
+                <Link to="/add-note">Add Note</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/edit-note">Edit Note</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Mobile menu */}
@@ -101,13 +114,25 @@ const Navbar = () => {
           >
             Unit Cost
           </Link>
-          <Link 
-            to="/to-do" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/to-do") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            To-do
-          </Link>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Link 
+                to="/to-do" 
+                className={`p-4 hover:bg-gray-50 ${isActive("/to-do") ? "text-primary" : ""}`}
+                onClick={toggleMenu}
+              >
+                To-do
+              </Link>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56">
+              <DropdownMenuItem asChild>
+                <Link to="/add-note" onClick={toggleMenu}>Add Note</Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/edit-note" onClick={toggleMenu}>Edit Note</Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Link 
             to="/add-works" 
             className={`p-4 hover:bg-gray-50 ${isActive("/add-works") ? "text-primary" : ""}`}
