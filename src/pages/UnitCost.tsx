@@ -4,6 +4,7 @@ import ExcelUploader from "@/components/ExcelUploader";
 import { DataTable } from "@/components/ui/data-table";
 import { toast } from "@/components/ui/use-toast";
 import * as XLSX from 'xlsx';
+import { Upload, TrendingUp } from "lucide-react";
 
 interface UnitCostData {
   id: number;
@@ -98,25 +99,37 @@ const UnitCost = () => {
   };
 
   return (
-    <div className="page-transition container pt-24">
-      <div className="mb-8">
-        <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-          Unit Cost
-        </span>
-        <h1 className="mt-4 text-4xl font-bold">Unit Cost Management</h1>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+      <div className="container mx-auto px-4 py-8 pt-24 max-w-5xl">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600">
+            <TrendingUp size={24} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Unit Cost Management</h1>
+            <p className="text-sm text-slate-500">Upload and manage unit cost data</p>
+          </div>
+        </div>
 
-      <Card className="p-6">
-        <div className="mb-6">
+        {/* Upload Section */}
+        <Card className="rounded-2xl border-slate-200 shadow-sm p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Upload size={18} className="text-slate-400" />
+            <h2 className="font-semibold text-slate-900">Upload Excel File</h2>
+          </div>
           <ExcelUploader 
             onFileUpload={handleFileUpload} 
             validateData={validateUnitCostData}
           />
-        </div>
+        </Card>
 
+        {/* Data Table */}
         {unitCosts.length > 0 && (
-          <div className="mt-6">
-            <h2 className="text-xl font-semibold mb-4">Unit Costs</h2>
+          <Card className="rounded-2xl border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-slate-100">
+              <h2 className="font-semibold text-slate-900">Unit Costs ({unitCosts.length} items)</h2>
+            </div>
             <DataTable
               columns={[
                 { header: "Item", accessorKey: "item" },
@@ -125,9 +138,9 @@ const UnitCost = () => {
               ]}
               data={unitCosts}
             />
-          </div>
+          </Card>
         )}
-      </Card>
+      </div>
     </div>
   );
 };

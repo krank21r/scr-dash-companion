@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Home, FileText, AlertCircle, TrendingUp, Plus, ChevronDown, Menu, X } from "lucide-react";
 import { useState } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
@@ -15,131 +15,92 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const navItems = [
+    { path: "/", label: "Home", icon: Home },
+    { path: "/rsp-works", label: "RSP Works", icon: FileText },
+    { path: "/irsp-works", label: "IRSP Works", icon: FileText },
+    { path: "/contingencies", label: "Contingencies", icon: AlertCircle },
+    { path: "/unit-cost", label: "Unit Cost", icon: TrendingUp },
+    { path: "/add-works", label: "Add Works", icon: Plus },
+  ];
+
   return (
-    <nav className="fixed top-0 z-50 w-full border-b bg-background/80 backdrop-blur-sm navbar-background">
+    <nav className="fixed top-0 z-50 w-full bg-white/80 backdrop-blur-xl border-b border-slate-200/50 shadow-sm">
       <div className="container flex h-16 items-center px-4 md:px-6">
-        <Link to="/" className="text-lg font-semibold md:mr-auto">
-          {/* Application Name removed - left blank */}
+        <Link to="/" className="text-xl font-bold mr-8 flex items-center gap-2 group">
+          <div className="p-1.5 rounded-lg gradient-primary group-hover:scale-110 transition-transform duration-300">
+            <Home size={20} className="text-white" />
+          </div>
+          <span className="hidden sm:inline bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent font-semibold">
+            Budget Portal
+          </span>
         </Link>
-        {/* Mobile menu button */}
+        
         <button 
-          className="md:hidden p-2 rounded-md hover:bg-gray-100"
+          className="md:hidden p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all duration-200"
           onClick={toggleMenu}
           aria-label="Toggle menu"
         >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
         </button>
 
         {/* Desktop menu */}
-        <div className="hidden md:flex md:items-center md:space-x-4 justify-center flex-1">
-          <Link to="/" className={`nav-item ${isActive("/") ? "active" : ""}`}>
-            Home
-          </Link>
-          <Link to="/rsp-works" className={`nav-item ${isActive("/rsp-works") ? "active" : ""}`}>
-            RSP Works
-          </Link>
-          <Link to="/irsp-works" className={`nav-item ${isActive("/irsp-works") ? "active" : ""}`}>
-            IRSP Works
-          </Link>
-          <Link to="/reviews" className={`nav-item ${isActive("/reviews") ? "active" : ""}`}>
-            Reviews
-          </Link>
-          <Link to="/proposals" className={`nav-item ${isActive("/proposals") ? "active" : ""}`}>
-            Proposals
-          </Link>
-          <Link to="/unit-cost" className={`nav-item ${isActive("/unit-cost") ? "active" : ""}`}>
-            Unit Cost
-          </Link>
-          <Link to="/add-works" className={`nav-item ${isActive("/add-works") ? "active" : ""}`}>
-            Add Works
-          </Link>
+        <div className="hidden md:flex md:items-center md:gap-1 flex-1">
+          {navItems.map((item) => (
+            <Link 
+              key={item.path}
+              to={item.path} 
+              className={`relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 group ${isActive(item.path) ? "text-violet-700 bg-violet-50" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"}`}
+            >
+              <item.icon size={16} className={`transition-transform duration-300 group-hover:scale-110 ${isActive(item.path) ? "text-violet-600" : ""}`} />
+              <span>{item.label}</span>
+            </Link>
+          ))}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Link to="/to-do" className={`nav-item ${isActive("/to-do") ? "active" : ""}`}>
-                To-do
-              </Link>
+              <button className="relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-300">
+                <FileText size={16} />
+                <span>To-do</span>
+                <ChevronDown size={14} className="transition-transform duration-200 group-data-[state=open]:rotate-180" />
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
+            <DropdownMenuContent className="w-48 bg-white shadow-lg border-slate-100">
               <DropdownMenuItem asChild>
-                <Link to="/add-note">Add Note</Link>
+                <Link to="/add-note" className="text-sm py-2">Add Note</Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
-                <Link to="/edit-note">Edit Note</Link>
+                <Link to="/edit-note" className="text-sm py-2">Edit Note</Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
         {/* Mobile menu */}
-        <div className={`${isMenuOpen ? 'flex' : 'hidden'} absolute top-16 left-0 right-0 flex-col items-center bg-white border-b shadow-lg w-full md:hidden`}>
-          <Link 
-            to="/" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            Home
-          </Link>
-          <Link 
-            to="/rsp-works" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/rsp-works") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            RSP Works
-          </Link>
-          <Link 
-            to="/irsp-works" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/irsp-works") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            IRSP Works
-          </Link>
-          <Link 
-            to="/reviews" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/reviews") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            Reviews
-          </Link>
-          <Link 
-            to="/proposals" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/proposals") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            Proposals
-          </Link>
-          <Link 
-            to="/unit-cost" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/unit-cost") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            Unit Cost
-          </Link>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+        <div className={`${isMenuOpen ? 'flex' : 'hidden'} absolute top-16 left-0 right-0 flex-col bg-white/95 backdrop-blur-xl border-b border-slate-200/50 shadow-xl w-full md:hidden`}>
+          <div className="p-4 space-y-1">
+            {navItems.map((item) => (
               <Link 
-                to="/to-do" 
-                className={`p-4 hover:bg-gray-50 ${isActive("/to-do") ? "text-primary" : ""}`}
+                key={item.path}
+                to={item.path} 
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive(item.path) ? "bg-violet-50 text-violet-700" : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"}`}
                 onClick={toggleMenu}
               >
-                To-do
+                <item.icon size={18} className={isActive(item.path) ? "text-violet-600" : ""} />
+                <span className="font-medium">{item.label}</span>
               </Link>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56">
-              <DropdownMenuItem asChild>
-                <Link to="/add-note" onClick={toggleMenu}>Add Note</Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link to="/edit-note" onClick={toggleMenu}>Edit Note</Link>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Link 
-            to="/add-works" 
-            className={`p-4 hover:bg-gray-50 ${isActive("/add-works") ? "text-primary" : ""}`}
-            onClick={toggleMenu}
-          >
-            Add Works
-          </Link>
+            ))}
+            <div className="pt-2 border-t border-slate-100">
+              <p className="px-4 py-2 text-xs font-medium text-slate-400 uppercase tracking-wider">To-do</p>
+              <Link to="/add-note" onClick={toggleMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-200">
+                <Plus size={18} />
+                <span className="font-medium">Add Note</span>
+              </Link>
+              <Link to="/edit-note" onClick={toggleMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-500 hover:text-slate-800 hover:bg-slate-50 transition-all duration-200">
+                <FileText size={18} />
+                <span className="font-medium">Edit Note</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </nav>

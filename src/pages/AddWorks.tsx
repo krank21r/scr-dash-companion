@@ -7,6 +7,7 @@ import IRSPWorkForm from '../components/forms/IRSPWorkForm';
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { db } from '../main';
+import { ArrowLeft, FileText, Plus } from "lucide-react";
 
 const AddWorks = () => {
   const { toast } = useToast();
@@ -46,7 +47,6 @@ const AddWorks = () => {
 
     try {
       if (formData.id) {
-        // Edit mode - update existing work
         const workRef = doc(db, "works", formData.id);
         const { id, ...updateData } = formData;
         await updateDoc(workRef, updateData);
@@ -55,7 +55,6 @@ const AddWorks = () => {
           description: "Work updated successfully",
         });
       } else {
-        // Add mode - create new work
         const { id, ...newWorkData } = formData;
         await addDoc(collection(db, "works"), {
           ...newWorkData,
@@ -67,7 +66,6 @@ const AddWorks = () => {
         });
       }
 
-      // Clear localStorage and navigate back
       localStorage.removeItem('editWork');
       navigate(workType === 'rsp' ? '/rsp-works' : '/irsp-works');
     } catch (error: any) {
@@ -81,69 +79,103 @@ const AddWorks = () => {
   };
 
   return (
-    <div className="page-transition container pt-24">
-      <div className="mb-8">
-        <span className="rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary">
-          {formData.id ? 'Edit' : 'Add'} Works
-        </span>
-        <h1 className="mt-4 text-4xl font-bold">
-          {formData.id ? 'Edit' : 'Create New'} Work
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          {formData.id ? 'Edit existing' : 'Add new'} RSP or IRSP works to the system
-        </p>
-      </div>
-
-      {!showForm ? (
-        <Card className="max-w-2xl p-6">
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold">Select Work Type</h2>
-            <div className="flex gap-4">
-              <Button onClick={() => {
-                setWorkType("rsp");
-                setFormData({ ...formData, type: "rsp" });
-                setShowForm(true);
-              }}>Add RSP</Button>
-              <Button onClick={() => {
-                setWorkType("irsp");
-                setFormData({ ...formData, type: "irsp" });
-                setShowForm(true);
-              }}>Add IRSP</Button>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
+      <div className="container mx-auto px-4 py-8 pt-24 max-w-3xl">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-8">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 rounded-xl hover:bg-slate-100">
+            <ArrowLeft size={20} />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {formData.id ? 'Edit' : 'Create New'} Work
+            </h1>
+            <p className="text-sm text-slate-500">
+              {formData.id ? 'Edit existing' : 'Add new'} RSP or IRSP works to the system
+            </p>
           </div>
-        </Card>
-      ) : (
-        <Card className="max-w-2xl p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {workType === "rsp" ? (
-              <RSPWorkForm formData={formData} setFormData={setFormData} />
-            ) : (
-              <IRSPWorkForm formData={formData} setFormData={setFormData} />
-            )}
+        </div>
 
-            <div className="flex gap-4">
-              <Button type="submit">{formData.id ? 'Update' : 'Add'} Work</Button>
-              <Button 
-                type="button" 
-                variant="outline" 
+        {!showForm ? (
+          <div className="space-y-6">
+            <h2 className="text-lg font-semibold text-slate-900">Select Work Type</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Card 
+                className="p-6 rounded-2xl border-slate-200 hover:border-violet-200 hover:shadow-lg transition-all duration-300 cursor-pointer group"
                 onClick={() => {
-                  setShowForm(false);
-                  setWorkType("");
-                  setFormData({
-                    type: "",
-                    description: "",
-                    yearOfSanction: "",
-                    status: "",
-                  });
-                  localStorage.removeItem('editWork');
+                  setWorkType("rsp");
+                  setFormData({ ...formData, type: "rsp" });
+                  setShowForm(true);
                 }}
               >
-                Cancel
-              </Button>
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 group-hover:scale-110 transition-transform duration-300">
+                    <FileText size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">RSP Work</p>
+                    <p className="text-sm text-slate-500">Add a new RSP work item</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card 
+                className="p-6 rounded-2xl border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                onClick={() => {
+                  setWorkType("irsp");
+                  setFormData({ ...formData, type: "irsp" });
+                  setShowForm(true);
+                }}
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 group-hover:scale-110 transition-transform duration-300">
+                    <FileText size={24} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-900">IRSP Work</p>
+                    <p className="text-sm text-slate-500">Add a new IRSP work item</p>
+                  </div>
+                </div>
+              </Card>
             </div>
-          </form>
-        </Card>
-      )}
+          </div>
+        ) : (
+          <Card className="rounded-2xl border-slate-200 shadow-sm p-6">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {workType === "rsp" ? (
+                <RSPWorkForm formData={formData} setFormData={setFormData} />
+              ) : (
+                <IRSPWorkForm formData={formData} setFormData={setFormData} />
+              )}
+
+              <div className="flex gap-3 pt-4 border-t border-slate-100">
+                <Button type="submit" className="bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 rounded-xl">
+                  <Plus size={16} className="mr-2" />
+                  {formData.id ? 'Update' : 'Add'} Work
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowForm(false);
+                    setWorkType("");
+                    setFormData({
+                      type: "",
+                      description: "",
+                      yearOfSanction: "",
+                      status: "",
+                    });
+                    localStorage.removeItem('editWork');
+                  }}
+                  className="rounded-xl"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
