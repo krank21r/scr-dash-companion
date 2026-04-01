@@ -70,21 +70,22 @@ const ExcelUploader = ({
 
   return (
     <div
-      className={`border-2 border-dashed rounded-lg p-8 text-center ${
+      className={`border-2 border-dashed rounded-lg p-6 sm:p-8 text-center ${
         isDragging ? 'border-primary bg-primary/10' : 'border-gray-300'
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-      <p className="mt-2 text-sm text-gray-600">
-        Drag and drop your Excel file here, or
+      <Upload className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" />
+      <p className="mt-3 text-sm text-gray-600">
+        Tap below to upload your Excel file
       </p>
       <div className="mt-4">
         <Button
           variant="outline"
           onClick={() => document.getElementById('fileInput')?.click()}
+          className="min-h-[48px] px-6"
         >
           Select File
         </Button>
@@ -96,7 +97,7 @@ const ExcelUploader = ({
           onChange={handleFileChange}
         />
       </div>
-      <p className="mt-2 text-xs text-gray-500">
+      <p className="mt-3 text-xs text-gray-500">
         Supported formats: {acceptedFileTypes.join(', ')}
       </p>
     </div>

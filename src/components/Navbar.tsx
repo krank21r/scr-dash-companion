@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, FileText, AlertCircle, TrendingUp, Plus, ChevronDown, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 
 import "./Navbar.css";
@@ -14,6 +14,17 @@ const Navbar = () => {
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMenuOpen]);
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
@@ -76,8 +87,8 @@ const Navbar = () => {
         </div>
 
         {/* Mobile menu */}
-        <div className={`${isMenuOpen ? 'flex' : 'hidden'} absolute top-16 left-0 right-0 flex-col bg-white/95 backdrop-blur-xl border-b border-slate-200/50 shadow-xl w-full md:hidden`}>
-          <div className="p-4 space-y-1">
+        <div className={`${isMenuOpen ? 'flex' : 'hidden'} fixed top-16 left-0 right-0 bottom-0 flex-col bg-white/98 backdrop-blur-xl z-40 overflow-y-auto md:hidden overscroll-contain`}>
+          <div className="p-4 space-y-1 pb-8">
             {navItems.map((item) => (
               <Link 
                 key={item.path}

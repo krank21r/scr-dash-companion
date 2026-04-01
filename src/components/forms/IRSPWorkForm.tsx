@@ -1,6 +1,7 @@
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Button } from "../ui/button";
 import { db } from "../../main";
 import { collection, addDoc } from "firebase/firestore";
 
@@ -33,7 +34,7 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">LAW No</label>
           <Input
@@ -48,6 +49,7 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
           <label className="text-sm font-medium">Year of Sanction</label>
           <Input
             type="text"
+            inputMode="numeric"
             value={formData.yearOfSanction}
             onChange={(e) => setFormData({ ...formData, yearOfSanction: e.target.value })}
             placeholder="YYYY"
@@ -56,11 +58,12 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Rate</label>
           <Input
             type="text"
+            inputMode="decimal"
             value={formData.rate}
             onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
             placeholder="Enter rate"
@@ -108,9 +111,9 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
           </SelectContent>
         </Select>
       </div>
-      <button type="button" onClick={saveData}>
+      <Button type="button" onClick={saveData} className="w-full sm:w-auto">
         Save
-      </button>
+      </Button>
     </div>
   );
 };

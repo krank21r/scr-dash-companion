@@ -334,7 +334,7 @@ const HomePage = () => {
 
       {/* Dialog for filtered works */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-4xl w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>
               {selectedStatus && statusLabels[selectedStatus]} Works

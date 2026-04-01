@@ -193,8 +193,8 @@ const RSPWorks = () => {
 
         {/* Table */}
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full table-fixed">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full table-fixed md:table-fixed mobile-card-table">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   <th className="px-4 py-3 w-[30%]">Description</th>
@@ -225,20 +225,20 @@ const RSPWorks = () => {
                 ) : (
                   filteredWorks.map((work) => (
                     <tr key={work.id} className="hover:bg-slate-50/80 transition-colors duration-150 text-sm">
-                      <TableCell className="px-4 py-3 font-medium text-slate-900 break-words">{work.description || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600">{work.yearOfSanction || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600">{work.pbNo || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600">{work.rbSanctionedCost || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600">{work.qtySanctioned || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600">{work.qtyAllotted || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600">{work.deTotalValue || '-'}</TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-4 py-3 font-medium text-slate-900 break-words" data-label="Description">{work.description || '-'}</TableCell>
+                      <TableCell className="px-4 py-3 text-slate-600" data-label="Year">{work.yearOfSanction || '-'}</TableCell>
+                      <TableCell className="px-4 py-3 text-slate-600" data-label="PB No">{work.pbNo || '-'}</TableCell>
+                      <TableCell className="px-4 py-3 text-slate-600" data-label="Cost">{work.rbSanctionedCost || '-'}</TableCell>
+                      <TableCell className="px-4 py-3 text-slate-600" data-label="Qty">{work.qtySanctioned || '-'}</TableCell>
+                      <TableCell className="px-4 py-3 text-slate-600" data-label="Allot">{work.qtyAllotted || '-'}</TableCell>
+                      <TableCell className="px-4 py-3 text-slate-600" data-label="DE Value">{work.deTotalValue || '-'}</TableCell>
+                      <TableCell className="px-4 py-3" data-label="Status">
                         <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border ${getStatusColor(work.status)}`}>
                           {getStatusLabel(work.status)}
                         </span>
                       </TableCell>
-                      <TableCell className="px-4 py-3 text-slate-500 truncate" title={work.remarks}>{work.remarks || '-'}</TableCell>
-                      <TableCell className="px-4 py-3">
+                      <TableCell className="px-4 py-3 text-slate-500 truncate" data-label="Remarks" title={work.remarks}>{work.remarks || '-'}</TableCell>
+                      <TableCell className="px-4 py-3" data-label="Actions">
                         <div className="flex items-center gap-1">
                           <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-violet-50 hover:text-violet-600" onClick={() => handleEdit(work)}>
                             <Pencil className="h-4 w-4" />

@@ -177,7 +177,7 @@ const Contingencies = () => {
             <div className="flex items-center gap-2">
               <Filter size={16} className="text-slate-400" />
               <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-[160px] h-10 bg-white border-slate-200 rounded-xl">
+                <SelectTrigger className="w-full sm:w-[160px] h-10 bg-white border-slate-200 rounded-xl">
                   <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -199,8 +199,8 @@ const Contingencies = () => {
 
         {/* Table */}
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          <div className="overflow-x-auto scrollbar-thin">
+            <table className="w-full mobile-card-table">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50/50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                   <th className="px-4 py-3 w-[6%] text-center">Sl.</th>
@@ -231,8 +231,8 @@ const Contingencies = () => {
                     return (
                       <>
                         <tr key={item.id} className="hover:bg-slate-50/80 transition-colors duration-150 text-sm">
-                          <TableCell className="px-4 py-3 text-center text-slate-500 font-medium">{index + 1}</TableCell>
-                          <TableCell className="px-4 py-3">
+                          <TableCell className="px-4 py-3 text-center text-slate-500 font-medium" data-label="Sl.">{index + 1}</TableCell>
+                          <TableCell className="px-4 py-3" data-label="Description">
                             <button
                               onClick={() => toggleExpand(item.id)}
                               className="flex items-center gap-2 text-slate-800 hover:text-amber-600 font-medium transition-colors"
@@ -241,15 +241,15 @@ const Contingencies = () => {
                               {item.description || '-'}
                             </button>
                           </TableCell>
-                          <TableCell className="px-4 py-3 text-slate-600">{item.yearOfSanction || '-'}</TableCell>
-                          <TableCell className="px-4 py-3 text-slate-700 font-medium">₹{parseFloat(item.totalAmount).toLocaleString('en-IN')}</TableCell>
-                          <TableCell className="px-4 py-3 text-slate-600">₹{spent.toLocaleString('en-IN')}</TableCell>
-                          <TableCell className="px-4 py-3">
+                          <TableCell className="px-4 py-3 text-slate-600" data-label="Year">{item.yearOfSanction || '-'}</TableCell>
+                          <TableCell className="px-4 py-3 text-slate-700 font-medium" data-label="Total">₹{parseFloat(item.totalAmount).toLocaleString('en-IN')}</TableCell>
+                          <TableCell className="px-4 py-3 text-slate-600" data-label="Spent">₹{spent.toLocaleString('en-IN')}</TableCell>
+                          <TableCell className="px-4 py-3" data-label="Balance">
                             <span className={`font-semibold ${balance <= 0 ? 'text-red-600' : balance < parseFloat(item.totalAmount) * 0.25 ? 'text-amber-600' : 'text-emerald-600'}`}>
                               ₹{balance.toLocaleString('en-IN')}
                             </span>
                           </TableCell>
-                          <TableCell className="px-4 py-3">
+                          <TableCell className="px-4 py-3" data-label="">
                             <div className="flex items-center gap-1">
                               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-amber-50 hover:text-amber-600" onClick={() => handleEdit(item)}>
                                 <Pencil className="h-4 w-4" />
@@ -301,21 +301,22 @@ const Contingencies = () => {
                                   <p className="text-sm text-slate-400 mb-4">No expenditures added yet</p>
                                 )}
                                 {balance > 0 ? (
-                                  <div className="flex items-center gap-3 pt-3 border-t border-amber-200">
+                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-amber-200">
                                     <Input
                                       type="number"
+                                      inputMode="decimal"
                                       value={expenditureAmount}
                                       onChange={(e) => setExpenditureAmount(e.target.value)}
                                       placeholder="Amount"
-                                      className="w-32 h-9 rounded-lg border-slate-200"
+                                      className="w-full sm:w-32 h-10 rounded-lg border-slate-200"
                                     />
                                     <Input
                                       value={expenditureRemarks}
                                       onChange={(e) => setExpenditureRemarks(e.target.value)}
                                       placeholder="Remarks"
-                                      className="flex-1 h-9 rounded-lg border-slate-200"
+                                      className="flex-1 h-10 rounded-lg border-slate-200"
                                     />
-                                    <Button onClick={() => addExpenditure(item)} size="sm" className="bg-amber-500 hover:bg-amber-600 rounded-lg h-9">
+                                    <Button onClick={() => addExpenditure(item)} size="sm" className="bg-amber-500 hover:bg-amber-600 rounded-lg h-10 w-full sm:w-auto">
                                       Add
                                     </Button>
                                   </div>

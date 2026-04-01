@@ -20,11 +20,12 @@ const RSPWorkForm = ({ formData, setFormData }: RSPWorkFormProps) => {
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Year of Sanction</label>
           <Input
             type="text"
+            inputMode="numeric"
             value={formData.yearOfSanction}
             onChange={(e) => setFormData({ ...formData, yearOfSanction: e.target.value })}
             placeholder="YYYY"
@@ -43,11 +44,12 @@ const RSPWorkForm = ({ formData, setFormData }: RSPWorkFormProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">RB Sanctioned Cost</label>
           <Input
             type="text"
+            inputMode="decimal"
             value={formData.rbSanctionedCost}
             onChange={(e) => setFormData({ ...formData, rbSanctionedCost: e.target.value })}
             placeholder="Enter cost"
@@ -66,7 +68,7 @@ const RSPWorkForm = ({ formData, setFormData }: RSPWorkFormProps) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <label className="text-sm font-medium">Quantity Allotted</label>
           <Input
