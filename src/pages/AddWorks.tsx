@@ -79,103 +79,107 @@ const AddWorks = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
-      <div className="container mx-auto px-4 py-8 pt-24 max-w-3xl">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 rounded-xl hover:bg-slate-100">
-            <ArrowLeft size={20} />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              {formData.id ? 'Edit' : 'Create New'} Work
-            </h1>
-            <p className="text-sm text-slate-500">
-              {formData.id ? 'Edit existing' : 'Add new'} RSP or IRSP works to the system
-            </p>
+    <div className="space-y-6 max-w-3xl mx-auto pb-10">
+      {/* Header */}
+      <div className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 shrink-0 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors">
+          <ArrowLeft size={20} />
+        </Button>
+        <div>
+          <h2 className="text-xl font-bold text-slate-800 tracking-tight">
+            {formData.id ? 'Edit' : 'Create New'} Work
+          </h2>
+          <p className="text-sm text-slate-500 mt-0.5 font-medium">
+            {formData.id ? 'Modify the details of this item' : 'Add new RSP or IRSP elements to the database'}
+          </p>
+        </div>
+      </div>
+
+      {!showForm ? (
+        <div className="space-y-4">
+          <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest px-1">Select Category</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card 
+              className="premium-card premium-card-hover p-5 border border-slate-200 cursor-pointer group"
+              onClick={() => {
+                setWorkType("rsp");
+                setFormData({ ...formData, type: "rsp" });
+                setShowForm(true);
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-violet-50 text-violet-600 group-hover:scale-105 transition-transform duration-300 shadow-sm border border-violet-100">
+                  <FileText size={24} />
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800">RSP Work</p>
+                  <p className="text-xs font-medium text-slate-500 mt-0.5">Rolling Stock Program</p>
+                </div>
+              </div>
+            </Card>
+
+            <Card 
+              className="premium-card premium-card-hover p-5 border border-slate-200 cursor-pointer group"
+              onClick={() => {
+                setWorkType("irsp");
+                setFormData({ ...formData, type: "irsp" });
+                setShowForm(true);
+              }}
+            >
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-xl bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform duration-300 shadow-sm border border-blue-100">
+                  <FileText size={24} />
+                </div>
+                <div>
+                  <p className="font-bold text-slate-800">IRSP Work</p>
+                  <p className="text-xs font-medium text-slate-500 mt-0.5">Itemized Rolling Stock</p>
+                </div>
+              </div>
+            </Card>
           </div>
         </div>
-
-        {!showForm ? (
-          <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-slate-900">Select Work Type</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Card 
-                className="p-6 rounded-2xl border-slate-200 hover:border-violet-200 hover:shadow-lg transition-all duration-300 cursor-pointer group"
-                onClick={() => {
-                  setWorkType("rsp");
-                  setFormData({ ...formData, type: "rsp" });
-                  setShowForm(true);
-                }}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600 group-hover:scale-110 transition-transform duration-300">
-                    <FileText size={24} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-900">RSP Work</p>
-                    <p className="text-sm text-slate-500">Add a new RSP work item</p>
-                  </div>
-                </div>
-              </Card>
-
-              <Card 
-                className="p-6 rounded-2xl border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300 cursor-pointer group"
-                onClick={() => {
-                  setWorkType("irsp");
-                  setFormData({ ...formData, type: "irsp" });
-                  setShowForm(true);
-                }}
-              >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 group-hover:scale-110 transition-transform duration-300">
-                    <FileText size={24} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-900">IRSP Work</p>
-                    <p className="text-sm text-slate-500">Add a new IRSP work item</p>
-                  </div>
-                </div>
-              </Card>
-            </div>
+      ) : (
+        <Card className="premium-card p-0 border border-slate-200/60 overflow-hidden">
+          <div className="bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between">
+            <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+              <FileText size={18} className="text-primary" />
+              {workType.toUpperCase()} Details
+            </h3>
           </div>
-        ) : (
-          <Card className="rounded-2xl border-slate-200 shadow-sm p-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {workType === "rsp" ? (
-                <RSPWorkForm formData={formData} setFormData={setFormData} />
-              ) : (
-                <IRSPWorkForm formData={formData} setFormData={setFormData} />
-              )}
+          <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-white">
+            {workType === "rsp" ? (
+              <RSPWorkForm formData={formData} setFormData={setFormData} />
+            ) : (
+              <IRSPWorkForm formData={formData} setFormData={setFormData} />
+            )}
 
-              <div className="flex gap-3 pt-4 border-t border-slate-100">
-                <Button type="submit" className="bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 rounded-xl">
-                  <Plus size={16} className="mr-2" />
-                  {formData.id ? 'Update' : 'Add'} Work
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowForm(false);
-                    setWorkType("");
-                    setFormData({
-                      type: "",
-                      description: "",
-                      yearOfSanction: "",
-                      status: "",
-                    });
-                    localStorage.removeItem('editWork');
-                  }}
-                  className="rounded-xl"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          </Card>
-        )}
-      </div>
+            <div className="flex gap-3 pt-6 border-t border-slate-100">
+              <Button type="submit" className="bg-primary hover:bg-primary/90 text-white rounded-xl h-11 px-6 font-semibold shadow-sm transition-all">
+                <Plus size={18} className="mr-2" />
+                {formData.id ? 'Save Changes' : 'Create Record'}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  setShowForm(false);
+                  setWorkType("");
+                  setFormData({
+                    type: "",
+                    description: "",
+                    yearOfSanction: "",
+                    status: "",
+                  });
+                  localStorage.removeItem('editWork');
+                }}
+                className="rounded-xl h-11 px-6 font-semibold border-slate-200 hover:bg-slate-50 text-slate-600"
+              >
+                Clear & Cancel
+              </Button>
+            </div>
+          </form>
+        </Card>
+      )}
     </div>
   );
 };

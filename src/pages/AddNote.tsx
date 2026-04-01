@@ -34,53 +34,63 @@ const AddNote = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
-      <div className="container mx-auto px-4 py-8 pt-24 max-w-2xl">
-        <div className="flex items-center gap-3 mb-8">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 rounded-xl hover:bg-slate-100">
-            <ArrowLeft size={20} />
-          </Button>
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600">
-              <FileText size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">Add New Note</h1>
-              <p className="text-sm text-slate-500">Create and save a new note</p>
-            </div>
+    <div className="space-y-6 max-w-2xl mx-auto pb-10">
+      <div className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 shrink-0 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors">
+          <ArrowLeft size={20} />
+        </Button>
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-violet-50 text-violet-600 border border-violet-100 shadow-sm">
+            <FileText size={20} />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800 tracking-tight">Add New To-Do</h2>
+            <p className="text-sm font-medium text-slate-500 mt-0.5">Jot down your pending tasks</p>
           </div>
         </div>
+      </div>
 
-        <Card className="rounded-2xl border-slate-200 shadow-sm p-6">
+      <Card className="premium-card p-0 border border-slate-200/60 overflow-hidden">
+        <div className="bg-slate-50/50 p-5 border-b border-slate-100">
+          <h3 className="font-semibold text-slate-800 flex items-center gap-2">
+            Task Details
+          </h3>
+        </div>
+        
+        <div className="p-6 bg-white space-y-5">
           {saved && (
-            <div className="flex items-center gap-2 p-3 mb-4 rounded-xl bg-emerald-50 text-emerald-700">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700">
               <CheckCircle size={18} />
-              <span className="text-sm font-medium">Note saved successfully!</span>
+              <span className="text-sm font-medium">To-Do saved successfully!</span>
             </div>
           )}
 
           {error && (
-            <div className="p-3 mb-4 rounded-xl bg-red-50 text-red-600 text-sm">
+            <div className="p-3 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-100">
               {error}
             </div>
           )}
 
-          <Textarea
-            placeholder="Enter your note here..."
-            value={noteText}
-            onChange={(e) => setNoteText(e.target.value)}
-            rows={8}
-            className="rounded-xl border-slate-200 focus:border-violet-300 focus:ring-violet-200 resize-none"
-          />
+          <div>
+             <label className="text-xs font-semibold text-slate-700 uppercase tracking-widest mb-1.5 block">Task Description *</label>
+             <Textarea
+              placeholder="What needs to be done?"
+              value={noteText}
+              onChange={(e) => setNoteText(e.target.value)}
+              rows={6}
+              className="rounded-xl border-slate-200 focus-visible:ring-primary/20 focus-visible:border-primary bg-slate-50 focus-visible:bg-white text-sm transition-colors resize-none p-4"
+              autoFocus
+             />
+          </div>
 
-          <div className="flex justify-end mt-4">
-            <Button onClick={handleSaveNote} className="bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 rounded-xl">
-              <Save size={16} className="mr-2" />
-              Save Note
+          <div className="flex justify-end pt-4 border-t border-slate-100">
+            <Button onClick={handleSaveNote} className="bg-primary hover:bg-primary/90 text-white rounded-xl h-11 px-6 font-semibold shadow-sm transition-all">
+              <Save size={18} className="mr-2" />
+              Save Task
             </Button>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
     </div>
   );
 };

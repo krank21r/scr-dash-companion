@@ -169,153 +169,178 @@ const HomePage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
-      <div className="container mx-auto px-4 py-8 pt-24 max-w-7xl">
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-2 h-2 rounded-full bg-violet-500"></div>
-            <span className="text-sm font-medium text-violet-600 uppercase tracking-wider">Dashboard</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Budget Section Portal</h1>
-          <p className="text-slate-500 mt-2 text-lg">Track and manage all your works efficiently</p>
+    <div className="space-y-8 pb-10">
+
+      {/* Hero Section */}
+      <div className="relative w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200/60">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <img 
+            src="/Image train.png" 
+            alt="" 
+            className="w-full h-full object-cover"
+          />
+          {/* Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <Link to="/rsp-works" className="group">
-            <Card className="p-6 rounded-2xl border-0 shadow-sm hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-violet-500 to-indigo-600 text-white cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-violet-100 font-medium">Total RSP Works</p>
-                  <p className="text-4xl font-bold mt-2">{rspWorks?.length || 0}</p>
-                </div>
-                <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                  <FileText size={28} />
-                </div>
-              </div>
-              <div className="flex items-center mt-4 text-sm text-violet-100">
-                <span>View details</span>
-                <ChevronRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Card>
-          </Link>
+        {/* Content */}
+        <div className="relative z-10 px-8 py-16 sm:px-12 sm:py-20 lg:py-24">
+          <div className="max-w-2xl">
 
-          <Link to="/irsp-works" className="group">
-            <Card className="p-6 rounded-2xl border-0 shadow-sm hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-blue-500 to-cyan-600 text-white cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100 font-medium">Total IRSP Works</p>
-                  <p className="text-4xl font-bold mt-2">{irspWorks?.length || 0}</p>
-                </div>
-                <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform duration-300">
-                  <FileText size={28} />
-                </div>
-              </div>
-              <div className="flex items-center mt-4 text-sm text-blue-100">
-                <span>View details</span>
-                <ChevronRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Card>
-          </Link>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
+              Budget Section
+              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">
+                Portal
+              </span>
+            </h1>
 
-          <Card className="p-6 rounded-2xl border-0 shadow-sm bg-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-500 font-medium">Completed Works</p>
-                <p className="text-4xl font-bold mt-2 text-slate-900">
-                  {works.filter(work => work.status === 'completed').length}
-                </p>
-              </div>
-              <div className="bg-emerald-50 p-3 rounded-xl">
-                <CheckSquare size={28} className="text-emerald-600" />
-              </div>
-            </div>
-            <div className="flex items-center mt-4 text-sm text-slate-400">
-              <span>All projects</span>
-              <ChevronRight size={16} className="ml-1" />
-            </div>
-          </Card>
-        </div>
-
-        {/* Quick Links */}
-        <div className="mb-10">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Links</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {quickLinks.map((link) => (
-              <Link key={link.path} to={link.path} className="group">
-                <Card className="p-4 rounded-xl border-slate-200 hover:border-violet-200 hover:shadow-md transition-all duration-300 cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-br ${link.color} text-white`}>
-                      <link.icon size={20} />
-                    </div>
-                    <div className="flex-1">
-                      <p className="font-medium text-slate-900">{link.label}</p>
-                      <p className="text-sm text-slate-500">{link.count} items</p>
-                      {link.balance !== undefined && (
-                        <p className="text-xs font-medium text-amber-600 mt-0.5">
-                          Balance: ₹{link.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                        </p>
-                      )}
-                    </div>
-                    <ChevronRight size={16} className="text-slate-400 group-hover:text-violet-500 group-hover:translate-x-1 transition-all" />
-                  </div>
-                </Card>
+            <div className="flex flex-wrap gap-4">
+              <Link to="/rsp-works" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 transition-all duration-300">
+                <FileText size={18} />
+                RSP Works
               </Link>
+              <Link to="/irsp-works" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold text-sm hover:bg-white/20 hover:scale-105 transition-all duration-300">
+                <FileText size={18} />
+                IRSP Works
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Link to="/rsp-works" className="group">
+          <Card className="premium-card premium-card-hover p-5 border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2.5 bg-violet-50 text-violet-600 rounded-xl">
+                <FileText size={22} />
+              </div>
+              <div className="flex items-center text-xs font-semibold text-violet-600 bg-violet-50 px-2 py-1 rounded-full">
+                <span>View</span>
+                <ChevronRight size={14} className="ml-0.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </div>
+            <p className="text-slate-500 text-sm font-medium mb-1">Total RSP Works</p>
+            <p className="text-3xl font-bold text-slate-900">{rspWorks?.length || 0}</p>
+          </Card>
+        </Link>
+
+        <Link to="/irsp-works" className="group">
+          <Card className="premium-card premium-card-hover p-5 border border-slate-200">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
+                <FileText size={22} />
+              </div>
+              <div className="flex items-center text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                <span>View</span>
+                <ChevronRight size={14} className="ml-0.5 group-hover:translate-x-0.5 transition-transform" />
+              </div>
+            </div>
+            <p className="text-slate-500 text-sm font-medium mb-1">Total IRSP Works</p>
+            <p className="text-3xl font-bold text-slate-900">{irspWorks?.length || 0}</p>
+          </Card>
+        </Link>
+
+        <Card className="premium-card p-5 border border-slate-200">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+              <CheckSquare size={22} />
+            </div>
+          </div>
+          <p className="text-slate-500 text-sm font-medium mb-1">Completed Works</p>
+          <div className="flex items-end justify-between">
+            <p className="text-3xl font-bold text-slate-900">
+              {works.filter((work) => work.status === "completed").length}
+            </p>
+            <p className="text-sm font-medium text-slate-400">All projects</p>
+          </div>
+        </Card>
+      </div>
+
+      {/* Quick Links */}
+      <div>
+        <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wide">Quick Links</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {quickLinks.map((link) => (
+            <Link key={link.path} to={link.path} className="group">
+              <Card className="premium-card hover:border-primary/40 hover:shadow-md p-4 transition-all duration-300">
+                <div className="flex items-center gap-4">
+                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${link.color} text-white shadow-sm group-hover:scale-105 transition-transform`}>
+                    <link.icon size={18} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-slate-800 text-sm">{link.label}</p>
+                    <p className="text-xs text-slate-500 truncate">{link.count} items</p>
+                    {link.balance !== undefined && (
+                      <p className="text-xs font-medium text-amber-600 mt-1">
+                        Bal: ₹{link.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      </p>
+                    )}
+                  </div>
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                </div>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Status Overview */}
+        <Card className="premium-card p-6">
+          <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-2">
+              <TrendingUp size={18} className="text-primary" />
+              <h3 className="text-base font-semibold text-slate-900">Status Overview</h3>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(statusCounts).map(([status, count]) => (
+              count > 0 && (
+                <div 
+                  key={status}
+                  className="p-3.5 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-primary/20 hover:shadow-sm cursor-pointer transition-all duration-200 group"
+                  onClick={() => handleStatusClick(status)}
+                >
+                  <p className="text-xs font-medium text-slate-500 group-hover:text-primary transition-colors mb-1">{statusLabels[status]}</p>
+                  <p className="text-xl font-bold text-slate-800">{count}</p>
+                </div>
+              )
             ))}
           </div>
-        </div>
+        </Card>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Status Overview */}
-          <Card className="p-6 rounded-2xl border-slate-200 shadow-sm">
-            <div className="flex items-center gap-2 mb-6">
-              <TrendingUp size={20} className="text-violet-500" />
-              <h3 className="text-lg font-semibold text-slate-900">Status Overview</h3>
+        {/* To-Do Tasks */}
+        <Card className="premium-card p-0 overflow-hidden flex flex-col">
+          <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
+            <div className="flex items-center gap-2">
+              <CheckSquare size={18} className="text-primary" />
+              <h3 className="text-base font-semibold text-slate-900">To-Do List</h3>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {Object.entries(statusCounts).map(([status, count]) => (
-                count > 0 && (
-                  <div 
-                    key={status}
-                    className="p-4 rounded-xl bg-slate-50 hover:bg-violet-50 cursor-pointer transition-all duration-200 group"
-                    onClick={() => handleStatusClick(status)}
-                  >
-                    <p className="text-xs text-slate-500 group-hover:text-violet-600 transition-colors">{statusLabels[status]}</p>
-                    <p className="text-2xl font-bold text-slate-800 mt-1">{count}</p>
-                  </div>
-                )
-              ))}
-            </div>
-          </Card>
-
-          {/* To-Do Tasks */}
-          <Card className="p-6 rounded-2xl border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <CheckSquare size={20} className="text-violet-500" />
-                <h3 className="text-lg font-semibold text-slate-900">To-Do Tasks</h3>
-              </div>
-              <Link to="/add-note">
-                <Button variant="ghost" size="sm" className="text-violet-600 hover:text-violet-700 hover:bg-violet-50">
-                  <Plus size={16} className="mr-1" /> Add
-                </Button>
-              </Link>
-            </div>
+            <Link to="/add-note">
+              <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
+                <Plus size={16} className="mr-1" /> Add
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto p-2">
             {notes.length > 0 ? (
-              <div className="space-y-3">
+              <div className="space-y-1">
                 {notes.slice(0, 5).map((note) => (
-                  <div key={note.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors">
-                    <div className="flex-1">
-                      <p className="text-sm text-slate-700 line-clamp-1">{note.text}</p>
-                      <p className="text-xs text-slate-400 mt-1">{note.createdAt}</p>
+                  <div key={note.id} className="group flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <p className="text-sm font-medium text-slate-700 truncate">{note.text}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{note.createdAt}</p>
                     </div>
-                    <div className="flex gap-1 ml-2">
-                      <Button variant="ghost" size="sm" onClick={() => navigate(`/edit-note/${note.id}`)}>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="sm" className="h-8 px-2 text-slate-500 hover:text-primary" onClick={() => navigate(`/edit-note/${note.id}`)}>
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteNote(note.id)} className="text-red-500 hover:text-red-600 hover:bg-red-50">
+                      <Button variant="ghost" size="sm" className="h-8 px-2 text-slate-500 hover:text-red-600" onClick={() => handleDeleteNote(note.id)}>
                         Delete
                       </Button>
                     </div>
@@ -323,24 +348,25 @@ const HomePage = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <CheckSquare size={40} className="mx-auto text-slate-200 mb-3" />
-                <p className="text-slate-400">No tasks yet</p>
+              <div className="h-full flex flex-col items-center justify-center py-10">
+                <CheckSquare size={36} className="text-slate-200 mb-3" />
+                <p className="text-sm font-medium text-slate-500">No tasks pending</p>
+                <p className="text-xs text-slate-400 mt-1">You're all caught up!</p>
               </div>
             )}
-          </Card>
-        </div>
+          </div>
+        </Card>
       </div>
 
       {/* Dialog for filtered works */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl w-[95vw] sm:w-full">
+        <DialogContent className="max-w-4xl w-[95vw] sm:w-full rounded-2xl border-0 shadow-2xl">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xl font-bold text-slate-800">
               {selectedStatus && statusLabels[selectedStatus]} Works
             </DialogTitle>
           </DialogHeader>
-          <div className="mt-4">
+          <div className="mt-4 bg-white/50 rounded-lg border border-slate-100 overflow-hidden">
             <DataTable columns={columns} data={filteredWorks} />
           </div>
         </DialogContent>

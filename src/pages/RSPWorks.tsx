@@ -140,138 +140,129 @@ const RSPWorks = () => {
     : works.filter(work => work.yearOfSanction === selectedYear);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
-      <div className="container mx-auto px-4 py-8 pt-24 max-w-7xl">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-violet-500 to-indigo-600">
-              <FileText size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">RSP Works</h1>
-              <p className="text-sm text-slate-500">{filteredWorks.length} works found</p>
-            </div>
+    <div className="space-y-6 pb-10">
+      {/* Overview Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-violet-50 text-violet-600">
+            <FileText size={20} />
           </div>
-          <Button onClick={() => {
-            localStorage.removeItem('editWork');
-            navigate('/add-works');
-          }} className="bg-gradient-to-r from-violet-500 to-indigo-600 hover:from-violet-600 hover:to-indigo-700 rounded-xl h-10 self-end">
-            <Plus className="mr-2 h-4 w-4" /> Add Work
-          </Button>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">Overview</h2>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">{filteredWorks.length} works recorded</p>
+          </div>
         </div>
-
-        {/* Year Cards */}
+        
         {years.length > 0 && (
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <Calendar size={16} className="text-slate-400" />
-              <span className="text-sm font-medium text-slate-500">Filter by Year</span>
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
+            <div className="flex items-center gap-1.5 mr-2">
+              <Calendar size={14} className="text-slate-400" />
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setSelectedYear("all")}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${selectedYear === "all" ? "bg-gradient-to-r from-violet-500 to-indigo-600 text-white shadow-md" : "bg-white border border-slate-200 text-slate-600 hover:border-violet-200 hover:text-violet-600"}`}
-              >
-                All Years
-              </button>
-              {years.map((year) => {
-                const count = works.filter(w => w.yearOfSanction === year).length;
-                return (
-                  <button
-                    key={year}
-                    onClick={() => setSelectedYear(year)}
-                    className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${selectedYear === year ? "bg-gradient-to-r from-violet-500 to-indigo-600 text-white shadow-md" : "bg-white border border-slate-200 text-slate-600 hover:border-violet-200 hover:text-violet-600"}`}
-                  >
-                    {year} <span className="ml-1 text-xs opacity-70">({count})</span>
-                  </button>
-                );
-              })}
-            </div>
+            <button
+              onClick={() => setSelectedYear("all")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all ${selectedYear === "all" ? "bg-primary text-white shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100"}`}
+            >
+              All
+            </button>
+            {years.map((year) => {
+              const count = works.filter(w => w.yearOfSanction === year).length;
+              return (
+                <button
+                  key={year}
+                  onClick={() => setSelectedYear(year)}
+                  className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all ${selectedYear === year ? "bg-primary text-white shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100"}`}
+                >
+                  {year} <span className={`ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] ${selectedYear === year ? "bg-white/20 text-white" : "bg-white text-slate-400 border border-slate-200"}`}>{count}</span>
+                </button>
+              );
+            })}
           </div>
         )}
+      </div>
 
-        {/* Table */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="overflow-x-auto scrollbar-thin">
-            <table className="w-full table-fixed md:table-fixed mobile-card-table">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  <th className="px-4 py-3 w-[30%]">Description</th>
-                  <th className="px-4 py-3 w-[8%]">Year</th>
-                  <th className="px-4 py-3 w-[8%]">PB No</th>
-                  <th className="px-4 py-3 w-[12%]">Cost</th>
-                  <th className="px-4 py-3 w-[8%]">Qty</th>
-                  <th className="px-4 py-3 w-[8%]">Allot</th>
-                  <th className="px-4 py-3 w-[10%]">DE Value</th>
-                  <th className="px-4 py-3 w-[10%]">Status</th>
-                  <th className="px-4 py-3 w-[10%]">Remarks</th>
-                  <th className="px-4 py-3 w-[6%]">Act</th>
+      {/* Table Area */}
+      <div className="premium-card overflow-hidden flex flex-col">
+        <div className="overflow-x-auto scrollbar-none">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-5 py-4 w-[28%] font-medium">Description</th>
+                <th className="px-4 py-4 w-[8%] font-medium">Year</th>
+                <th className="px-4 py-4 w-[8%] font-medium">PB No</th>
+                <th className="px-4 py-4 w-[10%] font-medium">Cost</th>
+                <th className="px-4 py-4 w-[8%] font-medium">Qty</th>
+                <th className="px-4 py-4 w-[10%] font-medium">DE Value</th>
+                <th className="px-4 py-4 w-[14%] font-medium">Status</th>
+                <th className="px-4 py-4 w-[14%] font-medium">Remarks</th>
+                <th className="px-4 py-4 w-[8%] text-right font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredWorks.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-4 py-16 text-center">
+                    <div className="mx-auto w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3 border border-slate-100">
+                      <FileText size={20} className="text-slate-300" />
+                    </div>
+                    <p className="text-slate-600 font-medium text-sm">No works found</p>
+                    <p className="text-slate-400 text-xs mt-1">
+                      {selectedYear !== "all" ? `No entries for ${selectedYear}.` : "Start by adding a new work entry."}
+                    </p>
+                    <Button onClick={() => navigate('/add-works')} variant="outline" size="sm" className="mt-4 text-primary border-primary/20 hover:bg-primary/5">
+                      <Plus size={14} className="mr-1.5" /> Add Work
+                    </Button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredWorks.length === 0 ? (
-                  <tr>
-                    <td colSpan={10} className="px-4 py-12 text-center">
-                      <FileText size={40} className="mx-auto text-slate-200 mb-3" />
-                      <p className="text-slate-400 text-sm">
-                        No RSP works found for {selectedYear !== "all" ? `year ${selectedYear}` : "any year"}.
-                      </p>
-                      <Button onClick={() => navigate('/add-works')} variant="link" className="text-violet-600 mt-2">
-                        <Plus size={16} className="mr-1" /> Add Work
-                      </Button>
-                    </td>
+              ) : (
+                filteredWorks.map((work) => (
+                  <tr key={work.id} className="hover:bg-slate-50/80 transition-colors duration-150 text-sm group">
+                    <TableCell className="px-5 py-3.5 font-medium text-slate-800 break-words">{work.description || '-'}</TableCell>
+                    <TableCell className="px-4 py-3.5 text-slate-600">{work.yearOfSanction || '-'}</TableCell>
+                    <TableCell className="px-4 py-3.5 text-slate-600">{work.pbNo || '-'}</TableCell>
+                    <TableCell className="px-4 py-3.5 text-slate-600 font-medium">{work.rbSanctionedCost || '-'}</TableCell>
+                    <TableCell className="px-4 py-3.5 text-slate-600">{work.qtySanctioned || '-'}</TableCell>
+                    <TableCell className="px-4 py-3.5 text-slate-600">{work.deTotalValue || '-'}</TableCell>
+                    <TableCell className="px-4 py-3.5">
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold border ${getStatusColor(work.status)}`}>
+                        {getStatusLabel(work.status)}
+                      </span>
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 text-slate-500 text-xs truncate max-w-[150px]" title={work.remarks}>
+                      {work.remarks || '-'}
+                    </TableCell>
+                    <TableCell className="px-4 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg" onClick={() => handleEdit(work)}>
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-2xl border-0 shadow-2xl bg-white sm:max-w-[425px]">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-xl text-slate-800">Delete Work</AlertDialogTitle>
+                              <AlertDialogDescription className="text-slate-500">
+                                Are you sure you want to delete this work? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-6">
+                              <AlertDialogCancel className="border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50">Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(work.id)} className="bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm">
+                                Delete Work
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </TableCell>
                   </tr>
-                ) : (
-                  filteredWorks.map((work) => (
-                    <tr key={work.id} className="hover:bg-slate-50/80 transition-colors duration-150 text-sm">
-                      <TableCell className="px-4 py-3 font-medium text-slate-900 break-words" data-label="Description">{work.description || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600" data-label="Year">{work.yearOfSanction || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600" data-label="PB No">{work.pbNo || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600" data-label="Cost">{work.rbSanctionedCost || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600" data-label="Qty">{work.qtySanctioned || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600" data-label="Allot">{work.qtyAllotted || '-'}</TableCell>
-                      <TableCell className="px-4 py-3 text-slate-600" data-label="DE Value">{work.deTotalValue || '-'}</TableCell>
-                      <TableCell className="px-4 py-3" data-label="Status">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium border ${getStatusColor(work.status)}`}>
-                          {getStatusLabel(work.status)}
-                        </span>
-                      </TableCell>
-                      <TableCell className="px-4 py-3 text-slate-500 truncate" data-label="Remarks" title={work.remarks}>{work.remarks || '-'}</TableCell>
-                      <TableCell className="px-4 py-3" data-label="Actions">
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-violet-50 hover:text-violet-600" onClick={() => handleEdit(work)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-red-50 hover:text-red-600">
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Work</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this work? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(work.id)} className="bg-red-600 hover:bg-red-700">
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </TableCell>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

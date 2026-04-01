@@ -160,27 +160,28 @@ const Contingencies = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50/30">
-      <div className="container mx-auto px-4 py-8 pt-24 max-w-5xl">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600">
-              <AlertCircle size={24} className="text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">Contingencies</h1>
-              <p className="text-sm text-slate-500">{filteredContingencies.length} entries</p>
-            </div>
+    <div className="space-y-6 pb-10">
+      {/* Overview Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm">
+        <div className="flex items-center gap-3">
+          <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600">
+            <AlertCircle size={20} />
           </div>
-          <div className="flex items-center gap-3">
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800">Overview</h2>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">{filteredContingencies.length} contingencies recorded</p>
+          </div>
+        </div>
+        
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          {years.length > 0 && (
             <div className="flex items-center gap-2">
               <Filter size={16} className="text-slate-400" />
               <Select value={selectedYear} onValueChange={setSelectedYear}>
-                <SelectTrigger className="w-full sm:w-[160px] h-10 bg-white border-slate-200 rounded-xl">
+                <SelectTrigger className="w-full sm:w-[160px] h-9 bg-slate-50 border-slate-200 rounded-lg text-sm text-slate-700 hover:bg-slate-100 transition-colors">
                   <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl border-slate-100 shadow-xl">
                   <SelectItem value="all">All Years</SelectItem>
                   {years.map((year) => (
                     <SelectItem key={year} value={year}>{year}</SelectItem>
@@ -188,152 +189,175 @@ const Contingencies = () => {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={() => {
+          )}
+          <Button 
+            onClick={() => {
               localStorage.removeItem('editContingency');
               navigate('/add-contingency');
-            }} className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 rounded-xl h-10">
-              <Plus className="mr-2 h-4 w-4" /> Add
-            </Button>
-          </div>
+            }} 
+            className="bg-amber-500 hover:bg-amber-600 text-white rounded-lg h-9 px-4 text-sm font-medium shadow-sm transition-all w-full sm:w-auto"
+          >
+            <Plus className="mr-1.5 h-4 w-4" /> Add Contingency
+          </Button>
         </div>
+      </div>
 
-        {/* Table */}
-        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-          <div className="overflow-x-auto scrollbar-thin">
-            <table className="w-full mobile-card-table">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                  <th className="px-4 py-3 w-[6%] text-center">Sl.</th>
-                  <th className="px-4 py-3 w-[35%]">Description</th>
-                  <th className="px-4 py-3 w-[10%]">Year</th>
-                  <th className="px-4 py-3 w-[15%]">Total Amount</th>
-                  <th className="px-4 py-3 w-[15%]">Spent</th>
-                  <th className="px-4 py-3 w-[15%]">Balance</th>
-                  <th className="px-4 py-3 w-[4%]"></th>
+      {/* Table Area */}
+      <div className="premium-card overflow-hidden flex flex-col">
+        <div className="overflow-x-auto scrollbar-none">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50/50 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <th className="px-5 py-4 w-[6%] font-medium text-center">Sl.</th>
+                <th className="px-4 py-4 w-[35%] font-medium">Description</th>
+                <th className="px-4 py-4 w-[10%] font-medium">Year</th>
+                <th className="px-4 py-4 w-[15%] font-medium">Total Amount</th>
+                <th className="px-4 py-4 w-[15%] font-medium">Spent</th>
+                <th className="px-4 py-4 w-[15%] font-medium">Balance</th>
+                <th className="px-4 py-4 w-[4%] text-right font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredContingencies.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-16 text-center">
+                    <div className="mx-auto w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3 border border-slate-100">
+                      <AlertCircle size={20} className="text-slate-300" />
+                    </div>
+                    <p className="text-slate-600 font-medium text-sm">No contingencies found</p>
+                    <p className="text-slate-400 text-xs mt-1">
+                      {selectedYear !== "all" ? `No entries for ${selectedYear}.` : "Start by adding a new contingency."}
+                    </p>
+                    <Button onClick={() => navigate('/add-contingency')} variant="outline" size="sm" className="mt-4 text-primary border-primary/20 hover:bg-primary/5">
+                      <Plus size={14} className="mr-1.5" /> Add Contingency
+                    </Button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredContingencies.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-12 text-center">
-                      <AlertCircle size={40} className="mx-auto text-slate-200 mb-3" />
-                      <p className="text-slate-400 text-sm">No contingencies found.</p>
-                      <Button onClick={() => navigate('/add-contingency')} variant="link" className="text-amber-600 mt-2">
-                        <Plus size={16} className="mr-1" /> Add Contingency
-                      </Button>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredContingencies.map((item, index) => {
-                    const balance = getBalance(item);
-                    const spent = getTotalSpent(item);
-                    const isExpanded = expandedId === item.id;
-                    return (
-                      <>
-                        <tr key={item.id} className="hover:bg-slate-50/80 transition-colors duration-150 text-sm">
-                          <TableCell className="px-4 py-3 text-center text-slate-500 font-medium" data-label="Sl.">{index + 1}</TableCell>
-                          <TableCell className="px-4 py-3" data-label="Description">
-                            <button
-                              onClick={() => toggleExpand(item.id)}
-                              className="flex items-center gap-2 text-slate-800 hover:text-amber-600 font-medium transition-colors"
-                            >
-                              {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                              {item.description || '-'}
-                            </button>
-                          </TableCell>
-                          <TableCell className="px-4 py-3 text-slate-600" data-label="Year">{item.yearOfSanction || '-'}</TableCell>
-                          <TableCell className="px-4 py-3 text-slate-700 font-medium" data-label="Total">₹{parseFloat(item.totalAmount).toLocaleString('en-IN')}</TableCell>
-                          <TableCell className="px-4 py-3 text-slate-600" data-label="Spent">₹{spent.toLocaleString('en-IN')}</TableCell>
-                          <TableCell className="px-4 py-3" data-label="Balance">
-                            <span className={`font-semibold ${balance <= 0 ? 'text-red-600' : balance < parseFloat(item.totalAmount) * 0.25 ? 'text-amber-600' : 'text-emerald-600'}`}>
-                              ₹{balance.toLocaleString('en-IN')}
+              ) : (
+                filteredContingencies.map((item, index) => {
+                  const balance = getBalance(item);
+                  const spent = getTotalSpent(item);
+                  const isExpanded = expandedId === item.id;
+                  return (
+                    <>
+                      <tr key={item.id} className={`hover:bg-slate-50/80 transition-colors duration-150 text-sm group ${isExpanded ? 'bg-slate-50/50' : ''}`}>
+                        <TableCell className="px-5 py-3.5 text-center text-slate-500 font-medium" data-label="Sl.">{index + 1}</TableCell>
+                        <TableCell className="px-4 py-3.5" data-label="Description">
+                          <button
+                            onClick={() => toggleExpand(item.id)}
+                            className="flex items-center gap-2 text-slate-800 hover:text-amber-600 font-medium transition-colors break-words text-left"
+                          >
+                            <span className={`p-1 rounded bg-slate-100 text-slate-400 transition-transform ${isExpanded ? 'rotate-180 bg-amber-100 text-amber-600' : ''}`}>
+                              <ChevronDown size={14} />
                             </span>
-                          </TableCell>
-                          <TableCell className="px-4 py-3" data-label="">
-                            <div className="flex items-center gap-1">
-                              <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-amber-50 hover:text-amber-600" onClick={() => handleEdit(item)}>
-                                <Pencil className="h-4 w-4" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-red-50 hover:text-red-600">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Delete</AlertDialogTitle>
-                                    <AlertDialogDescription>Are you sure?</AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => handleDelete(item.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </TableCell>
-                        </tr>
-                        {isExpanded && (
-                          <tr key={`${item.id}-expand`}>
-                            <td colSpan={7} className="bg-amber-50/50 px-4 py-4">
-                              <div className="space-y-3">
-                                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Expenditure History</p>
-                                {item.expenditures && item.expenditures.length > 0 ? (
-                                  <div className="space-y-2 mb-4">
-                                    {item.expenditures.map((exp, i) => (
-                                      <div key={exp.id} className="flex items-center justify-between p-2 rounded-lg bg-white border border-slate-200 text-sm">
-                                        <div className="flex items-center gap-3">
-                                          <span className="w-6 h-6 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
-                                          <div>
-                                            <p className="font-medium text-slate-700">₹{parseFloat(exp.amount).toLocaleString('en-IN')}</p>
-                                            {exp.remarks && <p className="text-xs text-slate-400">{exp.remarks}</p>}
-                                          </div>
-                                        </div>
-                                        <div className="text-right">
-                                          <p className="text-xs text-slate-400">{exp.date}</p>
-                                          <p className="text-xs text-slate-500">Bal: ₹{parseFloat(exp.balance).toLocaleString('en-IN')}</p>
+                            {item.description || '-'}
+                          </button>
+                        </TableCell>
+                        <TableCell className="px-4 py-3.5 text-slate-600">{item.yearOfSanction || '-'}</TableCell>
+                        <TableCell className="px-4 py-3.5 text-slate-700 font-semibold tracking-tight">₹{parseFloat(item.totalAmount).toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="px-4 py-3.5 text-slate-600">₹{spent.toLocaleString('en-IN')}</TableCell>
+                        <TableCell className="px-4 py-3.5">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${balance <= 0 ? 'bg-red-50 text-red-600' : balance < parseFloat(item.totalAmount) * 0.25 ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'}`}>
+                            ₹{balance.toLocaleString('en-IN')}
+                          </span>
+                        </TableCell>
+                        <TableCell className="px-4 py-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg" onClick={() => handleEdit(item)}>
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-2xl border-0 shadow-2xl bg-white sm:max-w-[425px]">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle className="text-xl text-slate-800">Delete Contingency</AlertDialogTitle>
+                                  <AlertDialogDescription className="text-slate-500">
+                                    Are you sure you want to delete this contingency? This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className="mt-6">
+                                  <AlertDialogCancel className="border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDelete(item.id)} className="bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm">
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </tr>
+                      {isExpanded && (
+                        <tr key={`${item.id}-expand`} className="bg-slate-50/50">
+                          <td colSpan={7} className="px-6 py-5 border-b border-slate-100">
+                            <div className="max-w-3xl ml-10 pl-6 border-l-2 border-slate-200">
+                              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5"><IndianRupee size={12}/> Expenditure History</p>
+                              {item.expenditures && item.expenditures.length > 0 ? (
+                                <div className="space-y-2.5 mb-5">
+                                  {item.expenditures.map((exp, i) => (
+                                    <div key={exp.id} className="flex items-center justify-between p-3 rounded-xl bg-white border border-slate-200/60 shadow-sm text-sm hover:border-slate-300 transition-colors">
+                                      <div className="flex items-center gap-3">
+                                        <span className="w-6 h-6 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                                        <div>
+                                          <p className="font-semibold text-slate-800 tracking-tight">₹{parseFloat(exp.amount).toLocaleString('en-IN')}</p>
+                                          {exp.remarks && <p className="text-xs text-slate-500 mt-0.5">{exp.remarks}</p>}
                                         </div>
                                       </div>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <p className="text-sm text-slate-400 mb-4">No expenditures added yet</p>
-                                )}
-                                {balance > 0 ? (
-                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-3 border-t border-amber-200">
+                                      <div className="text-right">
+                                        <p className="text-[11px] font-medium text-slate-400 mb-0.5">{exp.date}</p>
+                                        <p className="text-xs font-medium text-slate-600">Bal: ₹{parseFloat(exp.balance).toLocaleString('en-IN')}</p>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2 mb-5 p-3 rounded-lg bg-white border border-dashed border-slate-200">
+                                  <AlertCircle size={14} className="text-slate-400" />
+                                  <p className="text-sm text-slate-400 font-medium">No expenditures added yet</p>
+                                </div>
+                              )}
+
+                              {balance > 0 ? (
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 p-3 rounded-xl bg-white border border-slate-200/60 shadow-sm">
+                                  <div className="relative flex-1 sm:max-w-[140px]">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">₹</span>
                                     <Input
                                       type="number"
                                       inputMode="decimal"
                                       value={expenditureAmount}
                                       onChange={(e) => setExpenditureAmount(e.target.value)}
                                       placeholder="Amount"
-                                      className="w-full sm:w-32 h-10 rounded-lg border-slate-200"
+                                      className="pl-7 h-9 rounded-lg border-slate-200 bg-slate-50 focus-visible:bg-white text-sm"
                                     />
-                                    <Input
-                                      value={expenditureRemarks}
-                                      onChange={(e) => setExpenditureRemarks(e.target.value)}
-                                      placeholder="Remarks"
-                                      className="flex-1 h-10 rounded-lg border-slate-200"
-                                    />
-                                    <Button onClick={() => addExpenditure(item)} size="sm" className="bg-amber-500 hover:bg-amber-600 rounded-lg h-10 w-full sm:w-auto">
-                                      Add
-                                    </Button>
                                   </div>
-                                ) : (
-                                  <p className="text-sm text-red-500 font-medium">Balance exhausted</p>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        )}
-                      </>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                                  <Input
+                                    value={expenditureRemarks}
+                                    onChange={(e) => setExpenditureRemarks(e.target.value)}
+                                    placeholder="Add remarks..."
+                                    className="flex-1 h-9 rounded-lg border-slate-200 bg-slate-50 focus-visible:bg-white text-sm"
+                                  />
+                                  <Button onClick={() => addExpenditure(item)} size="sm" className="bg-slate-800 hover:bg-slate-900 text-white rounded-lg h-9 px-4 font-medium transition-all shadow-sm">
+                                    Record
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="p-3 rounded-lg bg-red-50 text-red-600 text-sm font-medium flex items-center gap-2 border border-red-100">
+                                  <AlertCircle size={16} /> Fund completely exhausted
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
