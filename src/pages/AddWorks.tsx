@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { useToast } from '../hooks/use-toast';
@@ -7,7 +7,8 @@ import IRSPWorkForm from '../components/forms/IRSPWorkForm';
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
 import { db } from '../main';
-import { ArrowLeft, FileText, Plus } from "lucide-react";
+import { ArrowLeft, FileText, Plus, Component, CheckCircle2, ChevronRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const AddWorks = () => {
   const { toast } = useToast();
@@ -33,153 +34,155 @@ const AddWorks = () => {
         }
       } catch (error) {
         console.error("Error parsing stored work:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load work data for editing",
-          variant: "destructive",
-        });
       }
     }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       if (formData.id) {
         const workRef = doc(db, "works", formData.id);
         const { id, ...updateData } = formData;
         await updateDoc(workRef, updateData);
-        toast({
-          title: "Success",
-          description: "Work updated successfully",
-        });
+        toast({ title: "Update Successful", description: "Project ledger has been synchronized." });
       } else {
         const { id, ...newWorkData } = formData;
         await addDoc(collection(db, "works"), {
           ...newWorkData,
           type: workType,
+          createdAt: new Date(),
         });
-        toast({
-          title: "Success",
-          description: "Work added successfully",
-        });
+        toast({ title: "Entry Created", description: "New project has been added to the database." });
       }
-
       localStorage.removeItem('editWork');
       navigate(workType === 'rsp' ? '/rsp-works' : '/irsp-works');
     } catch (error: any) {
-      toast({
-        title: "Error",
-        description: `Failed to ${formData.id ? 'update' : 'add'} work: ${error.message}`,
-        variant: "destructive",
-      });
-      console.error("Error:", error);
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
   return (
-    <div className="space-y-6 max-w-3xl mx-auto pb-10">
-      {/* Header */}
-      <div className="flex items-center gap-4 bg-white p-5 rounded-2xl border border-slate-200/60 shadow-sm">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-10 w-10 shrink-0 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-slate-800 transition-colors">
-          <ArrowLeft size={20} />
+    <div className="max-w-4xl mx-auto space-y-8 pb-20 px-4">
+      {/* Header with Navigation */}
+      <div className="flex items-center gap-6 group">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={() => navigate(-1)} 
+          className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-primary hover:bg-primary/5 hover:border-primary/20 transition-all duration-300 active:scale-95"
+        >
+          <ArrowLeft size={24} />
         </Button>
-        <div>
-          <h2 className="text-xl font-bold text-slate-800 tracking-tight">
-            {formData.id ? 'Edit' : 'Create New'} Work
+        <div className="space-y-1">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight font-['Plus_Jakarta_Sans']">
+            {formData.id ? 'Refine Entry' : 'New Assignment'}
           </h2>
-          <p className="text-sm text-slate-500 mt-0.5 font-medium">
-            {formData.id ? 'Modify the details of this item' : 'Add new RSP or IRSP elements to the database'}
+          <p className="text-sm text-slate-500 font-bold uppercase tracking-[0.1em] flex items-center gap-2">
+            <span className="w-1 h-1 rounded-full bg-primary mb-0.5"></span>
+            {formData.id ? `ID: ${formData.id.slice(0, 8)}...` : 'Database Protocol Alpha'}
           </p>
         </div>
       </div>
 
-      {!showForm ? (
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold text-slate-800 uppercase tracking-widest px-1">Select Category</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <AnimatePresence mode="wait">
+        {!showForm ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+          >
             <Card 
-              className="premium-card premium-card-hover p-5 border border-slate-200 cursor-pointer group"
-              onClick={() => {
-                setWorkType("rsp");
-                setFormData({ ...formData, type: "rsp" });
-                setShowForm(true);
-              }}
+              className="glass-card group relative p-10 border-none shadow-premium-shadow cursor-pointer hover:shadow-2xl transition-all duration-500 overflow-hidden"
+              onClick={() => { setWorkType("rsp"); setFormData({ ...formData, type: "rsp" }); setShowForm(true); }}
             >
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-violet-50 text-violet-600 group-hover:scale-105 transition-transform duration-300 shadow-sm border border-violet-100">
-                  <FileText size={24} />
+              <div className="relative z-10 space-y-8">
+                <div className="w-16 h-16 rounded-[1.5rem] bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/40 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border-4 border-white/20">
+                  <FileText size={32} />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-800">RSP Work</p>
-                  <p className="text-xs font-medium text-slate-500 mt-0.5">Rolling Stock Program</p>
+                  <h3 className="text-2xl font-black text-slate-900 font-['Plus_Jakarta_Sans']">RSP Work</h3>
+                  <p className="text-slate-500 font-medium mt-2 leading-relaxed">New Assignment</p>
+                </div>
+                <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-widest pt-2 group-hover:gap-4 transition-all">
+                  Initialize <ChevronRight size={16} />
                 </div>
               </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl group-hover:bg-primary/10 transition-colors" />
             </Card>
 
             <Card 
-              className="premium-card premium-card-hover p-5 border border-slate-200 cursor-pointer group"
-              onClick={() => {
-                setWorkType("irsp");
-                setFormData({ ...formData, type: "irsp" });
-                setShowForm(true);
-              }}
+              className="glass-card group relative p-10 border-none shadow-premium-shadow cursor-pointer hover:shadow-2xl transition-all duration-500 overflow-hidden"
+              onClick={() => { setWorkType("irsp"); setFormData({ ...formData, type: "irsp" }); setShowForm(true); }}
             >
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-blue-50 text-blue-600 group-hover:scale-105 transition-transform duration-300 shadow-sm border border-blue-100">
-                  <FileText size={24} />
+              <div className="relative z-10 space-y-8">
+                <div className="w-16 h-16 rounded-[1.5rem] bg-cyan-500 text-white flex items-center justify-center shadow-2xl shadow-cyan-500/40 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500 border-4 border-white/20">
+                  <Component size={32} />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-800">IRSP Work</p>
-                  <p className="text-xs font-medium text-slate-500 mt-0.5">Itemized Rolling Stock</p>
+                  <h3 className="text-2xl font-black text-slate-900 font-['Plus_Jakarta_Sans']">IRSP Work</h3>
+                  <p className="text-slate-500 font-medium mt-2 leading-relaxed">New Assignment</p>                </div>
+                <div className="flex items-center gap-2 text-cyan-500 font-black text-xs uppercase tracking-widest pt-2 group-hover:gap-4 transition-all">
+                  Initialize <ChevronRight size={16} />
                 </div>
               </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl group-hover:bg-cyan-500/10 transition-colors" />
             </Card>
-          </div>
-        </div>
-      ) : (
-        <Card className="premium-card p-0 border border-slate-200/60 overflow-hidden">
-          <div className="bg-slate-50/50 p-5 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-              <FileText size={18} className="text-primary" />
-              {workType.toUpperCase()} Details
-            </h3>
-          </div>
-          <form onSubmit={handleSubmit} className="p-6 space-y-6 bg-white">
-            {workType === "rsp" ? (
-              <RSPWorkForm formData={formData} setFormData={setFormData} />
-            ) : (
-              <IRSPWorkForm formData={formData} setFormData={setFormData} />
-            )}
-
-            <div className="flex gap-3 pt-6 border-t border-slate-100">
-              <Button type="submit" className="bg-primary hover:bg-primary/90 text-white rounded-xl h-11 px-6 font-semibold shadow-sm transition-all">
-                <Plus size={18} className="mr-2" />
-                {formData.id ? 'Save Changes' : 'Create Record'}
-              </Button>
+          </motion.div>
+        ) : (
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="glass-card border-none shadow-2xl overflow-hidden"
+          >
+            <div className="bg-slate-900 p-8 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-black shadow-lg ${workType === 'rsp' ? 'bg-primary' : 'bg-cyan-500'}`}>
+                  {workType === 'rsp' ? 'R' : 'I'}
+                </div>
+                <div>
+                  <h3 className="font-black text-white text-lg tracking-tight font-['Plus_Jakarta_Sans'] uppercase">{workType === 'rsp' ? 'Rolling Stock Program' : 'Itemized Rolling Stock'}</h3>
+                  <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">Manual Ledger Entry</p>
+                </div>
+              </div>
               <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  setShowForm(false);
-                  setWorkType("");
-                  setFormData({
-                    type: "",
-                    description: "",
-                    yearOfSanction: "",
-                    status: "",
-                  });
-                  localStorage.removeItem('editWork');
-                }}
-                className="rounded-xl h-11 px-6 font-semibold border-slate-200 hover:bg-slate-50 text-slate-600"
+                variant="ghost" 
+                size="sm" 
+                onClick={() => { setShowForm(false); setWorkType(""); localStorage.removeItem('editWork'); }}
+                className="text-slate-400 hover:text-white hover:bg-white/5 rounded-lg px-4 font-bold"
               >
-                Clear & Cancel
+                Change Protocol
               </Button>
             </div>
-          </form>
-        </Card>
-      )}
+            
+            <form onSubmit={handleSubmit} className="p-10 space-y-10 bg-white">
+              <div className="space-y-8">
+                {workType === "rsp" ? (
+                  <RSPWorkForm formData={formData} setFormData={setFormData} />
+                ) : (
+                  <IRSPWorkForm formData={formData} setFormData={setFormData} />
+                )}
+              </div>
+
+              <div className="flex items-center gap-4 pt-10 border-t border-slate-50">
+                <Button type="submit" className="btn-primary-glow flex-1 h-14 rounded-2xl font-black text-base shadow-xl transition-all hover:-translate-y-1 active:scale-[0.98]">
+                  <CheckCircle2 size={20} className="mr-2" />
+                  {formData.id ? 'Synchronize Record' : 'Commit to Database'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => navigate(-1)}
+                  className="h-14 px-10 rounded-2xl font-bold border-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all"
+                >
+                  Discard
+                </Button>
+              </div>
+            </form>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

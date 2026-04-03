@@ -1,6 +1,7 @@
+import React, { useState, useEffect } from "react";
 import { TableCell } from '../components/ui/table';
 import { Button } from '../components/ui/button';
-import { Pencil, Trash2, Plus, FileText, Calendar } from "lucide-react";
+import { Pencil, Trash2, Plus, FileText, Calendar, Filter, AlertCircle, IndianRupee } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +17,6 @@ import { useToast } from '../hooks/use-toast';
 import { useNavigate } from "react-router-dom";
 import { db } from '../main';
 import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
-import { useState, useEffect } from "react";
 
 interface WorkItem {
   id: string;
@@ -44,22 +44,29 @@ const getStatusLabel = (status: string) => {
   return statusMap[status] || status;
 };
 
-const getStatusColor = (status: string) => {
-  const colorMap: Record<string, string> = {
-    completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    work_process: "bg-blue-50 text-blue-700 border-blue-200",
-    tender: "bg-violet-50 text-violet-700 border-violet-200",
-    de_process: "bg-amber-50 text-amber-700 border-amber-200",
-    de_finance: "bg-orange-50 text-orange-700 border-orange-200",
-    de_hqrs: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  };
-  return colorMap[status] || "bg-slate-50 text-slate-700 border-slate-200";
+const getStatusStyles = (status: string) => {
+  switch (status) {
+    case "completed":
+      return "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-100/20";
+    case "work_process":
+    case "de_process":
+      return "bg-blue-50 text-blue-600 border-blue-100 shadow-blue-100/20";
+    case "tender":
+      return "bg-violet-50 text-violet-600 border-violet-100 shadow-violet-100/20";
+    case "de_finance":
+      return "bg-orange-50 text-orange-600 border-orange-100 shadow-orange-100/20";
+    case "de_hqrs":
+      return "bg-indigo-50 text-indigo-600 border-indigo-100 shadow-indigo-100/20";
+    default:
+      return "bg-slate-50 text-slate-500 border-slate-100";
+  }
 };
 
 const RSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [years, setYears] = useState<string[]>([]);
+  const [scrolled, setScrolled] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -90,49 +97,25 @@ const RSPWorks = () => {
 
   useEffect(() => {
     loadWorks();
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleDelete = async (workId: string) => {
     try {
-      if (!workId) {
-        throw new Error("Work ID is required for deletion");
-      }
-      
-      const workRef = doc(db, "works", workId);
-      await deleteDoc(workRef);
-      
-      toast({
-        title: "Success",
-        description: "Work deleted successfully",
-      });
-      
+      if (!workId) throw new Error("Work ID is required");
+      await deleteDoc(doc(db, "works", workId));
+      toast({ title: "Success", description: "Project entry removed." });
       await loadWorks();
     } catch (error: any) {
-      console.error("Error deleting work:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete work: " + error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     }
   };
 
   const handleEdit = (work: WorkItem) => {
-    try {
-      if (!work || !work.id) {
-        throw new Error("Invalid work data for editing");
-      }
-
-      localStorage.setItem('editWork', JSON.stringify(work));
-      navigate('/add-works');
-    } catch (error: any) {
-      console.error("Error preparing work for edit:", error);
-      toast({
-        title: "Error",
-        description: "Failed to edit work: " + error.message,
-        variant: "destructive",
-      });
-    }
+    localStorage.setItem('editWork', JSON.stringify(work));
+    navigate('/add-works');
   };
 
   const filteredWorks = selectedYear === "all" 
@@ -140,118 +123,145 @@ const RSPWorks = () => {
     : works.filter(work => work.yearOfSanction === selectedYear);
 
   return (
-    <div className="space-y-6 pb-10">
-      {/* Overview Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white p-4 rounded-2xl border border-slate-200/60 shadow-sm">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-violet-50 text-violet-600">
-            <FileText size={20} />
+    <div className="space-y-8 pb-10">
+      {/* Dynamic Filter Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pointer-events-auto">
+        <div className="flex items-center gap-5">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner border border-blue-100/50">
+            <FileText size={28} />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-slate-800">Overview</h2>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">{filteredWorks.length} works recorded</p>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 font-['Plus_Jakarta_Sans']">RSP Works</h1>
+            <p className="text-sm text-slate-500 font-bold uppercase tracking-[0.1em] mt-1 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+              {filteredWorks.length} Records
+            </p>
           </div>
         </div>
-        
-        {years.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
-            <div className="flex items-center gap-1.5 mr-2">
-              <Calendar size={14} className="text-slate-400" />
-            </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 p-1.5 rounded-[1.25rem] bg-slate-100/50 border border-slate-200/40 backdrop-blur-md">
             <button
               onClick={() => setSelectedYear("all")}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all ${selectedYear === "all" ? "bg-primary text-white shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100"}`}
+              className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${selectedYear === "all" ? "bg-white text-primary shadow-xl shadow-slate-200" : "text-slate-400 hover:text-slate-600"}`}
             >
-              All
+              Overview
             </button>
-            {years.map((year) => {
-              const count = works.filter(w => w.yearOfSanction === year).length;
-              return (
-                <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={`flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wide transition-all ${selectedYear === year ? "bg-primary text-white shadow-sm" : "bg-slate-50 text-slate-600 hover:bg-slate-100"}`}
-                >
-                  {year} <span className={`ml-1.5 px-1.5 py-0.5 rounded-md text-[10px] ${selectedYear === year ? "bg-white/20 text-white" : "bg-white text-slate-400 border border-slate-200"}`}>{count}</span>
-                </button>
-              );
-            })}
+            {years.map((year) => (
+              <button
+                key={year}
+                onClick={() => setSelectedYear(year)}
+                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${selectedYear === year ? "bg-white text-primary shadow-xl shadow-slate-200" : "text-slate-400 hover:text-slate-600"}`}
+              >
+                {year}
+              </button>
+            ))}
           </div>
-        )}
+
+          <Button 
+            onClick={() => {
+              localStorage.removeItem('editWork');
+              navigate('/add-works');
+            }} 
+            className="btn-primary-glow h-12 px-8 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 active:translate-y-0"
+          >
+            <Plus className="mr-2 h-5 w-5" /> New Work Entry
+          </Button>
+        </div>
       </div>
 
-      {/* Table Area */}
-      <div className="premium-card overflow-hidden flex flex-col">
+      {/* Table Section */}
+      <div className="glass-card border-none shadow-premium-shadow overflow-hidden">
         <div className="overflow-x-auto scrollbar-none">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/50 text-xs font-semibold uppercase tracking-wider text-slate-500">
-                <th className="px-5 py-4 w-[28%] font-medium">Description</th>
-                <th className="px-4 py-4 w-[8%] font-medium">Year</th>
-                <th className="px-4 py-4 w-[8%] font-medium">PB No</th>
-                <th className="px-4 py-4 w-[10%] font-medium">Cost</th>
-                <th className="px-4 py-4 w-[8%] font-medium">Qty</th>
-                <th className="px-4 py-4 w-[10%] font-medium">DE Value</th>
-                <th className="px-4 py-4 w-[14%] font-medium">Status</th>
-                <th className="px-4 py-4 w-[14%] font-medium">Remarks</th>
-                <th className="px-4 py-4 w-[8%] text-right font-medium">Actions</th>
+          <table className="w-full text-left border-collapse min-w-[1200px]">
+            <thead className="sticky top-0 z-20 table-header-glow">
+              <tr className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 font-['Plus_Jakarta_Sans']">
+                <th className="px-8 py-6 w-[25%]">Description</th>
+                <th className="px-6 py-6 w-[8%] text-center">Year</th>
+                <th className="px-6 py-6 w-[8%] text-center">PB No</th>
+                <th className="px-6 py-6 w-[12%]">Sanctioned Cost</th>
+                <th className="px-6 py-6 w-[10%] text-center">Quantity</th>
+                <th className="px-6 py-6 w-[12%]">DE Value</th>
+                <th className="px-6 py-6 w-[15%]">Tracked Status</th>
+                <th className="px-6 py-6 w-[10%] text-right pr-10">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-50/50">
               {filteredWorks.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-16 text-center">
-                    <div className="mx-auto w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mb-3 border border-slate-100">
-                      <FileText size={20} className="text-slate-300" />
+                  <td colSpan={8} className="px-8 py-32 text-center">
+                    <div className="mx-auto w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 border border-slate-100 shadow-inner">
+                      <AlertCircle size={32} className="text-slate-300" />
                     </div>
-                    <p className="text-slate-600 font-medium text-sm">No works found</p>
-                    <p className="text-slate-400 text-xs mt-1">
-                      {selectedYear !== "all" ? `No entries for ${selectedYear}.` : "Start by adding a new work entry."}
+                    <h3 className="text-2xl font-black text-slate-800 font-['Plus_Jakarta_Sans'] tracking-tight">No works found</h3>
+                    <p className="text-slate-400 font-medium text-lg mt-2 mb-8 max-w-md mx-auto leading-relaxed">
+                      Initialize your project tracking by adding your first RSP work element to the system.
                     </p>
-                    <Button onClick={() => navigate('/add-works')} variant="outline" size="sm" className="mt-4 text-primary border-primary/20 hover:bg-primary/5">
-                      <Plus size={14} className="mr-1.5" /> Add Work
+                    <Button onClick={() => navigate('/add-works')} className="btn-primary-glow h-14 px-10 rounded-[1.25rem] font-black text-base">
+                      Initialize Database
                     </Button>
                   </td>
                 </tr>
               ) : (
                 filteredWorks.map((work) => (
-                  <tr key={work.id} className="hover:bg-slate-50/80 transition-colors duration-150 text-sm group">
-                    <TableCell className="px-5 py-3.5 font-medium text-slate-800 break-words">{work.description || '-'}</TableCell>
-                    <TableCell className="px-4 py-3.5 text-slate-600">{work.yearOfSanction || '-'}</TableCell>
-                    <TableCell className="px-4 py-3.5 text-slate-600">{work.pbNo || '-'}</TableCell>
-                    <TableCell className="px-4 py-3.5 text-slate-600 font-medium">{work.rbSanctionedCost || '-'}</TableCell>
-                    <TableCell className="px-4 py-3.5 text-slate-600">{work.qtySanctioned || '-'}</TableCell>
-                    <TableCell className="px-4 py-3.5 text-slate-600">{work.deTotalValue || '-'}</TableCell>
-                    <TableCell className="px-4 py-3.5">
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold border ${getStatusColor(work.status)}`}>
+                  <tr key={work.id} className="premium-table-row transition-all duration-500 group border-l-4 border-l-transparent hover:border-l-primary">
+                    <TableCell className="px-8 py-6">
+                      <div className="flex flex-col gap-1">
+                        <span className="font-extrabold text-slate-800 text-sm leading-snug group-hover:text-primary transition-colors font-['Plus_Jakarta_Sans']">{work.description || '-'}</span>
+                        {work.remarks && <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest line-clamp-1 opacity-60 group-hover:opacity-100 transition-opacity italic">"{work.remarks}"</span>}
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-6 text-center">
+                      <span className="px-3 py-1.5 rounded-lg bg-slate-50 text-[11px] font-black font-['Plus_Jakarta_Sans'] text-slate-500 border border-slate-100/50">{work.yearOfSanction || '-'}</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-6 text-center">
+                      <span className="font-mono text-xs font-black tracking-widest text-slate-400 bg-slate-100/30 px-2.5 py-1 rounded-md">{work.pbNo || '-'}</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-6">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-[10px] font-black text-primary/40 leading-none">₹</span>
+                        <span className="text-base font-black text-slate-900 font-['Plus_Jakarta_Sans'] tracking-tighter">{work.rbSanctionedCost || '-'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-6 text-center">
+                      <span className="text-xs font-black text-slate-600 bg-slate-50 px-3 py-1 rounded-full border border-slate-100 shadow-sm">{work.qtySanctioned || '-'}</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-6">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-[10px] font-black text-slate-300 leading-none">₹</span>
+                        <span className="text-sm font-bold text-slate-600 font-['Plus_Jakarta_Sans']">{work.deTotalValue || '-'}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-6 py-6">
+                      <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black border tracking-[0.05em] uppercase shadow-sm transition-all duration-500 font-['Plus_Jakarta_Sans'] ${getStatusStyles(work.status)}`}>
                         {getStatusLabel(work.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="px-4 py-3.5 text-slate-500 text-xs truncate max-w-[150px]" title={work.remarks}>
-                      {work.remarks || '-'}
-                    </TableCell>
-                    <TableCell className="px-4 py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg" onClick={() => handleEdit(work)}>
-                          <Pencil className="h-4 w-4" />
+                    <TableCell className="px-6 py-6 text-right pr-10">
+                      <div className="flex items-center justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                        <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-[1rem] ring-4 ring-transparent hover:ring-primary/5" onClick={() => handleEdit(work)}>
+                          <Pencil className="h-4.5 w-4.5" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg">
-                              <Trash2 className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-[1rem] ring-4 ring-transparent hover:ring-red-50">
+                              <Trash2 className="h-4.5 w-4.5" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-2xl border-0 shadow-2xl bg-white sm:max-w-[425px]">
+                          <AlertDialogContent className="rounded-[3rem] border-none shadow-[25px_25px_60px_rgba(0,0,0,0.15)] bg-white p-12 max-w-xl">
                             <AlertDialogHeader>
-                              <AlertDialogTitle className="text-xl text-slate-800">Delete Work</AlertDialogTitle>
-                              <AlertDialogDescription className="text-slate-500">
-                                Are you sure you want to delete this work? This action cannot be undone.
+                              <div className="w-20 h-20 rounded-[2rem] bg-red-50 text-red-600 flex items-center justify-center mb-8 shadow-inner ring-[12px] ring-red-50/50">
+                                <Trash2 size={40} />
+                              </div>
+                              <AlertDialogTitle className="text-4xl font-['Plus_Jakarta_Sans'] font-black text-slate-900 tracking-tight leading-tight">Excise this element?</AlertDialogTitle>
+                              <AlertDialogDescription className="text-slate-400 text-xl font-medium leading-relaxed pt-3">
+                                This will permanently remove the record from your database. All associated tracking data will be lost.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter className="mt-6">
-                              <AlertDialogCancel className="border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50">Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(work.id)} className="bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-sm">
-                                Delete Work
+                            <AlertDialogFooter className="mt-12 gap-5">
+                              <AlertDialogCancel className="h-16 flex-1 border-slate-100 text-slate-500 rounded-[1.5rem] hover:bg-slate-50 font-black px-8 text-base shadow-sm">Preserve</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(work.id)} className="h-16 flex-1 bg-red-600 hover:bg-red-700 text-white rounded-[1.5rem] shadow-2xl shadow-red-200 font-black px-10 text-base">
+                                Delete Permanently
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

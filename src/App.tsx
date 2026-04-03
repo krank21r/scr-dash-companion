@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { Layout } from './components/Layout';
+import { ThemeProvider } from 'next-themes';
 
 const HomePage = lazy(() => import('./pages/Home'));
 const RSPWorks = lazy(() => import('./pages/RSPWorks'));
@@ -15,6 +16,9 @@ const AddWorks = lazy(() => import('./pages/AddWorks'));
 const UnitCost = lazy(() => import('./pages/UnitCost'));
 const AddNote = lazy(() => import('./pages/AddNote'));
 const EditNote = lazy(() => import('./pages/EditNote'));
+const Info = lazy(() => import('./pages/Info'));
+const Holidays = lazy(() => import('./pages/Holidays'));
+const Weblinks = lazy(() => import('./pages/Weblinks'));
 
 const queryClient = new QueryClient();
 
@@ -26,25 +30,30 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Layout>
-        <Toaster />
-        <Sonner />
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/rsp-works" element={<RSPWorks />} />
-            <Route path="/irsp-works" element={<IRSPWorks />} />
-            <Route path="/contingencies" element={<Contingencies />} />
-            <Route path="/add-contingency" element={<AddContingency />} />
-            <Route path="/add-works" element={<AddWorks />} />
-            <Route path="/unit-cost" element={<UnitCost />} />
-            <Route path="/add-note" element={<AddNote />} />
-            <Route path="/edit-note/:id" element={<EditNote />} />
-          </Routes>
-        </Suspense>
-      </Layout>
-    </TooltipProvider>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+      <TooltipProvider>
+        <Layout>
+          <Toaster />
+          <Sonner />
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/rsp-works" element={<RSPWorks />} />
+              <Route path="/irsp-works" element={<IRSPWorks />} />
+              <Route path="/contingencies" element={<Contingencies />} />
+              <Route path="/add-contingency" element={<AddContingency />} />
+              <Route path="/add-works" element={<AddWorks />} />
+              <Route path="/unit-cost" element={<UnitCost />} />
+              <Route path="/add-note" element={<AddNote />} />
+              <Route path="/edit-note/:id" element={<EditNote />} />
+              <Route path="/info" element={<Info />} />
+              <Route path="/holidays" element={<Holidays />} />
+              <Route path="/weblinks" element={<Weblinks />} />
+            </Routes>
+          </Suspense>
+        </Layout>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 

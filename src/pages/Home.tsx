@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
-import { FileText, CheckSquare, TrendingUp, Plus, ChevronRight, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FileText, CheckSquare, TrendingUp, Plus, ChevronRight, AlertCircle, IndianRupee, Sparkles, Layout, Clock, Trash2, Edit3 } from "lucide-react";
 import { Card } from "../components/ui/card";
 import {
   Dialog,
@@ -10,10 +9,11 @@ import {
   DialogTitle,
 } from "../components/ui/dialog";
 import { DataTable } from "../components/ui/data-table";
-import { collection, deleteDoc, doc, getDocs } from "firebase/firestore";
-import { db, notesCollection } from '../lib/firebase';
+import { collection, deleteDoc, doc, getDocs, query, orderBy, limit } from "firebase/firestore";
+import { db } from '../main';
+const notesCollection = collection(db, 'notes');
 import { Button } from "../components/ui/button";
-
+import { motion, AnimatePresence } from "framer-motion";
 
 interface WorkItem {
   id: string;
@@ -27,7 +27,6 @@ interface NoteItem {
   id: string;
   text: string;
   createdAt: string;
-  actions?: React.ReactNode;
 }
 
 interface ContingencyItem {
@@ -37,6 +36,24 @@ interface ContingencyItem {
   expenditures?: { amount: string; balance: string; remarks: string }[];
 }
 
+const AnimatedNumber = ({ value }: { value: number }) => {
+  const [display, setDisplay] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const end = value;
+    const duration = 1000;
+    const startTime = performance.now();
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 4);
+      setDisplay(Math.round(start + (end - start) * eased));
+      if (progress < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [value]);
+  return <span>{display.toLocaleString('en-IN')}</span>;
+};
 
 const HomePage = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
@@ -44,334 +61,351 @@ const HomePage = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [contingencies, setContingencies] = useState<ContingencyItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchWorks = async () => {
-      const querySnapshot = await getDocs(collection(db, "works"));
-      const workData = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as WorkItem[];
-      setWorks(workData);
-    };
+    const fetchData = async () => {
+      try {
+        const [worksSnapshot, notesSnapshot, contingenciesSnapshot] = await Promise.all([
+          getDocs(collection(db, "works")),
+          getDocs(query(notesCollection, orderBy("createdAt", "desc"), limit(8))),
+          getDocs(collection(db, "contingencies")),
+        ]);
 
-    const fetchNotes = async () => {
-      const notesSnapshot = await getDocs(notesCollection);
-      const noteData = notesSnapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
+        setWorks(worksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WorkItem[]);
+        setNotes(notesSnapshot.docs.map(doc => ({
           id: doc.id,
-          ...data,
-          createdAt: data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'N/A',
-        };
-      }) as NoteItem[];
-
-      const notesWithActions = noteData.map(note => ({
-        ...note,
-        actions: (
-          <div className="space-x-2">
-            <Button variant="outline" size="icon" onClick={() => navigate(`/edit-note/${note.id}`)}>
-              Edit
-            </Button>
-            <Button variant="destructive" size="icon" onClick={() => handleDeleteNote(note.id)}>
-              Delete
-            </Button>
-          </div>
-        ),
-      }));
-
-      setNotes(notesWithActions);
+          text: doc.data().text,
+          createdAt: doc.data().createdAt?.toDate().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) || 'Recent',
+        })) as NoteItem[]);
+        setContingencies(contingenciesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ContingencyItem[]);
+      } catch (error) {
+        console.error("Hydration Error:", error);
+      } finally {
+        setLoading(false);
+      }
     };
-
-    const fetchContingencies = async () => {
-      const snapshot = await getDocs(collection(db, "contingencies"));
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as ContingencyItem[];
-      setContingencies(data);
-    };
-
-    fetchWorks();
-    fetchNotes();
-    fetchContingencies();
+    fetchData();
   }, []);
 
   const handleDeleteNote = async (id: string) => {
-    const noteDocRef = doc(notesCollection, id);
     try {
-      await deleteDoc(noteDocRef);
-      setNotes(notes.filter(note => note.id !== id));
-    } catch (error: any) {
-      console.error("Error deleting note:", error);
+      await deleteDoc(doc(notesCollection, id));
+      setNotes(prev => prev.filter(n => n.id !== id));
+    } catch (e) {
+      console.error(e);
     }
   };
-
-  const rspWorks = works.filter(work => work.type === 'rsp');
-  const irspWorks = works.filter(work => work.type === 'irsp');
-
-  const getStatusCounts = () => {
-    const statusCounts = {
-      'de_process': works.filter(work => work.status === 'de_process').length,
-      'de_finance': works.filter(work => work.status === 'de_finance').length,
-      'de_hqrs': works.filter(work => work.status === 'de_hqrs').length,
-      'work_process': works.filter(work => work.status === 'work_process').length,
-      'tender': works.filter(work => work.status === 'tender').length,
-      'completed': works.filter(work => work.status === 'completed').length,
-      'indents_placed': works.filter(work => work.status === 'indents_placed').length,
-    };
-    return statusCounts;
-  };
-
-  const statusLabels: Record<string, string> = {
-    'de_process': 'DE Under Process',
-    'de_finance': 'DE Sent to Finance',
-    'de_hqrs': 'DE Sent to HQrs',
-    'work_process': 'Work Under Process',
-    'tender': 'Tender Stage',
-    'completed': 'Completed',
-    'indents_placed': 'Indents Placed'
-  };
-
-  const statusCounts = getStatusCounts();
 
   const handleStatusClick = (status: string) => {
     setSelectedStatus(status);
     setDialogOpen(true);
   };
 
-  const columns = [
-    { header: "Type", accessorKey: "type" },
-    { header: "Description", accessorKey: "description" },
-    { header: "Year of Sanction", accessorKey: "yearOfSanction" },
-  ];
+  const statusLabels: Record<string, string> = {
+    'de_process': 'DE under process',
+    'de_finance': 'DE Sent to Finance',
+    'de_hqrs': 'DE sent to HQrs',
+    'work_process': 'Work under process',
+    'tender': 'Tender stage',
+    'completed': 'Work Completed',
+    'indents_placed': 'Indents placed'
+  };
 
-  const notesColumns = [
-    { header: "Note", accessorKey: "text" },
-    { header: "Actions", accessorKey: "actions" },
-  ] as any;
+  const totalSpent = contingencies.reduce((sum, c) => 
+    sum + (c.expenditures || []).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0), 0
+  );
+  
+  const totalAllocation = contingencies.reduce((sum, c) => sum + (parseFloat(c.totalAmount) || 0), 0);
 
-  const filteredWorks = selectedStatus
-    ? works.filter((work) => work.status === selectedStatus)
-    : [];
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  } as any;
 
-  const totalContingencyBalance = contingencies.reduce((sum, c) => {
-    const total = parseFloat(c.totalAmount) || 0;
-    const spent = (c.expenditures || []).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
-    return sum + (total - spent);
-  }, 0);
-
-  const quickLinks = [
-    { label: "RSP Works", count: rspWorks.length, path: "/rsp-works", icon: FileText, color: "from-violet-500 to-indigo-600" },
-    { label: "IRSP Works", count: irspWorks.length, path: "/irsp-works", icon: FileText, color: "from-blue-500 to-cyan-600" },
-    { label: "Contingencies", count: contingencies.length, path: "/contingencies", icon: AlertCircle, color: "from-amber-500 to-orange-600", balance: totalContingencyBalance },
-  ];
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+  } as any;
 
   return (
-    <div className="space-y-8 pb-10">
-
-      {/* Hero Section */}
-      <div className="relative w-full rounded-2xl overflow-hidden shadow-xl border border-slate-200/60">
-        {/* Background Image */}
-        <div className="absolute inset-0">
-          <img 
-            src="/Image train.png" 
-            alt="" 
-            className="w-full h-full object-cover"
-          />
-          {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-10 pb-20"
+    >
+      {/* Dynamic Hero */}
+      <motion.div variants={itemVariants} className="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+        <div className="space-y-2">
+          <h1 className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight font-['Plus_Jakarta_Sans'] leading-[1.1]">
+            Budget Section <span className="text-primary italic">Portal</span>
+          </h1>
+          <p className="text-slate-400 font-bold uppercase tracking-widest text-xs flex items-center gap-2">
+            Carriage Workshop LGD
+          </p>
         </div>
-
-        {/* Content */}
-        <div className="relative z-10 px-8 py-16 sm:px-12 sm:py-20 lg:py-24">
-          <div className="max-w-2xl">
-
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
-              Budget Section
-              <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-violet-400">
-                Portal
-              </span>
-            </h1>
-
-            <div className="flex flex-wrap gap-4">
-              <Link to="/rsp-works" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold text-sm shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 hover:scale-105 transition-all duration-300">
-                <FileText size={18} />
-                RSP Works
-              </Link>
-              <Link to="/irsp-works" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold text-sm hover:bg-white/20 hover:scale-105 transition-all duration-300">
-                <FileText size={18} />
-                IRSP Works
-              </Link>
-            </div>
-          </div>
+        <div className="flex items-center gap-4">
+          <Button onClick={() => navigate('/add-works')} className="btn-primary-glow h-14 px-8 rounded-2xl font-black text-sm tracking-tight active:scale-95 transition-all">
+            <Plus size={20} className="mr-2" /> New Work
+          </Button>
         </div>
-      </div>
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link to="/rsp-works" className="group">
-          <Card className="premium-card premium-card-hover p-5 border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2.5 bg-violet-50 text-violet-600 rounded-xl">
-                <FileText size={22} />
-              </div>
-              <div className="flex items-center text-xs font-semibold text-violet-600 bg-violet-50 px-2 py-1 rounded-full">
-                <span>View</span>
-                <ChevronRight size={14} className="ml-0.5 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </div>
-            <p className="text-slate-500 text-sm font-medium mb-1">Total RSP Works</p>
-            <p className="text-3xl font-bold text-slate-900">{rspWorks?.length || 0}</p>
-          </Card>
-        </Link>
+      </motion.div>
 
-        <Link to="/irsp-works" className="group">
-          <Card className="premium-card premium-card-hover p-5 border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl">
-                <FileText size={22} />
-              </div>
-              <div className="flex items-center text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                <span>View</span>
-                <ChevronRight size={14} className="ml-0.5 group-hover:translate-x-0.5 transition-transform" />
-              </div>
-            </div>
-            <p className="text-slate-500 text-sm font-medium mb-1">Total IRSP Works</p>
-            <p className="text-3xl font-bold text-slate-900">{irspWorks?.length || 0}</p>
-          </Card>
-        </Link>
-
-        <Card className="premium-card p-5 border border-slate-200">
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
-              <CheckSquare size={22} />
-            </div>
-          </div>
-          <p className="text-slate-500 text-sm font-medium mb-1">Completed Works</p>
-          <div className="flex items-end justify-between">
-            <p className="text-3xl font-bold text-slate-900">
-              {works.filter((work) => work.status === "completed").length}
-            </p>
-            <p className="text-sm font-medium text-slate-400">All projects</p>
-          </div>
-        </Card>
-      </div>
-
-      {/* Quick Links */}
-      <div>
-        <h3 className="text-sm font-semibold text-slate-900 mb-4 uppercase tracking-wide">Quick Links</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {quickLinks.map((link) => (
-            <Link key={link.path} to={link.path} className="group">
-              <Card className="premium-card hover:border-primary/40 hover:shadow-md p-4 transition-all duration-300">
-                <div className="flex items-center gap-4">
-                  <div className={`p-2.5 rounded-xl bg-gradient-to-br ${link.color} text-white shadow-sm group-hover:scale-105 transition-transform`}>
-                    <link.icon size={18} />
+      {/* KPI Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* RSP Card */}
+        <motion.div variants={itemVariants} className="group">
+          <Link to="/rsp-works">
+            <Card className="glass-card p-6 border-none shadow-premium-shadow relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 group-hover:bg-primary/[0.02]">
+              <div className="relative z-10 space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-500/30 group-hover:rotate-6 transition-all">
+                    <FileText size={22} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-slate-800 text-sm">{link.label}</p>
-                    <p className="text-xs text-slate-500 truncate">{link.count} items</p>
-                    {link.balance !== undefined && (
-                      <p className="text-xs font-medium text-amber-600 mt-1">
-                        Bal: ₹{link.balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-                      </p>
-                    )}
+                  <div className="text-right">
+                    <div className="text-3xl font-black text-slate-900 font-['Plus_Jakarta_Sans'] tracking-tighter">
+                      <AnimatedNumber value={works.filter(w => w.type === 'rsp').length} />
+                    </div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Works</p>
                   </div>
-                  <ChevronRight size={18} className="text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                 </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 font-['Plus_Jakarta_Sans'] leading-none">RSP</h3>
+                  <p className="text-slate-400 font-medium text-xs mt-1.5 leading-relaxed">Rolling Stock Program</p>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-primary font-black text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2">
+                  Navigate <ChevronRight size={12} />
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-colors" />
+            </Card>
+          </Link>
+        </motion.div>
+
+        {/* IRSP Card */}
+        <motion.div variants={itemVariants} className="group">
+          <Link to="/irsp-works">
+            <Card className="glass-card p-6 border-none shadow-premium-shadow relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 group-hover:bg-cyan-500/[0.02]">
+              <div className="relative z-10 space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-cyan-500 text-white flex items-center justify-center shadow-lg shadow-cyan-500/30 group-hover:rotate-6 transition-all">
+                    <Layout size={22} />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-3xl font-black text-slate-900 font-['Plus_Jakarta_Sans'] tracking-tighter">
+                      <AnimatedNumber value={works.filter(w => w.type === 'irsp').length} />
+                    </div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Works</p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 font-['Plus_Jakarta_Sans'] leading-none">IRSP</h3>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-cyan-600 font-black text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2">
+                  Navigate <ChevronRight size={12} />
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-3xl group-hover:bg-cyan-500/10 transition-colors" />
+            </Card>
+          </Link>
+        </motion.div>
+
+        {/* Contingencies Card */}
+        <motion.div variants={itemVariants} className="group">
+          <Link to="/contingencies">
+            <Card className="glass-card p-6 border-none shadow-premium-shadow relative overflow-hidden transition-all duration-500 hover:shadow-2xl hover:-translate-y-1 group-hover:bg-amber-500/[0.02]">
+              <div className="relative z-10 space-y-5">
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30 group-hover:rotate-6 transition-all">
+                    <AlertCircle size={22} />
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-black text-emerald-600 font-['Plus_Jakarta_Sans'] tracking-tighter">
+                      ₹<AnimatedNumber value={totalAllocation - totalSpent} />
+                    </div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Available</p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 font-['Plus_Jakarta_Sans'] leading-none">Contingencies</h3>
+                </div>
+                <div className="inline-flex items-center gap-1.5 text-amber-600 font-black text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2">
+                  View <ChevronRight size={12} />
+                </div>
+              </div>
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-3xl group-hover:bg-amber-500/10 transition-colors" />
+            </Card>
+          </Link>
+        </motion.div>
+
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Status Overview */}
-        <Card className="premium-card p-6">
-          <div className="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp size={18} className="text-primary" />
-              <h3 className="text-base font-semibold text-slate-900">Status Overview</h3>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {Object.entries(statusCounts).map(([status, count]) => (
-              count > 0 && (
-                <div 
-                  key={status}
-                  className="p-3.5 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-primary/20 hover:shadow-sm cursor-pointer transition-all duration-200 group"
-                  onClick={() => handleStatusClick(status)}
-                >
-                  <p className="text-xs font-medium text-slate-500 group-hover:text-primary transition-colors mb-1">{statusLabels[status]}</p>
-                  <p className="text-xl font-bold text-slate-800">{count}</p>
+      {/* Secondary Intelligence: Status & Tasks */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+        {/* Status Heatmap - 3 Columns */}
+        <motion.div variants={itemVariants} className="lg:col-span-3">
+          <Card className="glass-card p-10 border-none shadow-premium-shadow h-full pb-14">
+            <div className="flex items-center justify-between mb-10">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-slate-50 text-slate-400 border border-slate-100">
+                  <Layout size={20} />
                 </div>
-              )
-            ))}
-          </div>
-        </Card>
-
-        {/* To-Do Tasks */}
-        <Card className="premium-card p-0 overflow-hidden flex flex-col">
-          <div className="p-5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-            <div className="flex items-center gap-2">
-              <CheckSquare size={18} className="text-primary" />
-              <h3 className="text-base font-semibold text-slate-900">To-Do List</h3>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900 font-['Plus_Jakarta_Sans']">Status Overview</h3>
+                </div>
+              </div>
             </div>
-            <Link to="/add-note">
-              <Button variant="ghost" size="sm" className="h-8 text-primary hover:text-primary hover:bg-primary/10">
-                <Plus size={16} className="mr-1" /> Add
+            
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+              {Object.entries(statusLabels).map(([key, label]) => {
+                const count = works.filter(w => w.status === key).length;
+                if (count === 0 && key !== 'completed') return null;
+                return (
+                  <motion.div 
+                    key={key}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className="p-6 rounded-[1.5rem] bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:border-primary/20 transition-all cursor-pointer group"
+                    onClick={() => handleStatusClick(key)}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`w-2 h-2 rounded-full ${key === 'completed' ? 'bg-emerald-500' : key === 'tender' ? 'bg-violet-500' : 'bg-primary'} group-hover:animate-pulse`} />
+                      <span className="text-[11px] font-mono font-black text-slate-300">#{count}</span>
+                    </div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-tight">{label}</p>
+                    <div className="mt-3 flex items-center justify-between">
+                      <div className="text-2xl font-black text-slate-900 font-['Plus_Jakarta_Sans']">{count}</div>
+                      <ChevronRight size={14} className="text-slate-200 group-hover:text-primary transition-colors" />
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </Card>
+        </motion.div>
+
+        {/* Task Protocol - 2 Columns */}
+        <motion.div variants={itemVariants} className="lg:col-span-2">
+          <Card className="glass-card p-0 border-none shadow-premium-shadow h-full overflow-hidden flex flex-col">
+            <div className="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-inner">
+                  <Clock size={20} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900 font-['Plus_Jakarta_Sans']">To-do List</h3>
+                </div>
+              </div>
+              <Button 
+                onClick={() => navigate('/add-note')} 
+                variant="ghost" 
+                size="icon" 
+                className="w-10 h-10 rounded-xl hover:bg-primary/5 hover:text-primary text-slate-400"
+              >
+                <Plus size={20} />
               </Button>
-            </Link>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto p-2">
-            {notes.length > 0 ? (
-              <div className="space-y-1">
-                {notes.slice(0, 5).map((note) => (
-                  <div key={note.id} className="group flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-colors">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <p className="text-sm font-medium text-slate-700 truncate">{note.text}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{note.createdAt}</p>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto scrollbar-none p-4 min-h-[300px]">
+              <div className="space-y-3">
+                {notes.map((note) => (
+                  <motion.div 
+                    layout
+                    key={note.id} 
+                    className="group flex items-center justify-between p-5 rounded-[1.25rem] hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all duration-300"
+                  >
+                    <div className="flex-1 min-w-0 mr-4">
+                      <p className="text-sm font-bold text-slate-700 leading-relaxed font-['Plus_Jakarta_Sans']">{note.text}</p>
+                      <div className="flex items-center gap-2.5 mt-2">
+                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{note.createdAt}</span>
+                        <span className="w-1 h-1 rounded-full bg-slate-200" />
+                        <span className="text-[9px] font-bold text-slate-400 italic">Sync Active</span>
+                      </div>
                     </div>
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="sm" className="h-8 px-2 text-slate-500 hover:text-primary" onClick={() => navigate(`/edit-note/${note.id}`)}>
-                        Edit
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-xl" onClick={() => navigate(`/edit-note/${note.id}`)}>
+                        <Edit3 size={16} />
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 px-2 text-slate-500 hover:text-red-600" onClick={() => handleDeleteNote(note.id)}>
-                        Delete
+                      <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl" onClick={() => handleDeleteNote(note.id)}>
+                        <Trash2 size={16} />
                       </Button>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
+                {notes.length === 0 && (
+                  <div className="h-full flex flex-col items-center justify-center py-20 grayscale opacity-40">
+                    <CheckSquare size={48} className="text-slate-300 mb-4" />
+                    <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Protocol Buffer Empty</p>
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center py-10">
-                <CheckSquare size={36} className="text-slate-200 mb-3" />
-                <p className="text-sm font-medium text-slate-500">No tasks pending</p>
-                <p className="text-xs text-slate-400 mt-1">You're all caught up!</p>
-              </div>
-            )}
-          </div>
-        </Card>
+            </div>
+            <div className="p-4 border-t border-slate-50 bg-slate-50/10">
+              <Button 
+                variant="ghost" 
+                className="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary hover:bg-primary/5"
+                onClick={() => navigate('/add-note')}
+              >
+                Enter New Task Sequence
+              </Button>
+            </div>
+          </Card>
+        </motion.div>
       </div>
 
-      {/* Dialog for filtered works */}
+
+
+      {/* Modal View for Status Details */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-4xl w-[95vw] sm:w-full rounded-2xl border-0 shadow-2xl">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-800">
-              {selectedStatus && statusLabels[selectedStatus]} Works
-            </DialogTitle>
-          </DialogHeader>
-          <div className="mt-4 bg-white/50 rounded-lg border border-slate-100 overflow-hidden">
-            <DataTable columns={columns} data={filteredWorks} />
+        <DialogContent className="max-w-5xl w-[95vw] rounded-[3rem] border-none bg-white shadow-premium-shadow p-0 overflow-hidden">
+          <div className="bg-slate-900 p-10 flex items-center justify-between">
+            <div className="space-y-1">
+              <h3 className="text-3xl font-black text-white tracking-tight font-['Plus_Jakarta_Sans']">
+                {selectedStatus && statusLabels[selectedStatus]} <span className="text-primary">Elements</span>
+              </h3>
+              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest animate-pulse">Filtered Datastream Registry</p>
+            </div>
+            <div className="w-16 h-16 rounded-[1.5rem] bg-white/10 text-white flex items-center justify-center border border-white/5 backdrop-blur-xl">
+              <FileText size={32} />
+            </div>
+          </div>
+          <div className="p-10">
+            <div className="bg-slate-50/50 rounded-[2rem] border border-slate-100 overflow-hidden shadow-inner max-h-[60vh] overflow-y-auto">
+              <DataTable 
+                columns={[
+                  { 
+                    header: "SPECIFICATION", 
+                    accessorKey: "description",
+                    cell: (info: any) => <span className="font-bold text-slate-800 font-['Plus_Jakarta_Sans'] text-sm">{info.getValue() || '-'}</span>
+                  },
+                  { 
+                    header: "PROTOCOL TYPE", 
+                    accessorKey: "type",
+                    cell: (info: any) => (
+                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${info.getValue() === 'rsp' ? 'bg-blue-50 text-blue-600' : 'bg-cyan-50 text-cyan-600'}`}>
+                        {info.getValue()} Registry
+                      </span>
+                    )
+                  },
+                  { 
+                    header: "SANCTION PERIOD", 
+                    accessorKey: "yearOfSanction",
+                    cell: (info: any) => <span className="font-mono text-[11px] font-black text-slate-400">{info.getValue() || '-'}</span>
+                  },
+                ]} 
+                data={works.filter(w => w.status === selectedStatus)} 
+              />
+            </div>
+            <div className="mt-8 flex justify-end">
+              <Button onClick={() => setDialogOpen(false)} variant="outline" className="h-12 px-8 rounded-xl font-black text-slate-500 border-slate-100 hover:bg-slate-50">
+                Close Registry
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
-    </div>
+    </motion.div>
   );
 };
 

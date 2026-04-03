@@ -57,7 +57,7 @@ const ExcelUploader = ({
       await onFileUpload(file);
       toast({
         title: "Success",
-        description: "File uploaded and processed successfully"
+        description: "File processed successfully"
       });
     } catch (error) {
       toast({
