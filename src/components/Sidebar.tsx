@@ -19,7 +19,7 @@ export const Sidebar = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-[60] px-6 py-6 pointer-events-none">
       <div className="max-w-[1600px] mx-auto flex items-center justify-between pointer-events-auto h-16 px-8 bg-white/95 backdrop-blur-md border border-slate-200/50 rounded-full shadow-xl shadow-slate-200/20">
-        <div className="flex items-center shrink-0">
+        <div className="flex items-center">
           <Link to="/" className="flex items-center group">
             <div className="w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-lg shadow-md transition-transform group-hover:rotate-3">
               <LayoutDashboard size={18} />
@@ -37,7 +37,7 @@ export const Sidebar = () => {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`group relative flex items-center gap-2 h-10 px-5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 ${
+                className={`group flex items-center gap-2 h-10 px-5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 ${
                   active 
                     ? "bg-primary text-primary-foreground shadow-lg shadow-sky-500/20" 
                     : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
