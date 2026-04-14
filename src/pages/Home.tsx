@@ -114,13 +114,13 @@ const HomePage = () => {
   };
 
   const statusLabels: Record<string, string> = {
-    'de_process': 'Under Process',
-    'de_finance': 'With Finance',
-    'de_hqrs': 'Sent to HQrs',
-    'work_process': 'Active Works',
-    'tender': 'Tender Stage',
-    'completed': 'Completed',
-    'indents_placed': 'Indents Placed'
+    'de_process': 'DE under process',
+    'de_finance': 'DE Sent to Finance',
+    'de_hqrs': 'DE sent to HQrs',
+    'work_process': 'Work under process',
+    'tender': 'Tender stage',
+    'completed': 'Work Completed',
+    'indents_placed': 'Indents placed'
   };
 
   const totalSpent = contingencies.reduce((sum, c) => 
