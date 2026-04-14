@@ -349,21 +349,55 @@ const HomePage = () => {
                   { 
                     header: "WORK DESCRIPTION", 
                     accessorKey: "description",
-                    cell: (info: any) => <span className="font-bold text-foreground text-sm leading-relaxed">{info.getValue() || '-'}</span>
+                    cell: (info: any) => (
+                      <div className="max-w-[300px]">
+                        <span className="font-semibold text-foreground text-sm leading-relaxed line-clamp-2">{info.getValue() || '-'}</span>
+                      </div>
+                    )
+                  },
+                  { 
+                    header: "IDENTIFIER", 
+                    accessorKey: "id",
+                    cell: (info: any) => (
+                      <span className="font-mono text-[10px] font-black text-muted-foreground tracking-tighter">
+                        {info.row.pbNo || info.row.lawNo || 'N/A'}
+                      </span>
+                    )
                   },
                   { 
                     header: "CATEGORY", 
                     accessorKey: "type",
                     cell: (info: any) => (
-                      <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${info.getValue() === 'rsp' ? 'bg-primary/20 text-primary border border-primary/20' : 'bg-blue-500/20 text-blue-500 border border-blue-500/20'}`}>
-                        {info.getValue() === 'rsp' ? 'Rolling Stock' : 'IRSP Work'}
+                      <div className="flex flex-col gap-1">
+                        <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest w-fit shadow-xs ${info.getValue() === 'rsp' ? 'bg-primary/20 text-primary border border-primary/10' : 'bg-blue-500/20 text-blue-500 border border-blue-500/10'}`}>
+                          {info.getValue() === 'rsp' ? 'RSP' : 'IRSP'}
+                        </span>
+                        <span className="text-[10px] font-bold text-muted-foreground/60">{info.row.yearOfSanction}</span>
+                      </div>
+                    )
+                  },
+                  { 
+                    header: "CURRENT STANDING", 
+                    accessorKey: "status",
+                    cell: (info: any) => (
+                      <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold shadow-sm inline-flex items-center gap-2 ${
+                        info.getValue() === 'completed' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
+                        info.getValue() === 'tender' ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20' :
+                        'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                      }`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${
+                          info.getValue() === 'completed' ? 'bg-emerald-500' :
+                          info.getValue() === 'tender' ? 'bg-purple-500' :
+                          'bg-amber-500'
+                        }`} />
+                        {statusLabels[info.getValue() as string]}
                       </span>
                     )
                   },
                   { 
-                    header: "PERIOD", 
-                    accessorKey: "yearOfSanction",
-                    cell: (info: any) => <span className="font-mono text-[11px] font-bold text-muted-foreground bg-muted p-1.5 rounded-lg">{info.getValue() || '-'}</span>
+                    header: "REMARKS", 
+                    accessorKey: "remarks",
+                    cell: (info: any) => <span className="text-[11px] font-medium text-muted-foreground/80 line-clamp-1 italic">{info.getValue() || '--'}</span>
                   },
                 ]} 
                 data={works.filter(w => w.status === selectedStatus)} 
