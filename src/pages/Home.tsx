@@ -327,8 +327,8 @@ const HomePage = () => {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-5xl rounded-[2.5rem] border-none glass-card p-0 overflow-hidden shadow-2xl">
-          <div className="bg-foreground p-10 flex items-center justify-between">
+        <DialogContent className="max-w-7xl h-[94vh] rounded-[3rem] border-none bg-white p-0 overflow-hidden shadow-2xl flex flex-col">
+          <div className="bg-foreground p-8 md:p-10 flex items-center justify-between shrink-0">
             <div className="space-y-1">
               <h3 className="text-3xl font-black text-white tracking-tight">
                 {selectedStatus && statusLabels[selectedStatus]} <span className="text-primary italic">Units</span>
@@ -338,20 +338,22 @@ const HomePage = () => {
                 Filtered Overview
               </p>
             </div>
-            <div className="w-16 h-16 rounded-[1.5rem] bg-white/5 text-white flex items-center justify-center border border-white/10 backdrop-blur-3xl shadow-2xl rotate-3">
-              <Activity size={32} />
+            <div className="w-14 h-14 rounded-2xl bg-white/5 text-white flex items-center justify-center border border-white/10 backdrop-blur-3xl shadow-2xl rotate-3">
+              <Activity size={28} />
             </div>
           </div>
-          <div className="p-10 space-y-8">
-            <div className="rounded-3xl border border-border bg-muted/30 overflow-hidden shadow-inner max-h-[50vh] overflow-y-auto scrollbar-none">
+
+          <div className="flex-1 overflow-hidden flex flex-col p-6 md:p-10 space-y-6">
+            <div className="flex-1 rounded-[2.5rem] border border-slate-100 bg-white overflow-hidden shadow-inner relative">
+              <div className="absolute inset-0 overflow-auto scrollbar-none pb-20">
               <DataTable 
                 columns={[
                   { 
                     header: "WORK DESCRIPTION", 
                     accessorKey: "description",
                     cell: (info: any) => (
-                      <div className="max-w-[300px]">
-                        <span className="font-semibold text-foreground text-sm leading-relaxed line-clamp-2">{info.getValue() || '-'}</span>
+                      <div className="min-w-[400px] max-w-[500px]">
+                        <span className="font-bold text-slate-900 text-base leading-relaxed">{info.getValue() || '-'}</span>
                       </div>
                     )
                   },
@@ -359,55 +361,72 @@ const HomePage = () => {
                     header: "IDENTIFIER", 
                     accessorKey: "id",
                     cell: (info: any) => (
-                      <span className="font-mono text-[10px] font-black text-muted-foreground tracking-tighter">
-                        {info.row.pbNo || info.row.lawNo || 'N/A'}
-                      </span>
+                      <div className="flex flex-col gap-0.5 min-w-[120px]">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Serial Code</span>
+                        <span className="font-mono text-sm font-black text-slate-800 tracking-tight bg-slate-100 px-3 py-1 rounded-lg border border-slate-200 w-fit">
+                          {info.row.pbNo || info.row.lawNo || 'N/A'}
+                        </span>
+                      </div>
                     )
                   },
                   { 
                     header: "CATEGORY", 
                     accessorKey: "type",
                     cell: (info: any) => (
-                      <div className="flex flex-col gap-1">
-                        <span className={`px-2 py-1 rounded-md text-[9px] font-black uppercase tracking-widest w-fit shadow-xs ${info.getValue() === 'rsp' ? 'bg-primary/20 text-primary border border-primary/10' : 'bg-blue-500/20 text-blue-500 border border-blue-500/10'}`}>
-                          {info.getValue() === 'rsp' ? 'RSP' : 'IRSP'}
+                      <div className="flex flex-col gap-1.5 min-w-[100px]">
+                        <span className={`px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest w-fit shadow-xs ${info.getValue() === 'rsp' ? 'bg-sky-500/20 text-sky-600 border border-sky-200' : 'bg-indigo-500/20 text-indigo-600 border border-indigo-200'}`}>
+                          {info.getValue() === 'rsp' ? 'RSP Work' : 'IRSP Work'}
                         </span>
-                        <span className="text-[10px] font-bold text-muted-foreground/60">{info.row.yearOfSanction}</span>
+                        <div className="flex items-center gap-1.5 px-2">
+                           <div className="w-1 h-1 rounded-full bg-slate-300" />
+                           <span className="text-[10px] font-bold text-slate-400">Phase {info.row.yearOfSanction}</span>
+                        </div>
                       </div>
                     )
                   },
                   { 
-                    header: "CURRENT STANDING", 
+                    header: "OPERATIONAL STANDING", 
                     accessorKey: "status",
                     cell: (info: any) => (
-                      <span className={`px-3 py-1.5 rounded-full text-[10px] font-bold shadow-sm inline-flex items-center gap-2 ${
-                        info.getValue() === 'completed' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' :
-                        info.getValue() === 'tender' ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20' :
-                        'bg-amber-500/10 text-amber-600 border border-amber-500/20'
-                      }`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${
-                          info.getValue() === 'completed' ? 'bg-emerald-500' :
-                          info.getValue() === 'tender' ? 'bg-purple-500' :
-                          'bg-amber-500'
-                        }`} />
-                        {statusLabels[info.getValue() as string]}
-                      </span>
+                      <div className="min-w-[180px]">
+                        <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm inline-flex items-center gap-2.5 ${
+                          info.getValue() === 'completed' ? 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20' :
+                          info.getValue() === 'tender' ? 'bg-purple-500/10 text-purple-700 border border-purple-500/20' :
+                          'bg-amber-500/10 text-amber-700 border border-amber-500/20'
+                        }`}>
+                          <div className={`w-2 h-2 rounded-full shadow-inner ${
+                            info.getValue() === 'completed' ? 'bg-emerald-500 animate-pulse' :
+                            info.getValue() === 'tender' ? 'bg-purple-500' :
+                            'bg-amber-500'
+                          }`} />
+                          {statusLabels[info.getValue() as string]}
+                        </span>
+                      </div>
                     )
                   },
                   { 
-                    header: "REMARKS", 
+                    header: "OBSERVATIONS", 
                     accessorKey: "remarks",
-                    cell: (info: any) => <span className="text-[11px] font-medium text-muted-foreground/80 line-clamp-1 italic">{info.getValue() || '--'}</span>
+                    cell: (info: any) => (
+                      <div className="max-w-[200px]">
+                        <p className="text-xs font-medium text-slate-500 italic leading-relaxed">{info.getValue() || '--'}</p>
+                      </div>
+                    )
                   },
                 ]} 
                 data={works.filter(w => w.status === selectedStatus)} 
               />
+              </div>
             </div>
-            <div className="flex justify-end">
-              <Button onClick={() => setDialogOpen(false)} variant="ghost" className="h-12 px-8 rounded-xl font-bold text-muted-foreground hover:bg-muted transition-colors">
-                CLOSE
-              </Button>
-            </div>
+          </div>
+
+          <div className="p-6 md:p-8 bg-slate-50/50 border-t border-slate-100 flex justify-end shrink-0">
+            <Button 
+              onClick={() => setDialogOpen(false)} 
+              className="h-14 px-10 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-105 transition-all bg-foreground text-white"
+            >
+              CLOSE
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -29,7 +29,7 @@ export function DataTable({ columns, data, className }: DataTableProps) {
             {columns.map((column) => (
               <TableHead 
                 key={column.accessorKey} 
-                className="text-xs font-bold uppercase tracking-[0.15em] text-muted-foreground py-4 h-12"
+                className="text-xs font-black uppercase tracking-[0.2em] text-slate-900 overflow-visible py-5 h-14 border-b border-slate-200"
               >
                 {column.header}
               </TableHead>
@@ -47,7 +47,7 @@ export function DataTable({ columns, data, className }: DataTableProps) {
             data.map((row, rowIndex) => (
               <TableRow key={rowIndex} className="group hover:bg-muted/30 border-border/30 transition-colors">
                 {columns.map((column) => (
-                  <TableCell key={`${rowIndex}-${column.accessorKey}`} className="py-4 text-sm">
+                  <TableCell key={`${rowIndex}-${column.accessorKey}`} className="py-6 px-4 text-sm align-middle h-20">
                     {column.cell 
                       ? column.cell({ getValue: () => row[column.accessorKey], row })
                       : row[column.accessorKey]}
