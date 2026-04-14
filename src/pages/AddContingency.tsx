@@ -71,7 +71,7 @@ const AddContingency = () => {
           totalAmount: formData.totalAmount,
           updatedAt: new Date(),
         });
-        toast({ title: "Registry Updated", description: "Contingency allocation has been synchronized." });
+        toast({ title: "Success", description: "Allocation updated successfully." });
       } else {
         await addDoc(collection(db, "contingencies"), {
           description: formData.description,
@@ -80,7 +80,7 @@ const AddContingency = () => {
           createdAt: new Date(),
           expenditures: [],
         });
-        toast({ title: "Entry Created", description: "New contingency allocation added to system." });
+        toast({ title: "Success", description: "New allocation added to system." });
       }
 
       setSaved(true);
@@ -188,7 +188,7 @@ const AddContingency = () => {
               ) : (
                 <span className="flex items-center gap-2">
                   <Database size={18} className="group-hover:scale-110 transition-transform" />
-                  {isEditing ? "Synchronize Fund" : "Authorize Allocation"}
+                  {isEditing ? "Update Allocation" : "Save Allocation"}
                 </span>
               )}
             </Button>

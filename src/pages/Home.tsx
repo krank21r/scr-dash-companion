@@ -44,7 +44,7 @@ interface ContingencyItem {
   expenditures?: { amount: string; balance: string; remarks: string }[];
 }
 
-const AnimatedNumber = ({ value }: { value: number }) => {
+const AnimatedNumber = ({ value, isCurrency = false }: { value: number; isCurrency?: boolean }) => {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
     let start = 0;
@@ -60,6 +60,8 @@ const AnimatedNumber = ({ value }: { value: number }) => {
     };
     requestAnimationFrame(animate);
   }, [value]);
+
+  if (isCurrency) return <span>{formatRupee(display)}</span>;
   return <span>{display.toLocaleString('en-IN')}</span>;
 };
 
@@ -142,91 +144,88 @@ const HomePage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-12 pb-20"
+      className="space-y-8 pb-20"
     >
       <motion.div 
         variants={itemVariants} 
-        className="relative h-[550px] w-full rounded-[4rem] overflow-hidden shadow-3xl mb-16 group"
+        className="relative h-[600px] w-full rounded-[4rem] overflow-hidden shadow-3xl mb-8 group"
       >
         <img 
           src="/Image train.png" 
           alt="Carriage Workshop LGD" 
-          className="absolute inset-0 w-full h-full object-cover object-[center_35%] group-hover:scale-105 transition-transform duration-[2000ms]"
+          className="absolute inset-0 w-full h-full object-cover object-[center_55%] group-hover:scale-105 transition-transform duration-[2000ms]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent flex flex-col justify-end p-16 md:p-24">
-          <h1 className="text-6xl md:text-9xl font-extrabold tracking-tighter text-white leading-none">
-            Budget<span className="text-[#0ea5e9]">Portal</span>
-          </h1>
-          <div className="flex items-center gap-3 mt-8 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 w-fit">
-            <Activity size={20} className="text-[#0ea5e9]" />
-            <span className="text-white font-bold text-base tracking-wide uppercase">Carriage Workshop LGD</span>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent flex flex-col justify-end p-10 md:p-12">
+          <div className="mb-4">
+            <h1 className="text-4xl md:text-7xl font-extrabold tracking-tighter text-white leading-none">
+              Budget<span className="text-[#0ea5e9]">Portal</span>
+            </h1>
+            <div className="flex items-center gap-3 mt-8 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 w-fit">
+              <Activity size={20} className="text-[#0ea5e9]" />
+              <span className="text-white font-bold text-base tracking-wide uppercase">Carriage Workshop LGD</span>
+            </div>
+          </div>
+
+          {/* KPI Grid Integrated on Hero */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+            {/* Rolling Stock Card */}
+            <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 shadow-2xl group/card transition-all hover:bg-white/15">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 rounded-xl bg-sky-500/20 text-[#0ea5e9] flex items-center justify-center">
+                  <FileText size={24} />
+                </div>
+                <div className="text-right">
+                  <div className="text-4xl font-black text-white leading-none tracking-tight">
+                    <AnimatedNumber value={works.filter(w => w.type === 'rsp').length} />
+                  </div>
+                  <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1 block">Active Units</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-4">RSP Works</h3>
+              <button onClick={() => navigate('/rsp-works')} className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0ea5e9] flex items-center gap-2 hover:gap-3 transition-all">
+                Explore <ChevronRight size={14} />
+              </button>
+            </div>
+
+            {/* IRSP Card */}
+            <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 shadow-2xl group/card transition-all hover:bg-white/15">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center">
+                  <Layout size={24} />
+                </div>
+                <div className="text-right">
+                  <div className="text-4xl font-black text-white leading-none tracking-tight">
+                    <AnimatedNumber value={works.filter(w => w.type === 'irsp').length} />
+                  </div>
+                  <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1 block">Units</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-4">IRSP Works</h3>
+              <button onClick={() => navigate('/irsp-works')} className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 flex items-center gap-2 hover:gap-3 transition-all">
+                Access <ChevronRight size={14} />
+              </button>
+            </div>
+
+            {/* Contingencies Card */}
+            <div className="bg-white/10 backdrop-blur-xl border border-white/10 rounded-[2rem] p-6 shadow-2xl group/card transition-all hover:bg-white/15">
+              <div className="flex justify-between items-start mb-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <AlertCircle size={24} />
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-black text-white leading-none mb-1">
+                    <AnimatedNumber value={totalAllocation - totalSpent} isCurrency={true} />
+                  </div>
+                  <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1 block">Balance</span>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-4">Contingencies</h3>
+              <button onClick={() => navigate('/contingencies')} className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 flex items-center gap-2 hover:gap-3 transition-all">
+                Audit <ChevronRight size={14} />
+              </button>
+            </div>
           </div>
         </div>
-      </motion.div>
-
-      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Rolling Stock Card */}
-        <Card className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 hover:shadow-2xl transition-all duration-500 group">
-          <div className="flex justify-between items-start mb-12">
-            <div className="w-16 h-16 rounded-2xl bg-[#0ea5e9]/10 text-[#0ea5e9] flex items-center justify-center">
-              <FileText size={32} />
-            </div>
-            <div className="text-right">
-              <div className="text-5xl font-black text-slate-900 leading-none tracking-tight">
-                <AnimatedNumber value={works.filter(w => w.type === 'rsp').length} />
-              </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2 block">Active Units</span>
-            </div>
-          </div>
-          <h3 className="text-2xl font-black text-slate-800 mb-8">Rolling Stock</h3>
-          <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-            <button onClick={() => navigate('/rsp-works')} className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0ea5e9] flex items-center gap-2 hover:gap-3 transition-all">
-              Explore Dataset <ChevronRight size={14} />
-            </button>
-          </div>
-        </Card>
-
-        {/* IRSP Card */}
-        <Card className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 hover:shadow-2xl transition-all duration-500 group">
-          <div className="flex justify-between items-start mb-12">
-            <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-              <Layout size={32} />
-            </div>
-            <div className="text-right">
-              <div className="text-5xl font-black text-slate-900 leading-none tracking-tight">
-                <AnimatedNumber value={works.filter(w => w.type === 'irsp').length} />
-              </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2 block">Units</span>
-            </div>
-          </div>
-          <h3 className="text-2xl font-black text-slate-800 mb-8">IRSP Works</h3>
-          <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-            <button onClick={() => navigate('/irsp-works')} className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 flex items-center gap-2 hover:gap-3 transition-all">
-              Access Records <ChevronRight size={14} />
-            </button>
-          </div>
-        </Card>
-
-        {/* Contingencies Card */}
-        <Card className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 hover:shadow-2xl transition-all duration-500 group">
-          <div className="flex justify-between items-start mb-12">
-            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-              <AlertCircle size={32} />
-            </div>
-            <div className="text-right">
-              <div className="text-3xl font-black text-[#10b981] leading-none mb-1">
-                {formatRupee(totalAllocation - totalSpent)}
-              </div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2 block">Available Fund</span>
-            </div>
-          </div>
-          <h3 className="text-2xl font-black text-slate-800 mb-8">Contingencies</h3>
-          <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-            <button onClick={() => navigate('/contingencies')} className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 flex items-center gap-2 hover:gap-3 transition-all">
-              Financial Audit <ChevronRight size={14} />
-            </button>
-          </div>
-        </Card>
       </motion.div>
 
       {/* Intelligence Grid */}
@@ -336,7 +335,7 @@ const HomePage = () => {
               </h3>
               <p className="text-white/40 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                Datastream Filtered Result
+                Filtered Overview
               </p>
             </div>
             <div className="w-16 h-16 rounded-[1.5rem] bg-white/5 text-white flex items-center justify-center border border-white/10 backdrop-blur-3xl shadow-2xl rotate-3">
@@ -348,16 +347,16 @@ const HomePage = () => {
               <DataTable 
                 columns={[
                   { 
-                    header: "ENTITY SPECIFICATION", 
+                    header: "WORK DESCRIPTION", 
                     accessorKey: "description",
                     cell: (info: any) => <span className="font-bold text-foreground text-sm leading-relaxed">{info.getValue() || '-'}</span>
                   },
                   { 
-                    header: "PROTOCOL TYPE", 
+                    header: "CATEGORY", 
                     accessorKey: "type",
                     cell: (info: any) => (
                       <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${info.getValue() === 'rsp' ? 'bg-primary/20 text-primary border border-primary/20' : 'bg-blue-500/20 text-blue-500 border border-blue-500/20'}`}>
-                        {info.getValue()} Registry
+                        {info.getValue() === 'rsp' ? 'Rolling Stock' : 'IRSP Work'}
                       </span>
                     )
                   },
@@ -372,7 +371,7 @@ const HomePage = () => {
             </div>
             <div className="flex justify-end">
               <Button onClick={() => setDialogOpen(false)} variant="ghost" className="h-12 px-8 rounded-xl font-bold text-muted-foreground hover:bg-muted transition-colors">
-                EXIT REGISTRY
+                CLOSE
               </Button>
             </div>
           </div>

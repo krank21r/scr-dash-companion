@@ -46,19 +46,7 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-screen bg-background flex flex-col">
       <Sidebar />
       
-      <div className="flex-1 flex flex-col min-w-0 pt-10 transition-all duration-500">
-        <div className="px-4 lg:px-8 mb-6 flex justify-end max-w-[1600px] mx-auto w-full">
-          <div className="flex items-center gap-3">
-            <div className="relative hidden md:block group">
-              <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <input
-                type="text"
-                placeholder="Quick search..."
-                className="w-48 lg:w-64 h-11 pl-12 pr-4 rounded-2xl bg-muted/50 border-none text-sm focus:ring-2 focus:ring-primary/20 focus:ring-offset-2 focus:ring-offset-background transition-all outline-none"
-              />
-            </div>
-          </div>
-        </div>
+      <div className="flex-1 flex flex-col min-w-0 pt-24 transition-all duration-500">
 
         <main className="flex-1 px-4 lg:px-8 w-full pb-12">
           <div className="max-w-[1600px] mx-auto">

@@ -45,7 +45,7 @@ const AddWorks = () => {
         const workRef = doc(db, "works", formData.id);
         const { id, ...updateData } = formData;
         await updateDoc(workRef, updateData);
-        toast({ title: "Update Successful", description: "Project ledger has been synchronized." });
+        toast({ title: "Success", description: "Details have been updated." });
       } else {
         const { id, ...newWorkData } = formData;
         await addDoc(collection(db, "works"), {
@@ -53,7 +53,7 @@ const AddWorks = () => {
           type: workType,
           createdAt: new Date(),
         });
-        toast({ title: "Entry Created", description: "New project has been added to the database." });
+        toast({ title: "Success", description: "New work has been added." });
       }
       localStorage.removeItem('editWork');
       navigate(workType === 'rsp' ? '/rsp-works' : '/irsp-works');
@@ -101,7 +101,7 @@ const AddWorks = () => {
                   <h3 className="text-2xl font-black text-foreground">RSP Works</h3>
                 </div>
                 <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-widest pt-2">
-                  Initialize Workflow <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  Select Type <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full translate-x-12 -translate-y-12 blur-3xl group-hover:bg-primary/10 transition-colors" />
@@ -120,7 +120,7 @@ const AddWorks = () => {
                   <h3 className="text-2xl font-black text-foreground">IRSP Works</h3>
                 </div>
                 <div className="flex items-center gap-2 text-cyan-600 font-black text-[10px] uppercase tracking-widest pt-2">
-                  Initialize Workflow <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                  Select Type <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
               <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full translate-x-12 -translate-y-12 blur-3xl group-hover:bg-cyan-500/10 transition-colors" />
@@ -164,7 +164,7 @@ const AddWorks = () => {
               <div className="flex items-center gap-4 pt-10 border-t border-border/50">
                 <Button type="submit" className="btn-premium flex-1 h-14 rounded-2xl font-black text-base shadow-xl group">
                   <Database size={18} className="mr-2 group-hover:scale-110 transition-transform" />
-                  {formData.id ? 'Synchronize Record' : 'Commit to Registry'}
+                  {formData.id ? 'Update Work' : 'Save Work'}
                 </Button>
                 <Button 
                   type="button" 
