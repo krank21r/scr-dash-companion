@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { TableCell } from "../components/ui/table";
 import { Button } from "../components/ui/button";
-import { Pencil, Trash2, Plus, Filter, FileText, AlertCircle, IndianRupee } from "lucide-react";
+import { Pencil, Trash2, Plus, Filter, FileText, AlertCircle, IndianRupee, Search, Activity } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { motion } from "framer-motion";
 
 interface WorkItem {
   id: string;
@@ -52,18 +53,18 @@ const getStatusLabel = (status: string) => {
 const getStatusStyles = (status: string) => {
   switch (status) {
     case "completed":
-      return "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-100/20";
+      return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
     case "work_process":
     case "de_process":
-      return "bg-blue-50 text-blue-600 border-blue-100 shadow-blue-100/20";
+      return "bg-primary/10 text-primary border-primary/20";
     case "indents_placed":
-      return "bg-cyan-50 text-cyan-600 border-cyan-100 shadow-cyan-100/20";
+      return "bg-cyan-500/10 text-cyan-500 border-cyan-500/20";
     case "de_finance":
-      return "bg-orange-50 text-orange-600 border-orange-100 shadow-orange-100/20";
+      return "bg-orange-500/10 text-orange-500 border-orange-500/20";
     case "de_hqrs":
-      return "bg-indigo-50 text-indigo-600 border-indigo-100 shadow-indigo-100/20";
+      return "bg-indigo-500/10 text-indigo-500 border-indigo-500/20";
     default:
-      return "bg-slate-50 text-slate-500 border-slate-100";
+      return "bg-muted text-muted-foreground border-border";
   }
 };
 
@@ -71,6 +72,7 @@ const IRSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [years, setYears] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -106,7 +108,7 @@ const IRSPWorks = () => {
     try {
       await deleteDoc(doc(db, "works", id));
       await loadWorks();
-      toast({ title: "Work Removed", description: "Record successfully excised from system." });
+      toast({ title: "Work Removed", description: "Record successfully excised." });
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
@@ -117,135 +119,145 @@ const IRSPWorks = () => {
     navigate('/add-works');
   };
 
-  const filteredWorks = selectedYear === "all"
-    ? works
-    : works.filter(w => w.yearOfSanction === selectedYear);
+  const filteredWorks = works.filter(w => {
+    const matchesYear = selectedYear === "all" || w.yearOfSanction === selectedYear;
+    const matchesSearch = w.description?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         w.lawNo?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesYear && matchesSearch;
+  });
 
   return (
     <div className="space-y-8 pb-10">
-      {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div className="flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-cyan-50 text-cyan-600 flex items-center justify-center shadow-inner border border-cyan-100/50">
-            <FileText size={28} />
-          </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 font-['Plus_Jakarta_Sans']">IRSP Works</h1>
-            <p className="text-sm text-slate-500 font-bold uppercase tracking-[0.1em] mt-1 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse"></span>
-              {filteredWorks.length} Tracking Elements active
-            </p>
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 text-cyan-500 flex items-center justify-center shadow-inner">
+              <Activity size={24} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-foreground">IRSP Works</h1>
+            </div>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-slate-100/50 border border-slate-200/40 backdrop-blur-md">
-            <Filter size={14} className="text-slate-400 ml-3" />
-            <Select value={selectedYear} onValueChange={setSelectedYear}>
-              <SelectTrigger className="w-[160px] h-10 bg-transparent border-0 focus:ring-0 text-xs font-black text-slate-600 uppercase tracking-widest">
-                <SelectValue placeholder="Period Overview" />
-              </SelectTrigger>
-              <SelectContent className="bg-white border-slate-100 shadow-2xl rounded-2xl p-1">
-                <SelectItem value="all" className="rounded-xl font-bold">All Sanction Years</SelectItem>
-                {years.map((year) => (
-                  <SelectItem key={year} value={year} className="rounded-xl font-bold">{year}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="relative group">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-cyan-500 transition-colors" />
+            <input
+              type="text"
+              placeholder="Filter database..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-11 pl-12 pr-4 w-60 rounded-2xl bg-muted/50 border-none outline-none focus:ring-2 focus:ring-cyan-500/20 transition-all text-sm font-medium"
+            />
           </div>
-
           <Button 
             onClick={() => {
               localStorage.removeItem('editWork');
               navigate('/add-works');
             }} 
-            className="btn-primary-glow h-12 px-8 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5"
+            className="h-11 px-6 rounded-2xl bg-cyan-600 hover:bg-cyan-700 text-white font-bold shadow-lg shadow-cyan-500/20"
           >
-            <Plus className="mr-2 h-5 w-5" /> New IRSP Work 
+            <Plus className="mr-2 h-4 w-4" /> New Entry
           </Button>
         </div>
       </div>
 
-      {/* Modern Table Grid */}
-      <div className="glass-card border-none shadow-premium-shadow overflow-hidden">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-muted/30 border border-border/50 backdrop-blur-md">
+          <Filter size={14} className="text-muted-foreground ml-3" />
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="w-[180px] h-9 bg-transparent border-0 focus:ring-0 text-xs font-black text-foreground uppercase tracking-widest">
+              <SelectValue placeholder="All Sanctions" />
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-border bg-card shadow-2xl">
+              <SelectItem value="all" className="font-bold">Reset Filters</SelectItem>
+              {years.map((year) => (
+                <SelectItem key={year} value={year} className="font-bold">{year} Records</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="glass-card rounded-[2rem] overflow-hidden border-none shadow-2xl">
         <div className="overflow-x-auto scrollbar-none">
           <table className="w-full text-left border-collapse min-w-[1100px]">
-            <thead className="sticky top-0 z-20 table-header-glow">
-              <tr className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 font-['Plus_Jakarta_Sans']">
-                <th className="px-8 py-6 w-[30%]">Project Description</th>
-                <th className="px-6 py-6 w-[10%] text-center">Period</th>
-                <th className="px-6 py-6 w-[10%] text-center">LAW Ref</th>
-                <th className="px-6 py-6 w-[10%] text-center">Rate Unit</th>
-                <th className="px-6 py-6 w-[8%] text-center">Quantity</th>
-                <th className="px-6 py-6 w-[14%]">Current Status</th>
-                <th className="px-6 py-6 w-[12%]">Valuation</th>
-                <th className="px-6 py-6 w-[6%] text-right pr-10">Actions</th>
+            <thead>
+              <tr className="bg-muted/30 border-b border-border/50">
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Description</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-center">Period</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-center">LAW No</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-center">Unit Rate</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-center">Qty</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Status</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Value</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-right pr-10">Options</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50/50">
+            <tbody className="divide-y divide-border/30">
               {filteredWorks.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-8 py-32 text-center">
-                    <div className="mx-auto w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 border border-slate-100">
-                      <AlertCircle size={32} className="text-slate-200" />
+                  <td colSpan={8} className="px-8 py-32 text-center bg-muted/5">
+                    <div className="flex flex-col items-center justify-center opacity-30">
+                      <AlertCircle size={48} className="text-muted-foreground mb-4" />
+                      <h3 className="text-xl font-bold text-foreground">Empty Registry</h3>
+                      <p className="text-sm font-medium mt-2">No historical data found for current parameters.</p>
                     </div>
-                    <h3 className="text-2xl font-black text-slate-800 font-['Plus_Jakarta_Sans'] tracking-tight">System holds no IRSP records</h3>
-                    <p className="text-slate-400 font-medium text-lg mt-2 mb-8">No work elements match your current filter criteria.</p>
-                    <Button onClick={() => navigate('/add-works')} className="btn-primary-glow h-12 px-8 rounded-xl font-bold">
-                      Add Initial Entry
-                    </Button>
                   </td>
                 </tr>
               ) : (
                 filteredWorks.map((work) => (
-                  <tr key={work.id} className="premium-table-row transition-all duration-500 group border-l-4 border-l-transparent hover:border-l-cyan-400">
-                    <TableCell className="px-8 py-6 font-extrabold text-slate-800 text-sm leading-snug group-hover:text-primary transition-colors font-['Plus_Jakarta_Sans']">{work.description || '-'}</TableCell>
-                    <TableCell className="px-6 py-6 text-center">
-                      <span className="px-3 py-1 bg-slate-50 text-[11px] font-black font-['Plus_Jakarta_Sans'] text-slate-500 rounded-lg border border-slate-100">{work.yearOfSanction || '-'}</span>
+                  <tr key={work.id} className="group hover:bg-cyan-500/[0.02] transition-colors border-l-4 border-l-transparent hover:border-l-cyan-500">
+                    <TableCell className="px-8 py-6">
+                      <span className="font-bold text-foreground text-sm leading-relaxed block group-hover:text-cyan-600 transition-colors">{work.description || '-'}</span>
                     </TableCell>
                     <TableCell className="px-6 py-6 text-center">
-                      <span className="font-mono text-xs font-black tracking-widest text-slate-400">{work.lawNo || '-'}</span>
+                      <span className="px-3 py-1 bg-muted rounded-xl text-[11px] font-bold text-muted-foreground border border-border/50">{work.yearOfSanction || '-'}</span>
                     </TableCell>
-                    <TableCell className="px-6 py-6 text-center text-slate-500 font-bold text-xs">{work.rate || '-'}</TableCell>
                     <TableCell className="px-6 py-6 text-center">
-                      <span className="text-[11px] font-black text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">{work.qtySanctioned || '-'}</span>
+                      <span className="font-mono text-xs font-bold text-muted-foreground/60 tracking-wider p-1.5 rounded-lg bg-muted/50">{work.lawNo || '-'}</span>
+                    </TableCell>
+                    <TableCell className="px-6 py-6 text-center text-muted-foreground font-bold text-xs">{work.rate || '-'}</TableCell>
+                    <TableCell className="px-6 py-6 text-center">
+                      <span className="text-[11px] font-black text-foreground bg-cyan-500/5 px-3 py-1.5 rounded-full border border-cyan-500/10 shadow-sm">{work.qtySanctioned || '-'}</span>
                     </TableCell>
                     <TableCell className="px-6 py-6">
-                      <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-wider shadow-sm transition-all duration-500 font-['Plus_Jakarta_Sans'] ${getStatusStyles(work.status)}`}>
+                      <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black border uppercase tracking-wider transition-all duration-300 ${getStatusStyles(work.status)}`}>
                         {getStatusLabel(work.status)}
                       </span>
                     </TableCell>
                     <TableCell className="px-6 py-6">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[10px] font-black text-primary/40 leading-none">₹</span>
-                        <span className="text-base font-black text-slate-900 font-['Plus_Jakarta_Sans'] tracking-tighter">{work.totalValue || '-'}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-cyan-500/30">₹</span>
+                        <span className="text-base font-extrabold text-foreground tracking-tight stat-number">{work.totalValue || '-'}</span>
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-6 text-right pr-10">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl" onClick={() => handleEdit(work)}>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-cyan-600 hover:bg-cyan-500/10 rounded-xl" onClick={() => handleEdit(work)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl">
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 rounded-xl">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-[2.5rem] border-none shadow-[25px_25px_60px_rgba(0,0,0,0.15)] bg-white p-10 max-w-lg">
+                          <AlertDialogContent className="rounded-[2.5rem] border-none glass-card p-10 max-w-lg shadow-2xl">
                             <AlertDialogHeader>
-                              <div className="w-16 h-16 rounded-[1.5rem] bg-red-50 text-red-600 flex items-center justify-center mb-6 shadow-inner ring-8 ring-red-50/50">
-                                <Trash2 size={32} />
+                              <div className="w-16 h-16 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center mb-6 shadow-inner border border-rose-500/20">
+                                <Trash2 size={28} />
                               </div>
-                              <AlertDialogTitle className="text-3xl font-['Plus_Jakarta_Sans'] font-black text-slate-900 spacing-tight">Remove record?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-slate-400 text-lg font-medium leading-relaxed pt-3">
-                                This action is permanent and will remove this IRSP work element from all financial tracking logs.
+                              <AlertDialogTitle className="text-3xl font-extrabold text-foreground tracking-tight">Excise record?</AlertDialogTitle>
+                              <AlertDialogDescription className="text-muted-foreground text-lg font-medium leading-relaxed pt-2">
+                                Permanent erasure requested. This element will be purged from the IRSP registry database.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-10 gap-4">
-                              <AlertDialogCancel className="h-14 flex-1 border-slate-100 text-slate-500 rounded-2xl hover:bg-slate-50 font-bold px-6">Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(work.id)} className="h-14 flex-1 bg-red-600 hover:bg-red-700 text-white rounded-2xl shadow-xl shadow-red-200 font-bold px-8">
-                                Confirm Removal
+                              <AlertDialogCancel className="h-14 flex-1 border-border rounded-xl font-bold text-muted-foreground">Preserve</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(work.id)} className="h-14 flex-1 bg-rose-600 hover:bg-rose-700 text-white rounded-xl shadow-lg shadow-rose-500/20 font-bold">
+                                Purge Record
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

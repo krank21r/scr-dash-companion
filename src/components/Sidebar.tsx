@@ -17,56 +17,51 @@ export const Sidebar = () => {
   ];
 
   return (
-    <header 
-      className="w-full h-[72px] sticky top-0 z-[60] shadow-xl flex items-center shrink-0 border-b border-transparent"
-      style={{ background: "linear-gradient(90deg, #1FA6B8 0%, #1CA0B1 50%, #1895A5 100%)" }}
-    >
-      <div className="w-full mx-auto flex items-center h-full">
-        <div className="flex items-center px-4 md:px-8 shrink-0 md:border-r border-white/10 h-full">
+    <header className="fixed top-0 left-0 right-0 z-[60] px-6 py-6 pointer-events-none">
+      <div className="max-w-[1600px] mx-auto flex items-center justify-between pointer-events-auto h-16 px-8 bg-white/95 backdrop-blur-md border border-slate-200/50 rounded-full shadow-xl shadow-slate-200/20">
+        <div className="flex items-center shrink-0">
           <Link to="/" className="flex items-center group">
-            <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-              <div className="absolute left-0 top-1 w-[20px] h-[20px] rounded-full bg-white opacity-95 shadow-sm z-10 transition-transform group-hover:-translate-x-0.5"></div>
-              <div className="absolute right-0 bottom-1 w-3 h-3 rounded-full bg-[#E33E43] shadow-sm z-0 transition-transform group-hover:translate-x-0.5"></div>
+            <div className="w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-lg shadow-md transition-transform group-hover:rotate-3">
+              <LayoutDashboard size={18} />
             </div>
-            <motion.div 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="flex flex-col ml-3"
-            >
-              <span className="font-extrabold text-white tracking-wide text-xl leading-none">
-                Budget<span className="text-white/90 font-medium whitespace-nowrap">Portal</span>
-              </span>
-            </motion.div>
+            <span className="ml-3 font-extrabold text-slate-800 tracking-tight text-xl leading-none truncate">
+              Budget<span className="text-[#0ea5e9]">Portal</span>
+            </span>
           </Link>
         </div>
 
-        <nav className="flex-1 flex items-center gap-1.5 px-4 md:px-6 overflow-x-auto scrollbar-none h-full">
+        <nav className="hidden lg:flex items-center gap-2 px-4 overflow-x-auto scrollbar-none">
           {navItems.map((item) => {
             const active = isActive(item.path);
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`group shrink-0 relative z-10 flex items-center gap-2.5 h-11 transition-all duration-300 ease-out px-4 rounded-full ${
+                className={`group relative flex items-center gap-2 h-10 px-5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 ${
                   active 
-                    ? "bg-background text-foreground shadow-sm" 
-                    : "text-white/90 hover:text-white hover:bg-white/15"
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-sky-500/20" 
+                    : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
                 }`}
               >
                 <item.icon
-                  size={18}
-                  strokeWidth={active ? 2.5 : 2}
-                  className={`shrink-0 transition-transform duration-300 ${
-                    active ? "text-foreground" : "text-white group-hover:scale-110"
-                  }`}
+                  size={14}
+                  strokeWidth={active ? 3 : 2}
+                  className="shrink-0"
                 />
-                <span className={`text-[14.5px] whitespace-nowrap transition-transform duration-300 ${active ? "font-bold" : "font-medium"}`}>
+                <span className={`text-[11px] uppercase tracking-wider ${active ? "font-black" : "font-bold"}`}>
                   {item.label}
                 </span>
               </Link>
             );
           })}
         </nav>
+
+        <div className="flex items-center gap-4">
+          <div className="h-6 w-[1px] bg-slate-200" />
+          <button className="w-10 h-10 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary transition-all hover:shadow-md active:scale-95">
+            <AlertCircle size={20} />
+          </button>
+        </div>
       </div>
     </header>
   );

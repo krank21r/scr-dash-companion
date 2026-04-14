@@ -7,7 +7,7 @@ import { useToast } from "../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { db } from "../main";
 import { collection, addDoc, doc, updateDoc } from "firebase/firestore";
-import { ArrowLeft, AlertCircle, Plus, CheckCircle, Save, IndianRupee, Calendar, FileText } from "lucide-react";
+import { ArrowLeft, AlertCircle, Plus, CheckCircle, Save, IndianRupee, Calendar, FileText, Database, ShieldCheck } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface ContingencyFormData {
@@ -95,118 +95,100 @@ const AddContingency = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-10 pb-20 px-4">
-      {/* Navigation Header */}
-      <div className="flex items-center gap-6 group">
+      <div className="flex items-center gap-6">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => navigate(-1)} 
-          className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-amber-500 hover:bg-amber-50 hover:border-amber-200 transition-all duration-500 active:scale-95"
+          className="h-12 w-12 shrink-0 rounded-[1.25rem] bg-muted/50 border border-border/50 text-muted-foreground hover:text-amber-500 transition-all active:scale-95"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={20} />
         </Button>
         <div className="space-y-1">
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight font-['Plus_Jakarta_Sans']">
+          <h2 className="text-3xl font-extrabold text-foreground tracking-tight">
             {isEditing ? "Refine Allocation" : "New Contingency"}
           </h2>
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-[0.15em] flex items-center gap-2">
-            <span className="w-1 h-1 rounded-full bg-amber-500 animate-pulse"></span>
-            Financial Reserve Protocol
-          </p>
         </div>
       </div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass-card border-none shadow-premium-shadow overflow-hidden"
+        className="glass-card overflow-hidden shadow-2xl border-l-4 border-l-amber-500"
       >
-        <div className="bg-slate-900 p-8 border-b border-white/5 flex items-center justify-between">
+        <div className="bg-muted p-8 border-b border-border/50 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
-              <AlertCircle size={24} />
+            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/20">
+              <ShieldCheck size={24} />
             </div>
             <div>
-              <h3 className="font-black text-white text-lg tracking-tight font-['Plus_Jakarta_Sans'] uppercase">Allocation Specifics</h3>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">Reserve Fund Ledger Entrance</p>
+              <h3 className="font-extrabold text-foreground text-lg tracking-tight uppercase">Allocation Details</h3>
             </div>
           </div>
           {saved && (
-            <div className="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 animate-pulse">
-              Synchronizing...
+            <div className="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-500 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">
+              Validated
             </div>
           )}
         </div>
         
-        <form onSubmit={handleSubmit} className="p-10 space-y-10 bg-white">
+        <form onSubmit={handleSubmit} className="p-10 space-y-10 bg-card/30">
           <div className="space-y-8">
-            {/* Description Field */}
             <div className="space-y-3">
-              <div className="flex items-center gap-2.5 ml-1">
-                <FileText size={16} className="text-slate-400" />
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Contingency Description *</label>
-              </div>
+              <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Work Description *</label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                placeholder="Declare the purpose of this reserve fund..."
-                className="min-h-[140px] rounded-2xl border-slate-100 bg-slate-50/30 p-5 focus-visible:bg-white focus-visible:ring-amber-500/10 transition-all font-medium text-base leading-relaxed placeholder:font-normal"
+                placeholder="Declare the purpose of this reserve fund allocation..."
+                className="min-h-[140px] rounded-2xl border-border bg-muted/30 p-5 focus-visible:bg-card focus-visible:ring-amber-500/10 transition-all font-medium text-base leading-relaxed"
                 required
                 autoFocus={!isEditing}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-              {/* Year Field */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div className="space-y-3">
-                <div className="flex items-center gap-2.5 ml-1">
-                  <Calendar size={16} className="text-slate-400" />
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Sanction Period</label>
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Sanction Period</label>
+                <div className="relative">
+                  <Calendar size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/50" />
+                  <Input
+                    value={formData.yearOfSanction}
+                    onChange={(e) => setFormData(prev => ({ ...prev, yearOfSanction: e.target.value }))}
+                    placeholder="e.g. 2024-2025"
+                    className="h-14 pl-12 rounded-xl border-border bg-muted/30 font-bold focus-visible:bg-card"
+                  />
                 </div>
-                <Input
-                  value={formData.yearOfSanction}
-                  onChange={(e) => setFormData(prev => ({ ...prev, yearOfSanction: e.target.value }))}
-                  placeholder="e.g. 2024-2025"
-                  className="h-14 rounded-xl border-slate-100 bg-slate-50/50 px-5 font-bold text-base focus-visible:ring-amber-500/10 placeholder:font-normal"
-                />
               </div>
 
-              {/* Amount Field */}
               <div className="space-y-3">
-                <div className="flex items-center gap-2.5 ml-1">
-                  <IndianRupee size={16} className="text-amber-500" />
-                  <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Total Capital Allocation *</label>
-                </div>
+                <label className="text-[10px] font-black text-muted-foreground uppercase tracking-widest ml-1">Capital Allocation *</label>
                 <div className="relative">
-                  <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300 font-black text-lg">₹</span>
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground/30 font-black text-lg">₹</span>
                   <Input
                     type="number"
                     value={formData.totalAmount}
                     onChange={(e) => setFormData(prev => ({ ...prev, totalAmount: e.target.value }))}
-                    placeholder="Principal amount..."
+                    placeholder="0.00"
                     required
-                    className="pl-10 h-14 rounded-xl border-slate-100 bg-amber-50/10 px-5 font-black text-lg text-slate-900 focus-visible:ring-amber-500/10 shadow-inner placeholder:font-normal"
+                    className="h-14 pl-10 rounded-xl border-border bg-amber-500/[0.03] font-black text-lg text-foreground focus-visible:ring-amber-500/10"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 pt-10 border-t border-slate-50">
+          <div className="flex items-center gap-4 pt-10 border-t border-border/50">
             <Button 
               type="submit" 
               disabled={loading} 
-              className="flex-1 h-16 bg-amber-500 hover:bg-amber-600 text-white rounded-[1.5rem] font-black text-lg shadow-2xl shadow-amber-500/30 transition-all hover:-translate-y-1 active:scale-[0.98] disabled:opacity-50"
+              className="flex-1 h-14 bg-amber-600 hover:bg-amber-700 text-white rounded-2xl font-black text-base shadow-xl shadow-amber-500/20 group"
             >
               {loading ? (
-                <span className="flex items-center gap-3">
-                  <div className="w-5 h-5 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-                  Processing...
-                </span>
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <span className="flex items-center gap-2">
-                  {isEditing ? <Save size={20} /> : <Plus size={20} />}
-                  {isEditing ? "Synchronize Fund Details" : "Finalize Allocation"}
+                  <Database size={18} className="group-hover:scale-110 transition-transform" />
+                  {isEditing ? "Synchronize Fund" : "Authorize Allocation"}
                 </span>
               )}
             </Button>
@@ -214,7 +196,7 @@ const AddContingency = () => {
               type="button" 
               variant="outline" 
               onClick={() => navigate(-1)}
-              className="h-16 px-10 rounded-[1.5rem] font-black text-slate-500 border-slate-100 hover:bg-slate-50 transition-all"
+              className="h-14 px-10 rounded-2xl font-bold text-muted-foreground border-border hover:bg-muted transition-all"
             >
               Cancel
             </Button>

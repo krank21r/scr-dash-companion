@@ -93,10 +93,6 @@ const EditNote = () => {
           <h2 className="text-3xl font-black text-slate-900 tracking-tight font-['Plus_Jakarta_Sans']">
             Refine Memo
           </h2>
-          <p className="text-sm text-slate-500 font-bold uppercase tracking-[0.15em] flex items-center gap-2">
-            <span className="w-1 h-1 rounded-full bg-indigo-500 animate-pulse"></span>
-            Entry Revision Protocol
-          </p>
         </div>
       </div>
 

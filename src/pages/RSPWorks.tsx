@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { TableCell } from '../components/ui/table';
 import { Button } from '../components/ui/button';
-import { Pencil, Trash2, Plus, FileText, Calendar, Filter, AlertCircle, IndianRupee } from "lucide-react";
+import { Pencil, Trash2, Plus, FileText, Calendar, Filter, AlertCircle, IndianRupee, ArrowUpRight, Search } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,6 +17,7 @@ import { useToast } from '../hooks/use-toast';
 import { useNavigate } from "react-router-dom";
 import { db } from '../main';
 import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
+import { motion } from "framer-motion";
 
 interface WorkItem {
   id: string;
@@ -47,18 +48,18 @@ const getStatusLabel = (status: string) => {
 const getStatusStyles = (status: string) => {
   switch (status) {
     case "completed":
-      return "bg-emerald-50 text-emerald-600 border-emerald-100 shadow-emerald-100/20";
+      return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
     case "work_process":
     case "de_process":
-      return "bg-blue-50 text-blue-600 border-blue-100 shadow-blue-100/20";
+      return "bg-primary/10 text-primary border-primary/20";
     case "tender":
-      return "bg-violet-50 text-violet-600 border-violet-100 shadow-violet-100/20";
+      return "bg-violet-500/10 text-violet-500 border-violet-500/20";
     case "de_finance":
-      return "bg-orange-50 text-orange-600 border-orange-100 shadow-orange-100/20";
+      return "bg-orange-500/10 text-orange-500 border-orange-500/20";
     case "de_hqrs":
-      return "bg-indigo-50 text-indigo-600 border-indigo-100 shadow-indigo-100/20";
+      return "bg-indigo-500/10 text-indigo-500 border-indigo-500/20";
     default:
-      return "bg-slate-50 text-slate-500 border-slate-100";
+      return "bg-muted text-muted-foreground border-border";
   }
 };
 
@@ -66,7 +67,7 @@ const RSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [years, setYears] = useState<string[]>([]);
-  const [scrolled, setScrolled] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -97,9 +98,6 @@ const RSPWorks = () => {
 
   useEffect(() => {
     loadWorks();
-    const handleScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleDelete = async (workId: string) => {
@@ -118,150 +116,154 @@ const RSPWorks = () => {
     navigate('/add-works');
   };
 
-  const filteredWorks = selectedYear === "all" 
-    ? works 
-    : works.filter(work => work.yearOfSanction === selectedYear);
+  const filteredWorks = works.filter(work => {
+    const matchesYear = selectedYear === "all" || work.yearOfSanction === selectedYear;
+    const matchesSearch = work.description?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         work.pbNo?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesYear && matchesSearch;
+  });
 
   return (
     <div className="space-y-8 pb-10">
-      {/* Dynamic Filter Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pointer-events-auto">
-        <div className="flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner border border-blue-100/50">
-            <FileText size={28} />
-          </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 font-['Plus_Jakarta_Sans']">RSP Works</h1>
-            <p className="text-sm text-slate-500 font-bold uppercase tracking-[0.1em] mt-1 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-              {filteredWorks.length} Records
-            </p>
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-inner">
+              <FileText size={24} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight text-foreground">RSP Works</h1>
+            </div>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 p-1.5 rounded-[1.25rem] bg-slate-100/50 border border-slate-200/40 backdrop-blur-md">
-            <button
-              onClick={() => setSelectedYear("all")}
-              className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${selectedYear === "all" ? "bg-white text-primary shadow-xl shadow-slate-200" : "text-slate-400 hover:text-slate-600"}`}
-            >
-              Overview
-            </button>
-            {years.map((year) => (
-              <button
-                key={year}
-                onClick={() => setSelectedYear(year)}
-                className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-500 ${selectedYear === year ? "bg-white text-primary shadow-xl shadow-slate-200" : "text-slate-400 hover:text-slate-600"}`}
-              >
-                {year}
-              </button>
-            ))}
+          <div className="relative group">
+            <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            <input
+              type="text"
+              placeholder="Search records..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-11 pl-12 pr-4 w-64 rounded-2xl bg-muted/50 border-none outline-none focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
+            />
           </div>
-
           <Button 
             onClick={() => {
               localStorage.removeItem('editWork');
               navigate('/add-works');
             }} 
-            className="btn-primary-glow h-12 px-8 rounded-2xl text-sm font-black transition-all hover:-translate-y-0.5 active:translate-y-0"
+            className="btn-premium h-11 px-6 rounded-2xl"
           >
-            <Plus className="mr-2 h-5 w-5" /> New Work Entry
+            <Plus className="mr-2 h-4 w-4" /> New Work
           </Button>
         </div>
       </div>
 
-      {/* Table Section */}
-      <div className="glass-card border-none shadow-premium-shadow overflow-hidden">
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-muted/30 border border-border/50 w-fit overflow-x-auto scrollbar-none">
+        <button
+          onClick={() => setSelectedYear("all")}
+          className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedYear === "all" ? "bg-card text-primary shadow-lg border border-border/50" : "text-muted-foreground hover:text-foreground"}`}
+        >
+          Overview
+        </button>
+        {years.map((year) => (
+          <button
+            key={year}
+            onClick={() => setSelectedYear(year)}
+            className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${selectedYear === year ? "bg-card text-primary shadow-lg border border-border/50" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            {year}
+          </button>
+        ))}
+      </div>
+
+      <div className="glass-card rounded-[2rem] overflow-hidden border-none shadow-2xl shadow-primary/5">
         <div className="overflow-x-auto scrollbar-none">
           <table className="w-full text-left border-collapse min-w-[1200px]">
-            <thead className="sticky top-0 z-20 table-header-glow">
-              <tr className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400 font-['Plus_Jakarta_Sans']">
-                <th className="px-8 py-6 w-[25%]">Description</th>
-                <th className="px-6 py-6 w-[8%] text-center">Year</th>
-                <th className="px-6 py-6 w-[8%] text-center">PB No</th>
-                <th className="px-6 py-6 w-[12%]">Sanctioned Cost</th>
-                <th className="px-6 py-6 w-[10%] text-center">Quantity</th>
-                <th className="px-6 py-6 w-[12%]">DE Value</th>
-                <th className="px-6 py-6 w-[15%]">Tracked Status</th>
-                <th className="px-6 py-6 w-[10%] text-right pr-10">Actions</th>
+            <thead>
+              <tr className="bg-muted/30 border-b border-border/50">
+                <th className="px-8 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Description</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-center">Period</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-center">PB No</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Sanctioned Cost</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-center">Quantity</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Valuation</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Status</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground text-right pr-10">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50/50">
+            <tbody className="divide-y divide-border/30">
               {filteredWorks.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-8 py-32 text-center">
-                    <div className="mx-auto w-20 h-20 bg-slate-50 rounded-[2rem] flex items-center justify-center mb-6 border border-slate-100 shadow-inner">
-                      <AlertCircle size={32} className="text-slate-300" />
+                  <td colSpan={8} className="px-8 py-32 text-center bg-muted/5">
+                    <div className="flex flex-col items-center justify-center opacity-40">
+                      <AlertCircle size={48} className="text-muted-foreground mb-4" />
+                      <h3 className="text-xl font-bold text-foreground">No records found</h3>
+                      <p className="text-sm font-medium mt-2">Try adjusting your filters or add a new entry.</p>
                     </div>
-                    <h3 className="text-2xl font-black text-slate-800 font-['Plus_Jakarta_Sans'] tracking-tight">No works found</h3>
-                    <p className="text-slate-400 font-medium text-lg mt-2 mb-8 max-w-md mx-auto leading-relaxed">
-                      Initialize your project tracking by adding your first RSP work element to the system.
-                    </p>
-                    <Button onClick={() => navigate('/add-works')} className="btn-primary-glow h-14 px-10 rounded-[1.25rem] font-black text-base">
-                      Initialize Database
-                    </Button>
                   </td>
                 </tr>
               ) : (
                 filteredWorks.map((work) => (
-                  <tr key={work.id} className="premium-table-row transition-all duration-500 group border-l-4 border-l-transparent hover:border-l-primary">
+                  <tr key={work.id} className="group hover:bg-primary/[0.02] transition-colors">
                     <TableCell className="px-8 py-6">
-                      <div className="flex flex-col gap-1">
-                        <span className="font-extrabold text-slate-800 text-sm leading-snug group-hover:text-primary transition-colors font-['Plus_Jakarta_Sans']">{work.description || '-'}</span>
-                        {work.remarks && <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest line-clamp-1 opacity-60 group-hover:opacity-100 transition-opacity italic">"{work.remarks}"</span>}
+                      <div className="flex flex-col gap-1.5">
+                        <span className="font-bold text-foreground text-sm group-hover:text-primary transition-colors leading-relaxed">{work.description || '-'}</span>
+                        {work.remarks && <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest line-clamp-1 italic">"{work.remarks}"</span>}
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-6 text-center">
-                      <span className="px-3 py-1.5 rounded-lg bg-slate-50 text-[11px] font-black font-['Plus_Jakarta_Sans'] text-slate-500 border border-slate-100/50">{work.yearOfSanction || '-'}</span>
+                      <span className="px-3 py-1.5 rounded-xl bg-muted font-mono text-[11px] font-bold text-muted-foreground border border-border/50">{work.yearOfSanction || '-'}</span>
                     </TableCell>
                     <TableCell className="px-6 py-6 text-center">
-                      <span className="font-mono text-xs font-black tracking-widest text-slate-400 bg-slate-100/30 px-2.5 py-1 rounded-md">{work.pbNo || '-'}</span>
+                      <span className="font-mono text-xs font-bold text-muted-foreground/60">{work.pbNo || '-'}</span>
                     </TableCell>
                     <TableCell className="px-6 py-6">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[10px] font-black text-primary/40 leading-none">₹</span>
-                        <span className="text-base font-black text-slate-900 font-['Plus_Jakarta_Sans'] tracking-tighter">{work.rbSanctionedCost || '-'}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-primary/30">₹</span>
+                        <span className="text-base font-extrabold text-foreground tracking-tight stat-number">{work.rbSanctionedCost || '-'}</span>
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-6 text-center">
-                      <span className="text-xs font-black text-slate-600 bg-slate-50 px-3 py-1 rounded-full border border-slate-100 shadow-sm">{work.qtySanctioned || '-'}</span>
+                      <span className="text-xs font-bold text-foreground bg-primary/5 px-3 py-1.5 rounded-full border border-primary/10 shadow-sm">{work.qtySanctioned || '-'}</span>
                     </TableCell>
                     <TableCell className="px-6 py-6">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[10px] font-black text-slate-300 leading-none">₹</span>
-                        <span className="text-sm font-bold text-slate-600 font-['Plus_Jakarta_Sans']">{work.deTotalValue || '-'}</span>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-black text-muted-foreground/30">₹</span>
+                        <span className="text-sm font-bold text-muted-foreground/80">{work.deTotalValue || '-'}</span>
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-6">
-                      <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black border tracking-[0.05em] uppercase shadow-sm transition-all duration-500 font-['Plus_Jakarta_Sans'] ${getStatusStyles(work.status)}`}>
+                      <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-black border tracking-wider uppercase transition-all duration-300 ${getStatusStyles(work.status)}`}>
                         {getStatusLabel(work.status)}
                       </span>
                     </TableCell>
                     <TableCell className="px-6 py-6 text-right pr-10">
-                      <div className="flex items-center justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                        <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-[1rem] ring-4 ring-transparent hover:ring-primary/5" onClick={() => handleEdit(work)}>
-                          <Pencil className="h-4.5 w-4.5" />
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0">
+                        <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-xl" onClick={() => handleEdit(work)}>
+                          <Pencil className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-[1rem] ring-4 ring-transparent hover:ring-red-50">
-                              <Trash2 className="h-4.5 w-4.5" />
+                            <Button variant="ghost" size="icon" className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl">
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-[3rem] border-none shadow-[25px_25px_60px_rgba(0,0,0,0.15)] bg-white p-12 max-w-xl">
+                          <AlertDialogContent className="rounded-[2rem] border-none glass-card p-10 max-w-lg shadow-2xl">
                             <AlertDialogHeader>
-                              <div className="w-20 h-20 rounded-[2rem] bg-red-50 text-red-600 flex items-center justify-center mb-8 shadow-inner ring-[12px] ring-red-50/50">
-                                <Trash2 size={40} />
+                              <div className="w-16 h-16 rounded-2xl bg-destructive/10 text-destructive flex items-center justify-center mb-6 shadow-inner border border-destructive/20">
+                                <Trash2 size={28} />
                               </div>
-                              <AlertDialogTitle className="text-4xl font-['Plus_Jakarta_Sans'] font-black text-slate-900 tracking-tight leading-tight">Excise this element?</AlertDialogTitle>
-                              <AlertDialogDescription className="text-slate-400 text-xl font-medium leading-relaxed pt-3">
-                                This will permanently remove the record from your database. All associated tracking data will be lost.
+                              <AlertDialogTitle className="text-3xl font-extrabold text-foreground tracking-tight">Remove record?</AlertDialogTitle>
+                              <AlertDialogDescription className="text-muted-foreground text-lg font-medium leading-relaxed pt-2">
+                                This will permanently delete the record. This action cannot be undone.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
-                            <AlertDialogFooter className="mt-12 gap-5">
-                              <AlertDialogCancel className="h-16 flex-1 border-slate-100 text-slate-500 rounded-[1.5rem] hover:bg-slate-50 font-black px-8 text-base shadow-sm">Preserve</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleDelete(work.id)} className="h-16 flex-1 bg-red-600 hover:bg-red-700 text-white rounded-[1.5rem] shadow-2xl shadow-red-200 font-black px-10 text-base">
-                                Delete Permanently
+                            <AlertDialogFooter className="mt-10 gap-4">
+                              <AlertDialogCancel className="h-14 flex-1 border-border rounded-xl font-bold text-muted-foreground">Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => handleDelete(work.id)} className="h-14 flex-1 bg-destructive hover:bg-destructive/90 text-white rounded-xl shadow-lg shadow-destructive/20 font-bold">
+                                Confirm Delete
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>

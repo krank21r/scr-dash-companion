@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FileText, CheckSquare, TrendingUp, Plus, ChevronRight, AlertCircle, IndianRupee, Sparkles, Layout, Clock, Trash2, Edit3 } from "lucide-react";
+import { FileText, CheckSquare, TrendingUp, Plus, ChevronRight, AlertCircle, IndianRupee, Sparkles, Layout, Clock, Trash2, Edit3, ArrowUpRight, Activity } from "lucide-react";
 import { Card } from "../components/ui/card";
 import {
   Dialog,
@@ -14,6 +14,14 @@ import { db } from '../main';
 const notesCollection = collection(db, 'notes');
 import { Button } from "../components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+
+const formatRupee = (amount: number) => {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(amount);
+};
 
 interface WorkItem {
   id: string;
@@ -104,13 +112,13 @@ const HomePage = () => {
   };
 
   const statusLabels: Record<string, string> = {
-    'de_process': 'DE under process',
-    'de_finance': 'DE Sent to Finance',
-    'de_hqrs': 'DE sent to HQrs',
-    'work_process': 'Work under process',
-    'tender': 'Tender stage',
-    'completed': 'Work Completed',
-    'indents_placed': 'Indents placed'
+    'de_process': 'Under Process',
+    'de_finance': 'With Finance',
+    'de_hqrs': 'Sent to HQrs',
+    'work_process': 'Active Works',
+    'tender': 'Tender Stage',
+    'completed': 'Completed',
+    'indents_placed': 'Indents Placed'
   };
 
   const totalSpent = contingencies.reduce((sum, c) => 
@@ -134,141 +142,133 @@ const HomePage = () => {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-10 pb-20"
+      className="space-y-12 pb-20"
     >
-      <motion.div variants={itemVariants} className="flex flex-col gap-1.5 mb-10 pl-2">
-        <h1 className="text-4xl sm:text-5xl md:text-[3.5rem] font-extrabold tracking-tight leading-[1.1] font-['Plus_Jakarta_Sans']">
-          <span className="text-[#141A28]">Budget Section </span>
-          <span className="text-[#1CA0B1] italic">Portal</span>
-        </h1>
-        <p className="text-[#6a6a6a] font-bold uppercase tracking-[0.1em] text-[11px] sm:text-[13px] mt-1 ml-0.5">
-          Carriage Workshop Lgd
-        </p>
+      <motion.div 
+        variants={itemVariants} 
+        className="relative h-[550px] w-full rounded-[4rem] overflow-hidden shadow-3xl mb-16 group"
+      >
+        <img 
+          src="/Image train.png" 
+          alt="Carriage Workshop LGD" 
+          className="absolute inset-0 w-full h-full object-cover object-[center_35%] group-hover:scale-105 transition-transform duration-[2000ms]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/30 to-transparent flex flex-col justify-end p-16 md:p-24">
+          <h1 className="text-6xl md:text-9xl font-extrabold tracking-tighter text-white leading-none">
+            Budget<span className="text-[#0ea5e9]">Portal</span>
+          </h1>
+          <div className="flex items-center gap-3 mt-8 px-6 py-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 w-fit">
+            <Activity size={20} className="text-[#0ea5e9]" />
+            <span className="text-white font-bold text-base tracking-wide uppercase">Carriage Workshop LGD</span>
+          </div>
+        </div>
       </motion.div>
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* RSP Card */}
-        <motion.div variants={itemVariants} className="group">
-          <Link to="/rsp-works">
-            <Card className="glass-card p-6 border-none shadow-card relative overflow-hidden transition-all duration-300 hover:shadow-hover hover:-translate-y-0.5 group-hover:bg-[#ff385c]/[0.02]">
-              <div className="relative z-10 space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-[0.5rem] bg-[#222222] text-white flex items-center justify-center shadow-card group-hover:rotate-6 transition-all">
-                    <FileText size={22} />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-[#222222] tracking-tighter">
-                      <AnimatedNumber value={works.filter(w => w.type === 'rsp').length} />
-                    </div>
-                    <p className="text-[9px] font-bold text-[#6a6a6a] uppercase tracking-widest mt-0.5">Works</p>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[#222222] leading-none">RSP</h3>
-                  <p className="text-[#6a6a6a] font-medium text-xs mt-1.5 leading-relaxed">Rolling Stock Program</p>
-                </div>
-                <div className="inline-flex items-center gap-1.5 text-[#ff385c] font-semibold text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2">
-                  Navigate <ChevronRight size={12} />
-                </div>
+      <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Rolling Stock Card */}
+        <Card className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 hover:shadow-2xl transition-all duration-500 group">
+          <div className="flex justify-between items-start mb-12">
+            <div className="w-16 h-16 rounded-2xl bg-[#0ea5e9]/10 text-[#0ea5e9] flex items-center justify-center">
+              <FileText size={32} />
+            </div>
+            <div className="text-right">
+              <div className="text-5xl font-black text-slate-900 leading-none tracking-tight">
+                <AnimatedNumber value={works.filter(w => w.type === 'rsp').length} />
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#222222]/5 rounded-full blur-3xl group-hover:bg-[#222222]/10 transition-colors" />
-            </Card>
-          </Link>
-        </motion.div>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2 block">Active Units</span>
+            </div>
+          </div>
+          <h3 className="text-2xl font-black text-slate-800 mb-8">Rolling Stock</h3>
+          <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+            <button onClick={() => navigate('/rsp-works')} className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0ea5e9] flex items-center gap-2 hover:gap-3 transition-all">
+              Explore Dataset <ChevronRight size={14} />
+            </button>
+          </div>
+        </Card>
 
         {/* IRSP Card */}
-        <motion.div variants={itemVariants} className="group">
-          <Link to="/irsp-works">
-            <Card className="glass-card p-6 border-none shadow-card relative overflow-hidden transition-all duration-300 hover:shadow-hover hover:-translate-y-0.5 group-hover:bg-[#ff385c]/[0.02]">
-              <div className="relative z-10 space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-[0.5rem] bg-[#222222] text-white flex items-center justify-center shadow-card group-hover:rotate-6 transition-all">
-                    <Layout size={22} />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-3xl font-bold text-[#222222] tracking-tighter">
-                      <AnimatedNumber value={works.filter(w => w.type === 'irsp').length} />
-                    </div>
-                    <p className="text-[9px] font-bold text-[#6a6a6a] uppercase tracking-widest mt-0.5">Works</p>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[#222222] leading-none">IRSP</h3>
-                </div>
-                <div className="inline-flex items-center gap-1.5 text-[#ff385c] font-semibold text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2">
-                  Navigate <ChevronRight size={12} />
-                </div>
+        <Card className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 hover:shadow-2xl transition-all duration-500 group">
+          <div className="flex justify-between items-start mb-12">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <Layout size={32} />
+            </div>
+            <div className="text-right">
+              <div className="text-5xl font-black text-slate-900 leading-none tracking-tight">
+                <AnimatedNumber value={works.filter(w => w.type === 'irsp').length} />
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#222222]/5 rounded-full blur-3xl group-hover:bg-[#222222]/10 transition-colors" />
-            </Card>
-          </Link>
-        </motion.div>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2 block">Units</span>
+            </div>
+          </div>
+          <h3 className="text-2xl font-black text-slate-800 mb-8">IRSP Works</h3>
+          <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+            <button onClick={() => navigate('/irsp-works')} className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 flex items-center gap-2 hover:gap-3 transition-all">
+              Access Records <ChevronRight size={14} />
+            </button>
+          </div>
+        </Card>
 
         {/* Contingencies Card */}
-        <motion.div variants={itemVariants} className="group">
-          <Link to="/contingencies">
-            <Card className="glass-card p-6 border-none shadow-card relative overflow-hidden transition-all duration-300 hover:shadow-hover hover:-translate-y-0.5 group-hover:bg-[#ff385c]/[0.02]">
-              <div className="relative z-10 space-y-5">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-[0.5rem] bg-[#222222] text-white flex items-center justify-center shadow-card group-hover:rotate-6 transition-all">
-                    <AlertCircle size={22} />
-                  </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-emerald-600 tracking-tighter">
-                      ₹<AnimatedNumber value={totalAllocation - totalSpent} />
-                    </div>
-                    <p className="text-[9px] font-bold text-[#6a6a6a] uppercase tracking-widest mt-0.5">Available</p>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[#222222] leading-none">Contingencies</h3>
-                </div>
-                <div className="inline-flex items-center gap-1.5 text-[#ff385c] font-semibold text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2">
-                  View <ChevronRight size={12} />
-                </div>
+        <Card className="bg-white border border-slate-100 rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/40 hover:shadow-2xl transition-all duration-500 group">
+          <div className="flex justify-between items-start mb-12">
+            <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+              <AlertCircle size={32} />
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-black text-[#10b981] leading-none mb-1">
+                {formatRupee(totalAllocation - totalSpent)}
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#222222]/5 rounded-full blur-3xl group-hover:bg-[#222222]/10 transition-colors" />
-            </Card>
-          </Link>
-        </motion.div>
-      </div>
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2 block">Available Fund</span>
+            </div>
+          </div>
+          <h3 className="text-2xl font-black text-slate-800 mb-8">Contingencies</h3>
+          <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
+            <button onClick={() => navigate('/contingencies')} className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 flex items-center gap-2 hover:gap-3 transition-all">
+              Financial Audit <ChevronRight size={14} />
+            </button>
+          </div>
+        </Card>
+      </motion.div>
 
-      {/* Secondary Intelligence: Status & Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-        {/* Status Heatmap - 3 Columns */}
-        <motion.div variants={itemVariants} className="lg:col-span-3">
-          <Card className="glass-card p-10 border-none shadow-card h-full pb-14">
-            <div className="flex items-center justify-between mb-10">
+      {/* Intelligence Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Status heatmap */}
+        <motion.div variants={itemVariants} className="lg:col-span-8">
+          <Card className="glass-card p-8 h-full">
+            <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
-                <div className="p-3 rounded-[0.5rem] bg-[#f2f2f2] text-[#6a6a6a] border border-[#e0e0e0]">
-                  <Layout size={20} />
+                <div className="p-3 rounded-2xl bg-primary/5 text-primary border border-primary/10">
+                  <TrendingUp size={20} />
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-[#222222]">Status Overview</h3>
+                  <h3 className="text-xl font-bold text-foreground">Status</h3>
                 </div>
               </div>
+              <Button variant="outline" size="sm" className="rounded-xl border-border px-4 font-bold text-xs uppercase tracking-widest">View All</Button>
             </div>
             
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
               {Object.entries(statusLabels).map(([key, label]) => {
                 const count = works.filter(w => w.status === key).length;
                 if (count === 0 && key !== 'completed') return null;
                 return (
                   <motion.div 
                     key={key}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    className="p-6 rounded-[1.25rem] white border border-[#e0e0e0] shadow-card hover:shadow-hover hover:border-[#ff385c]/20 transition-all duration-300 cursor-pointer group"
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    className="p-5 rounded-2xl bg-muted/30 border border-border/50 hover:border-primary/30 hover:bg-muted/50 transition-all duration-300 cursor-pointer group flex flex-col justify-between min-h-[140px]"
                     onClick={() => handleStatusClick(key)}
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`w-2 h-2 rounded-full ${key === 'completed' ? 'bg-emerald-500' : key === 'tender' ? 'bg-purple-500' : 'bg-[#ff385c]'} group-hover:animate-pulse`} />
-                      <span className="text-[11px] font-mono font-semibold text-[#e0e0e0]">#{count}</span>
+                    <div className="flex items-center justify-between">
+                      <div className={`w-3 h-3 rounded-full ${key === 'completed' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : key === 'tender' ? 'bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.3)]' : 'bg-primary shadow-[0_0_10px_rgba(31,166,184,0.3)]'} group-hover:animate-pulse`} />
+                      <span className="text-[10px] font-mono font-bold text-muted-foreground">ID_{key.substring(0,4)}</span>
                     </div>
-                    <p className="text-[10px] font-semibold text-[#6a6a6a] uppercase tracking-widest leading-tight">{label}</p>
-                    <div className="mt-3 flex items-center justify-between">
-                      <div className="text-2xl font-semibold text-[#222222]">{count}</div>
-                      <ChevronRight size={14} className="text-[#e0e0e0] group-hover:text-[#ff385c] transition-colors" />
+                    <div>
+                      <h4 className="text-sm font-bold text-foreground mb-1 mt-4">{label}</h4>
+                      <div className="flex items-end justify-between">
+                        <span className="text-3xl font-extrabold text-foreground stat-number">{count}</span>
+                        <div className="p-1.5 rounded-lg bg-background/50 group-hover:bg-primary/10 transition-colors">
+                          <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors" />
+                        </div>
+                      </div>
                     </div>
                   </motion.div>
                 );
@@ -277,119 +277,102 @@ const HomePage = () => {
           </Card>
         </motion.div>
 
-        {/* Task Protocol - 2 Columns */}
-        <motion.div variants={itemVariants} className="lg:col-span-2">
-          <Card className="glass-card p-0 border-none shadow-card h-full overflow-hidden flex flex-col">
-            <div className="p-8 border-b border-[#f2f2f2] bg-[#f2f2f2]/30 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-[0.5rem] bg-[#f2f2f2] text-[#222222] border border-[#e0e0e0]">
-                  <Clock size={20} />
+        {/* Protocol Tasks */}
+        <motion.div variants={itemVariants} className="lg:col-span-4">
+          <Card className="glass-card flex flex-col h-full overflow-hidden">
+            <div className="p-6 border-b border-border flex items-center justify-between shrink-0 bg-primary/[0.01]">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                  <CheckSquare size={18} />
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-[#222222]">To-do List</h3>
-                </div>
+                <h3 className="font-bold text-foreground">To-do List</h3>
               </div>
-              <Button 
-                onClick={() => navigate('/add-note')} 
-                variant="ghost" 
-                size="icon" 
-                className="w-10 h-10 rounded-full hover:bg-[#f2f2f2] hover:text-[#222222] text-[#6a6a6a]"
-              >
-                <Plus size={20} />
-              </Button>
             </div>
             
-            <div className="flex-1 overflow-y-auto scrollbar-none p-4 min-h-[300px]">
-              <div className="space-y-3">
-                {notes.map((note) => (
-                  <motion.div 
-                    layout
-                    key={note.id} 
-                    className="group flex items-center justify-between p-5 rounded-[1.25rem] hover:bg-[#f2f2f2] border border-transparent hover:border-[#e0e0e0] transition-all duration-300"
-                  >
-                    <div className="flex-1 min-w-0 mr-4">
-                      <p className="text-sm font-medium text-[#222222] leading-relaxed">{note.text}</p>
-                      <div className="flex items-center gap-2.5 mt-2">
-                        <span className="text-[10px] font-semibold text-[#e0e0e0] uppercase tracking-widest">{note.createdAt}</span>
-                        <span className="w-1 h-1 rounded-full bg-[#e0e0e0]" />
-                        <span className="text-[9px] font-semibold text-[#6a6a6a] italic">Sync Active</span>
-                      </div>
+            <div className="flex-1 overflow-y-auto scrollbar-none p-6 space-y-4 min-h-[400px]">
+              {notes.map((note) => (
+                <motion.div 
+                  layout
+                  key={note.id} 
+                  className="group flex gap-4 p-4 rounded-2xl hover:bg-muted/50 border border-transparent hover:border-border transition-all duration-300"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0"></div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground leading-relaxed">{note.text}</p>
+                    <div className="flex items-center gap-2 mt-3">
+                      <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
+                        <Clock size={10} /> {note.createdAt}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-2 group-hover:translate-x-0">
-                      <Button variant="ghost" size="icon" className="h-9 w-9 text-[#6a6a6a] hover:text-[#222222] hover:bg-[#f2f2f2] rounded-full" onClick={() => navigate(`/edit-note/${note.id}`)}>
-                        <Edit3 size={16} />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-9 w-9 text-[#6a6a6a] hover:text-red-500 hover:bg-red-50 rounded-full" onClick={() => handleDeleteNote(note.id)}>
-                        <Trash2 size={16} />
-                      </Button>
-                    </div>
-                  </motion.div>
-                ))}
-                {notes.length === 0 && (
-                  <div className="h-full flex flex-col items-center justify-center py-20 grayscale opacity-40">
-                    <CheckSquare size={48} className="text-[#e0e0e0] mb-4" />
-                    <p className="text-xs font-semibold text-[#6a6a6a] uppercase tracking-widest">Protocol Buffer Empty</p>
                   </div>
-                )}
-              </div>
+                  <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                    <button onClick={() => navigate(`/edit-note/${note.id}`)} className="p-1.5 rounded-lg hover:bg-background text-muted-foreground hover:text-primary transition-all"><Edit3 size={14} /></button>
+                    <button onClick={() => handleDeleteNote(note.id)} className="p-1.5 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-all"><Trash2 size={14} /></button>
+                  </div>
+                </motion.div>
+              ))}
+              {notes.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 opacity-30">
+                  <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
+                    <Sparkles size={32} />
+                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-center">No pending tasks</p>
+                </div>
+              )}
             </div>
-            <div className="p-4 border-t border-[#f2f2f2] bg-[#f2f2f2]/10">
-              <Button 
-                variant="ghost" 
-                className="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary hover:bg-primary/5"
-                onClick={() => navigate('/add-note')}
-              >
-                Enter New Task Sequence
-              </Button>
+            
+            <div className="p-4 bg-muted/20 mt-auto">
             </div>
           </Card>
         </motion.div>
       </div>
 
-      {/* Modal View for Status Details */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-5xl w-[95vw] rounded-[3rem] border-none bg-white shadow-premium-shadow p-0 overflow-hidden">
-          <div className="bg-slate-900 p-10 flex items-center justify-between">
+        <DialogContent className="max-w-5xl rounded-[2.5rem] border-none glass-card p-0 overflow-hidden shadow-2xl">
+          <div className="bg-foreground p-10 flex items-center justify-between">
             <div className="space-y-1">
-              <h3 className="text-3xl font-black text-white tracking-tight font-['Plus_Jakarta_Sans']">
-                {selectedStatus && statusLabels[selectedStatus]} <span className="text-primary">Elements</span>
+              <h3 className="text-3xl font-black text-white tracking-tight">
+                {selectedStatus && statusLabels[selectedStatus]} <span className="text-primary italic">Units</span>
               </h3>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest animate-pulse">Filtered Datastream Registry</p>
+              <p className="text-white/40 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                Datastream Filtered Result
+              </p>
             </div>
-            <div className="w-16 h-16 rounded-[1.5rem] bg-white/10 text-white flex items-center justify-center border border-white/5 backdrop-blur-xl">
-              <FileText size={32} />
+            <div className="w-16 h-16 rounded-[1.5rem] bg-white/5 text-white flex items-center justify-center border border-white/10 backdrop-blur-3xl shadow-2xl rotate-3">
+              <Activity size={32} />
             </div>
           </div>
-          <div className="p-10">
-            <div className="bg-slate-50/50 rounded-[2rem] border border-slate-100 overflow-hidden shadow-inner max-h-[60vh] overflow-y-auto">
+          <div className="p-10 space-y-8">
+            <div className="rounded-3xl border border-border bg-muted/30 overflow-hidden shadow-inner max-h-[50vh] overflow-y-auto scrollbar-none">
               <DataTable 
                 columns={[
                   { 
-                    header: "SPECIFICATION", 
+                    header: "ENTITY SPECIFICATION", 
                     accessorKey: "description",
-                    cell: (info: any) => <span className="font-bold text-slate-800 font-['Plus_Jakarta_Sans'] text-sm">{info.getValue() || '-'}</span>
+                    cell: (info: any) => <span className="font-bold text-foreground text-sm leading-relaxed">{info.getValue() || '-'}</span>
                   },
                   { 
                     header: "PROTOCOL TYPE", 
                     accessorKey: "type",
                     cell: (info: any) => (
-                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-black uppercase tracking-widest ${info.getValue() === 'rsp' ? 'bg-blue-50 text-blue-600' : 'bg-cyan-50 text-cyan-600'}`}>
+                      <span className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${info.getValue() === 'rsp' ? 'bg-primary/20 text-primary border border-primary/20' : 'bg-blue-500/20 text-blue-500 border border-blue-500/20'}`}>
                         {info.getValue()} Registry
                       </span>
                     )
                   },
                   { 
-                    header: "SANCTION PERIOD", 
+                    header: "PERIOD", 
                     accessorKey: "yearOfSanction",
-                    cell: (info: any) => <span className="font-mono text-[11px] font-black text-slate-400">{info.getValue() || '-'}</span>
+                    cell: (info: any) => <span className="font-mono text-[11px] font-bold text-muted-foreground bg-muted p-1.5 rounded-lg">{info.getValue() || '-'}</span>
                   },
                 ]} 
                 data={works.filter(w => w.status === selectedStatus)} 
               />
             </div>
-            <div className="mt-8 flex justify-end">
-              <Button onClick={() => setDialogOpen(false)} variant="outline" className="h-12 px-8 rounded-xl font-black text-slate-500 border-slate-100 hover:bg-slate-50">
-                Close Registry
+            <div className="flex justify-end">
+              <Button onClick={() => setDialogOpen(false)} variant="ghost" className="h-12 px-8 rounded-xl font-bold text-muted-foreground hover:bg-muted transition-colors">
+                EXIT REGISTRY
               </Button>
             </div>
           </div>
