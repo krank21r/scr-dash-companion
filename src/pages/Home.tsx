@@ -155,7 +155,7 @@ const HomePage = () => {
           alt="Carriage Workshop LGD" 
           className="absolute inset-0 w-full h-full object-cover object-[center_45%] group-hover:scale-105 transition-transform duration-[2000ms]"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent flex flex-col justify-end p-10 md:p-12">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent flex flex-col justify-between p-10 md:p-12">
           <div className="mb-4">
             <h1 className="text-4xl md:text-7xl font-extrabold tracking-tighter text-white leading-none">
               Budget<span className="text-[#0ea5e9]">Portal</span>
