@@ -153,7 +153,7 @@ const HomePage = () => {
         <img 
           src="/Image train.png" 
           alt="Carriage Workshop LGD" 
-          className="absolute inset-0 w-full h-full object-cover object-[center_55%] group-hover:scale-105 transition-transform duration-[2000ms]"
+          className="absolute inset-0 w-full h-full object-cover object-[center_45%] group-hover:scale-105 transition-transform duration-[2000ms]"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/20 to-transparent flex flex-col justify-end p-10 md:p-12">
           <div className="mb-4">
