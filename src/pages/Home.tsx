@@ -327,25 +327,25 @@ const HomePage = () => {
       </div>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-7xl h-[94vh] rounded-[3rem] border-none bg-white p-0 overflow-hidden shadow-2xl flex flex-col">
-          <div className="bg-foreground p-8 md:p-10 flex items-center justify-between shrink-0">
-            <div className="space-y-1">
-              <h3 className="text-3xl font-black text-white tracking-tight">
-                {selectedStatus && statusLabels[selectedStatus]} <span className="text-primary italic">Units</span>
+        <DialogContent className="max-w-7xl h-[86vh] top-10 translate-y-0 rounded-[3.5rem] border-none bg-white p-0 overflow-hidden shadow-2xl flex flex-col">
+          <div className="bg-[#0f172a] p-6 md:p-8 flex items-center justify-between shrink-0">
+            <div className="space-y-0.5">
+              <h3 className="text-2xl font-black text-white tracking-tight">
+                {selectedStatus && statusLabels[selectedStatus]} <span className="text-sky-400 italic">Units</span>
               </h3>
-              <p className="text-white/40 text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-                Filtered Overview
+              <p className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
+                <div className="w-1 h-1 rounded-full bg-sky-500 animate-pulse"></div>
+                Management Overview
               </p>
             </div>
-            <div className="w-14 h-14 rounded-2xl bg-white/5 text-white flex items-center justify-center border border-white/10 backdrop-blur-3xl shadow-2xl rotate-3">
-              <Activity size={28} />
+            <div className="w-12 h-12 rounded-xl bg-white/5 text-white flex items-center justify-center border border-white/10 backdrop-blur-3xl shadow-2xl">
+              <Activity size={24} />
             </div>
           </div>
 
-          <div className="flex-1 overflow-hidden flex flex-col p-6 md:p-10 space-y-6">
-            <div className="flex-1 rounded-[2.5rem] border border-slate-100 bg-white overflow-hidden shadow-inner relative">
-              <div className="absolute inset-0 overflow-auto scrollbar-none pb-20">
+          <div className="flex-1 overflow-hidden flex flex-col p-4 md:p-8">
+            <div className="flex-1 rounded-[2.5rem] border border-slate-100 bg-white shadow-2xl relative overflow-hidden">
+              <div className="absolute inset-0 overflow-auto scrollbar-hide pb-20">
               <DataTable 
                 columns={[
                   { 
