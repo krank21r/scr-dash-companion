@@ -30,14 +30,14 @@ export const Sidebar = () => {
           </Link>
         </div>
 
-        <nav className="hidden lg:flex items-center gap-2 px-4 overflow-x-auto scrollbar-none">
+        <nav className="hidden lg:flex items-center gap-1 px-2 overflow-x-auto scrollbar-none">
           {navItems.map((item) => {
             const active = isActive(item.path);
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                className={`group flex items-center gap-2 h-10 px-5 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 ${
+                className={`group flex items-center gap-2 h-10 px-4 rounded-full transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-400 ${
                   active 
                     ? "bg-primary text-primary-foreground shadow-lg shadow-sky-500/20" 
                     : "text-slate-500 hover:text-slate-800 hover:bg-slate-50"
