@@ -202,7 +202,7 @@ const HomePage = () => {
                 </div>
                 <div>
                   <h3 className="card-title text-slate-900 leading-none">IRSP</h3>
-                  <p className="text-slate-500 font-medium text-xs mt-1.5 leading-relaxed">Infrastructure Program</p>
+                  <p className="text-slate-500 font-medium text-xs mt-1.5 leading-relaxed">Itemised RSP</p>
                 </div>
                 <div className="inline-flex items-center gap-1.5 text-secondary font-bold text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2">
                   Navigate <ChevronRight size={12} />
@@ -231,7 +231,7 @@ const HomePage = () => {
                 </div>
                 <div>
                   <h3 className="card-title text-slate-900 leading-none">Contingencies</h3>
-                  <p className="text-slate-500 font-medium text-xs mt-1.5 leading-relaxed">Financial Registry</p>
+                  <p className="text-slate-500 font-medium text-xs mt-1.5 leading-relaxed">Balance</p>
                 </div>
                 <div className="inline-flex items-center gap-1.5 text-primary font-bold text-[10px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-2">
                   View <ChevronRight size={12} />
