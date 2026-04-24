@@ -1,0 +1,169 @@
+@import url('https://api.fontshare.com/v2/css?f[]=general-sans@200,300,400,500,600,700&f[]=satoshi@300,400,500,700,900&display=swap');
+ 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 210 40% 98%; /* #F8FAFC */
+    --foreground: 222 47% 11%; /* Slate-900 */
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 161 94% 30%; /* Emerald Green #059669 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 201 94% 32%; /* Sky Blue #0369A1 */
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%; /* Slate-500 */
+    --accent: 161 94% 30%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%; /* #E2E8F0 */
+    --input: 214.3 31.8% 91.4%;
+    --ring: 161 94% 30%;
+    --radius: 1.5rem; /* 24px */
+  }
+ 
+  .dark {
+    --background: 222 47% 4%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 6%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 161 94% 35%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 201 94% 40%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 161 94% 35%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 32% 20%;
+    --input: 217 32% 20%;
+    --ring: 161 94% 35%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply antialiased min-h-screen selection:bg-primary/20 transition-colors duration-300;
+    font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+    color: #0F172A; /* Slate-900 */
+    background-color: #F8FAFC; /* Light Gray */
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .dark body {
+    color: #F8FAFC;
+    background-color: #020617;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'General Sans', system-ui, -apple-system, sans-serif;
+    @apply font-bold text-slate-900;
+    letter-spacing: -0.02em;
+  }
+
+  .page-title {
+    font-size: 32px;
+    @apply font-bold;
+  }
+
+  .card-title {
+    font-size: 18px;
+    @apply font-bold;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white border border-[#E2E8F0] rounded-[1.5rem] transition-all duration-300;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.06);
+  }
+  
+  .dark .glass-card {
+    @apply bg-slate-900/50 backdrop-blur-xl border-slate-800 shadow-[0_8px_32px_rgba(0,0,0,0.2)];
+  }
+
+  .btn-primary {
+    @apply bg-[#059669] text-white px-4 py-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  .btn-primary:hover {
+    @apply bg-[#047857];
+    transform: translateY(-1px);
+  }
+
+  .news-item-hover {
+    @apply hover:scale-[1.05] transition-transform duration-300;
+  }
+
+  @keyframes pulse-glow {
+    0% {
+      box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 12px rgba(5, 150, 105, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
+    }
+  }
+
+  .glass-navbar {
+    @apply bg-white/70 backdrop-blur-xl border-b border-[#E2E8F0];
+  }
+
+  .dark .glass-navbar {
+    @apply bg-slate-950/70 backdrop-blur-xl border-b border-slate-800/50;
+  }
+
+  .glass-sidebar {
+    @apply bg-white border-r border-[#E2E8F0] px-4 py-6;
+  }
+
+  .dark .glass-sidebar {
+    @apply bg-slate-950 border-r border-slate-800;
+  }
+
+  .sidebar-nav-item {
+    @apply flex items-center gap-3 px-4 py-3 rounded-2xl text-slate-500 font-medium transition-all duration-200 relative;
+  }
+
+  .sidebar-nav-item:hover {
+    @apply text-slate-900 bg-slate-50;
+  }
+
+  .sidebar-nav-item.active {
+    @apply text-[#059669] bg-[#059669]/10 font-bold;
+  }
+
+  .dark .sidebar-nav-item.active {
+    @apply text-[#10B981] bg-[#10B981]/10;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+}
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 rounded-full hover:bg-slate-700;
+}
