@@ -265,14 +265,15 @@ const Contingencies = () => {
                       {spent.toLocaleString('en-IN')}
                     </TableCell>
                     <TableCell className="px-6 py-5">
-                      <span className={`inline-flex items-center px-3.5 py-1.5 rounded-full text-[10px] font-bold border transition-all font-display ${
+                      <span className={`inline-flex items-center px-4 py-2 rounded-xl text-sm md:text-base font-bold border shadow-sm transition-all font-display ${
                         balance <= 0 
-                          ? 'bg-red-50 text-red-600 border-red-100' 
+                          ? 'bg-red-50 text-red-700 border-red-200' 
                           : balance < parseFloat(item.totalAmount) * 0.25 
-                            ? 'bg-amber-50 text-amber-600 border-amber-100' 
-                            : 'bg-emerald-50 text-emerald-600 border-emerald-100'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200' 
+                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                           }`}>
-                            ₹{balance.toLocaleString('en-IN')}
+                            <span className="opacity-70 mr-1 text-xs">₹</span>
+                            {balance.toLocaleString('en-IN')}
                           </span>
                         </TableCell>
                         <TableCell className="px-6 py-5 text-right pr-8">
