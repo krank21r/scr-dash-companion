@@ -90,6 +90,40 @@ const Info = () => {
               <p className="text-sm font-medium text-slate-900">Budget Section, Carriage Workshop</p>
             </div>
           </div>
+
+          <div className="pt-8 border-t border-slate-50">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Section Staff Details</h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-emerald-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-display text-sm">1</div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">N.Chandrasekhar</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-0.5">SSE</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-emerald-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-display text-sm">2</div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">Jagadeesh Sundar</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-0.5">SSE</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-emerald-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-display text-sm">3</div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">J.RamTilak</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-0.5">SSE</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-emerald-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-display text-sm">4</div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900">R.Kranthi Kumar</p>
+                  <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-0.5">Tech-I</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </motion.div>
     </div>
