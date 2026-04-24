@@ -12,19 +12,19 @@
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 161 94% 30%; /* Emerald Green #059669 */
+    --primary: 200 98% 39%; /* Sky Green #0284c7 */
     --primary-foreground: 0 0% 100%;
     --secondary: 201 94% 32%; /* Sky Blue #0369A1 */
     --secondary-foreground: 0 0% 100%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%; /* Slate-500 */
-    --accent: 161 94% 30%;
+    --accent: 200 98% 39%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%; /* #E2E8F0 */
     --input: 214.3 31.8% 91.4%;
-    --ring: 161 94% 30%;
+    --ring: 200 98% 39%;
     --radius: 1.5rem; /* 24px */
   }
  
@@ -35,19 +35,19 @@
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 4%;
     --popover-foreground: 210 40% 98%;
-    --primary: 161 94% 35%;
+    --primary: 200 98% 45%;
     --primary-foreground: 0 0% 100%;
     --secondary: 201 94% 40%;
     --secondary-foreground: 0 0% 100%;
     --muted: 217 32% 17%;
     --muted-foreground: 215 20% 65%;
-    --accent: 161 94% 35%;
+    --accent: 200 98% 45%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62% 30%;
     --destructive-foreground: 210 40% 98%;
     --border: 217 32% 20%;
     --input: 217 32% 20%;
-    --ring: 161 94% 35%;
+    --ring: 200 98% 45%;
   }
 
   * {
@@ -96,12 +96,12 @@
   }
 
   .btn-primary {
-    @apply bg-[#059669] text-white px-4 py-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2;
+    @apply bg-[#0284c7] text-white px-4 py-4 rounded-xl font-medium transition-all duration-300 flex items-center justify-center gap-2;
     animation: pulse-glow 2s ease-in-out infinite;
   }
 
   .btn-primary:hover {
-    @apply bg-[#047857];
+    @apply bg-[#0369a1];
     transform: translateY(-1px);
   }
 
@@ -111,13 +111,13 @@
 
   @keyframes pulse-glow {
     0% {
-      box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.4);
+      box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.4);
     }
     70% {
-      box-shadow: 0 0 0 12px rgba(5, 150, 105, 0);
+      box-shadow: 0 0 0 12px rgba(2, 132, 199, 0);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(5, 150, 105, 0);
+      box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
     }
   }
 
@@ -146,11 +146,11 @@
   }
 
   .sidebar-nav-item.active {
-    @apply text-[#059669] bg-[#059669]/10 font-bold;
+    @apply text-[#0284c7] bg-[#0284c7]/10 font-bold;
   }
 
   .dark .sidebar-nav-item.active {
-    @apply text-[#10B981] bg-[#10B981]/10;
+    @apply text-[#38bdf8] bg-[#38bdf8]/10;
   }
 }
 

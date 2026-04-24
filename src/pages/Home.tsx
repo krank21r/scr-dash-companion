@@ -161,7 +161,7 @@ const HomePage = () => {
             <Card className="glass-card p-6 relative overflow-hidden transition-all duration-500 hover:-translate-y-1">
               <div className="relative z-10 space-y-5">
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-[#059669] text-white flex items-center justify-center shadow-lg shadow-[#059669]/20 group-hover:rotate-6 transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-[#0284c7] text-white flex items-center justify-center shadow-lg shadow-[#0284c7]/20 group-hover:rotate-6 transition-all">
                     <FileText size={22} />
                   </div>
                   <div className="text-right">
@@ -179,7 +179,7 @@ const HomePage = () => {
                   Navigate <ChevronRight size={12} />
                 </div>
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#059669]/5 rounded-full blur-3xl" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#0284c7]/5 rounded-full blur-3xl" />
             </Card>
           </Link>
         </motion.div>
@@ -219,11 +219,11 @@ const HomePage = () => {
             <Card className="glass-card p-6 relative overflow-hidden transition-all duration-500 hover:-translate-y-1">
               <div className="relative z-10 space-y-5">
                 <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-[#059669] text-white flex items-center justify-center shadow-lg shadow-[#059669]/20 group-hover:rotate-6 transition-all">
+                  <div className="w-12 h-12 rounded-xl bg-[#0284c7] text-white flex items-center justify-center shadow-lg shadow-[#0284c7]/20 group-hover:rotate-6 transition-all">
                     <AlertCircle size={22} />
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold text-[#059669] font-display tracking-tight">
+                    <div className="text-2xl font-bold text-[#0284c7] font-display tracking-tight">
                       ₹<AnimatedNumber value={totalAllocation - totalSpent} />
                     </div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Available</p>
@@ -237,7 +237,7 @@ const HomePage = () => {
                   View <ChevronRight size={12} />
                 </div>
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#059669]/5 rounded-full blur-3xl" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#0284c7]/5 rounded-full blur-3xl" />
             </Card>
           </Link>
         </motion.div>
@@ -271,7 +271,7 @@ const HomePage = () => {
                     onClick={() => handleStatusClick(key)}
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <div className={`w-2 h-2 rounded-full ${key === 'completed' ? 'bg-emerald-500' : key === 'tender' ? 'bg-sky-500' : 'bg-primary'} group-hover:animate-pulse`} />
+                      <div className={`w-2 h-2 rounded-full ${key === 'completed' ? 'bg-sky-500' : key === 'tender' ? 'bg-sky-500' : 'bg-primary'} group-hover:animate-pulse`} />
                       <span className="text-[11px] font-mono font-bold text-slate-300">#{count}</span>
                     </div>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">{label}</p>
@@ -362,7 +362,7 @@ const HomePage = () => {
                     header: "PROTOCOL TYPE", 
                     accessorKey: "type",
                     cell: (info: any) => (
-                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest ${info.getValue() === 'rsp' ? 'bg-emerald-50 text-emerald-600' : 'bg-sky-50 text-sky-600'}`}>
+                      <span className={`px-2.5 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest ${info.getValue() === 'rsp' ? 'bg-sky-50 text-sky-600' : 'bg-sky-50 text-sky-600'}`}>
                         {info.getValue()} Registry
                       </span>
                     )

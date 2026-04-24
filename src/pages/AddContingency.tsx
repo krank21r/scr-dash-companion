@@ -101,7 +101,7 @@ const AddContingency = () => {
           variant="ghost" 
           size="icon" 
           onClick={() => navigate(-1)} 
-          className="h-14 w-14 shrink-0 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-100 transition-all active:scale-95"
+          className="h-14 w-14 shrink-0 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-100 transition-all active:scale-95"
         >
           <ArrowLeft size={24} />
         </Button>
@@ -110,7 +110,7 @@ const AddContingency = () => {
             {isEditing ? "Refine Allocation" : "New Contingency"}
           </h2>
           <p className="text-sm text-slate-500 font-medium uppercase tracking-[0.15em] flex items-center gap-2">
-            <span className="w-1 h-1 rounded-full bg-emerald-500"></span>
+            <span className="w-1 h-1 rounded-full bg-sky-500"></span>
             Financial Reserve Protocol
           </p>
         </div>
@@ -123,7 +123,7 @@ const AddContingency = () => {
       >
         <div className="bg-slate-900 p-8 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+            <div className="w-12 h-12 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-lg shadow-sky-500/30">
               <AlertCircle size={24} />
             </div>
             <div>
@@ -132,7 +132,7 @@ const AddContingency = () => {
             </div>
           </div>
           {saved && (
-            <div className="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20 animate-pulse">
+            <div className="px-4 py-2 rounded-xl bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest border border-sky-500/20 animate-pulse">
               Synchronizing...
             </div>
           )}
@@ -150,7 +150,7 @@ const AddContingency = () => {
                 value={formData.description}
                 onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
                 placeholder="Declare the purpose of this reserve fund..."
-                className="min-h-[140px] rounded-xl border-slate-100 bg-slate-50/30 p-5 focus-visible:bg-white focus-visible:ring-emerald-500/10 transition-all font-medium text-base leading-relaxed placeholder:font-normal"
+                className="min-h-[140px] rounded-xl border-slate-100 bg-slate-50/30 p-5 focus-visible:bg-white focus-visible:ring-sky-500/10 transition-all font-medium text-base leading-relaxed placeholder:font-normal"
                 required
                 autoFocus={!isEditing}
               />

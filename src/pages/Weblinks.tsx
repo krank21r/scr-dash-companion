@@ -84,21 +84,21 @@ const Weblinks = () => {
             variant="ghost" 
             size="icon" 
             onClick={() => navigate(-1)} 
-            className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-all duration-500 active:scale-95"
+            className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-500 active:scale-95"
           >
             <ArrowLeft size={24} />
           </Button>
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-display">Weblinks</h1>
             <p className="text-sm text-slate-500 font-medium uppercase tracking-[0.15em] flex items-center gap-2">
-              <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="w-1 h-1 rounded-full bg-sky-500 animate-pulse"></span>
               Quick Access Resources
             </p>
           </div>
         </div>
         <Button 
           onClick={() => { setShowForm(true); setEditingId(null); setFormData({ title: "", url: "", category: "" }); }}
-          className="bg-emerald-600 hover:bg-emerald-700 text-white h-12 px-6 rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/20"
+          className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-6 rounded-xl font-bold transition-all shadow-lg shadow-sky-600/20"
         >
           <Plus size={18} className="mr-2" />
           Add Link
@@ -125,7 +125,7 @@ const Weblinks = () => {
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Enter link title"
-                  className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
                   required
                 />
               </div>
@@ -136,7 +136,7 @@ const Weblinks = () => {
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="e.g. Official, Reference"
-                  className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                  className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
                 />
               </div>
             </div>
@@ -147,12 +147,12 @@ const Weblinks = () => {
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
                 placeholder="https://example.com"
-                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
                 required
               />
             </div>
             <div className="flex items-center gap-4 pt-4">
-              <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 h-12 px-8 rounded-xl font-bold">
+              <Button type="submit" className="bg-sky-600 hover:bg-sky-700 h-12 px-8 rounded-xl font-bold">
                 {editingId ? "Update Link" : "Save Link"}
               </Button>
               <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }} className="h-12 px-8 rounded-xl font-bold text-slate-500">
@@ -170,12 +170,12 @@ const Weblinks = () => {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.05 }}
-            className="group rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-emerald-200 transition-all duration-300 overflow-hidden"
+            className="group rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-sky-200 transition-all duration-300 overflow-hidden"
           >
             <div className="p-5">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
+                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 group-hover:bg-sky-100 transition-colors">
                     <Globe size={20} />
                   </div>
                   <div className="min-w-0">
@@ -190,14 +190,14 @@ const Weblinks = () => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-emerald-50 text-emerald-600 text-xs font-bold hover:bg-emerald-100 transition-colors"
+                  className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-sky-50 text-sky-600 text-xs font-bold hover:bg-sky-100 transition-colors"
                 >
                   <ExternalLink size={14} />
                   Open
                 </a>
                 <button
                   onClick={() => handleEdit(link)}
-                  className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-emerald-50 hover:text-emerald-600 flex items-center justify-center transition-colors"
+                  className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-sky-50 hover:text-sky-600 flex items-center justify-center transition-colors"
                 >
                   <Edit3 size={14} />
                 </button>
@@ -219,8 +219,8 @@ const Weblinks = () => {
           animate={{ opacity: 1 }}
           className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200"
         >
-          <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-            <Link2 size={28} className="text-emerald-600" />
+          <div className="w-16 h-16 rounded-2xl bg-sky-50 flex items-center justify-center mx-auto mb-4">
+            <Link2 size={28} className="text-sky-600" />
           </div>
           <div>
             <h2 className="text-xl font-bold text-slate-900 font-display">No Weblinks Yet</h2>
@@ -228,7 +228,7 @@ const Weblinks = () => {
           </div>
           <Button 
             onClick={() => setShowForm(true)}
-            className="mt-6 bg-emerald-600 hover:bg-emerald-700 h-12 px-8 rounded-xl font-bold"
+            className="mt-6 bg-sky-600 hover:bg-sky-700 h-12 px-8 rounded-xl font-bold"
           >
             <Plus size={18} className="mr-2" />
             Add First Link

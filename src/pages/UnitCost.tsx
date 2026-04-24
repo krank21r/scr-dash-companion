@@ -68,7 +68,7 @@ const UnitCost = () => {
       {/* Dynamic Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner border border-emerald-100/50">
+          <div className="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center shadow-inner border border-sky-100/50">
             <TrendingUp size={28} />
           </div>
           <div>
@@ -78,7 +78,7 @@ const UnitCost = () => {
 
         <div className="flex items-center gap-3">
           <div className="px-5 py-2.5 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center gap-2">
-            <FileSpreadsheet size={16} className="text-emerald-500" />
+            <FileSpreadsheet size={16} className="text-sky-500" />
             <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">XLSX Support Active</span>
           </div>
         </div>
@@ -121,7 +121,7 @@ const UnitCost = () => {
           >
             <div className="p-8 bg-slate-900 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/20">
+                <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center border border-sky-500/20">
                   <CheckCircle2 size={20} />
                 </div>
                 <div>

@@ -80,7 +80,7 @@ const Reviews = () => {
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-display">Project Audits</h1>
             <p className="text-sm text-slate-500 font-medium uppercase tracking-[0.1em] mt-1 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
               {reviewData.length} Review entries synchronized
             </p>
           </div>

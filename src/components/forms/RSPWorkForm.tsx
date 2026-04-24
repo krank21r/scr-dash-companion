@@ -67,7 +67,7 @@ const RSPWorkForm = ({ formData, setFormData }: RSPWorkFormProps) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 pt-2">
         <div className="space-y-2.5">
           <div className="flex items-center gap-2 mb-1 ml-1">
-            <IndianRupee size={14} className="text-emerald-500" />
+            <IndianRupee size={14} className="text-sky-500" />
             <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">RB Sanctioned Cost</label>
           </div>
           <Input
@@ -77,7 +77,7 @@ const RSPWorkForm = ({ formData, setFormData }: RSPWorkFormProps) => {
             onChange={(e) => setFormData({ ...formData, rbSanctionedCost: e.target.value })}
             placeholder="0.00"
             required
-            className="h-12 rounded-xl border-slate-100 bg-emerald-50/10 px-4 font-black text-slate-900"
+            className="h-12 rounded-xl border-slate-100 bg-sky-50/10 px-4 font-black text-slate-900"
           />
         </div>
 
@@ -143,7 +143,7 @@ const RSPWorkForm = ({ formData, setFormData }: RSPWorkFormProps) => {
                 <SelectItem value="de_hqrs" className="rounded-lg font-bold">DE sent to HQrs</SelectItem>
                 <SelectItem value="work_process" className="rounded-lg font-bold">Work under process</SelectItem>
                 <SelectItem value="tender" className="rounded-lg font-bold">Tender stage</SelectItem>
-                <SelectItem value="completed" className="rounded-lg font-black text-emerald-600">Work Completed</SelectItem>
+                <SelectItem value="completed" className="rounded-lg font-black text-sky-600">Work Completed</SelectItem>
               </SelectContent>
             </Select>
           </div>

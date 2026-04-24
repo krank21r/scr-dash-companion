@@ -15,7 +15,7 @@ const Info = () => {
           variant="ghost"
           size="icon"
           onClick={() => navigate(-1)}
-          className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-all duration-500 active:scale-95"
+          className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-500 active:scale-95"
         >
           <ArrowLeft size={24} />
         </Button>
@@ -24,7 +24,7 @@ const Info = () => {
             Info
           </h2>
           <p className="text-sm text-slate-500 font-medium uppercase tracking-[0.15em] flex items-center gap-2">
-            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="w-1 h-1 rounded-full bg-sky-500 animate-pulse"></span>
             Application Information
           </p>
         </div>
@@ -37,11 +37,11 @@ const Info = () => {
       >
         <Link
           to="/holidays"
-          className="group block rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-emerald-200 transition-all duration-300 hover:-translate-y-0.5"
+          className="group block rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-sky-200 transition-all duration-300 hover:-translate-y-0.5"
         >
           <div className="flex items-center justify-between p-6">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-sm group-hover:bg-emerald-100 group-hover:scale-110 transition-all duration-300">
+              <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shadow-sm group-hover:bg-sky-100 group-hover:scale-110 transition-all duration-300">
                 <CalendarDays size={24} />
               </div>
               <div>
@@ -49,7 +49,7 @@ const Info = () => {
                 <p className="text-sm text-slate-500 mt-0.5">View holiday list</p>
               </div>
             </div>
-            <ArrowRight size={20} className="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all duration-300" />
+            <ArrowRight size={20} className="text-slate-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-all duration-300" />
           </div>
         </Link>
       </motion.div>
@@ -62,7 +62,7 @@ const Info = () => {
       >
         <div className="bg-slate-900 p-8 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/30">
+            <div className="w-12 h-12 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-lg shadow-sky-600/30">
               <InfoIcon size={24} />
             </div>
             <div>
@@ -94,29 +94,29 @@ const Info = () => {
           <div className="pt-8 border-t border-slate-50">
             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Section Staff Details</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-emerald-200 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-display text-sm">1</div>
+              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-sky-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold font-display text-sm">1</div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">N.Chandrasekhar</p>
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-0.5">SSE</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-emerald-200 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-display text-sm">2</div>
+              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-sky-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold font-display text-sm">2</div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">Jagadeesh Sundar</p>
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-0.5">SSE</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-emerald-200 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-display text-sm">3</div>
+              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-sky-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold font-display text-sm">3</div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">J.RamTilak</p>
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-0.5">SSE</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-emerald-200 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold font-display text-sm">4</div>
+              <div className="flex items-center gap-3 bg-slate-50/50 rounded-xl p-4 border border-slate-100 hover:border-sky-200 transition-colors">
+                <div className="w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold font-display text-sm">4</div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">R.Kranthi Kumar</p>
                   <p className="text-xs font-medium text-slate-500 uppercase tracking-widest mt-0.5">Tech-I</p>

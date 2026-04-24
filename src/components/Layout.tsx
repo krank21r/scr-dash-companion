@@ -87,7 +87,7 @@ export const Layout = ({ children }: LayoutProps) => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="h-10 px-2 rounded-full hover:bg-slate-100 flex items-center gap-2 group transition-all">
-                    <div className="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs ring-4 ring-emerald-50 group-hover:ring-emerald-100 transition-all">
+                    <div className="w-8 h-8 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-xs ring-4 ring-sky-50 group-hover:ring-sky-100 transition-all">
                       AD
                     </div>
                   </Button>
@@ -97,7 +97,7 @@ export const Layout = ({ children }: LayoutProps) => {
                   <DropdownMenuSeparator className="bg-slate-50" />
                   <DropdownMenuItem asChild>
                     <Link to="/add-works" className="rounded-xl p-3 cursor-pointer hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><Plus size={16} /></div>
+                      <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center"><Plus size={16} /></div>
                       Add Work Element
                     </Link>
                   </DropdownMenuItem>

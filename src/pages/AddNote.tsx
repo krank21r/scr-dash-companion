@@ -45,7 +45,7 @@ const AddNote = () => {
           variant="ghost" 
           size="icon" 
           onClick={() => navigate(-1)} 
-          className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 hover:border-emerald-200 transition-all duration-500 active:scale-95"
+          className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-500 active:scale-95"
         >
           <ArrowLeft size={24} />
         </Button>
@@ -54,7 +54,7 @@ const AddNote = () => {
             To-do
           </h2>
           <p className="text-sm text-slate-500 font-medium uppercase tracking-[0.15em] flex items-center gap-2">
-            <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="w-1 h-1 rounded-full bg-sky-500 animate-pulse"></span>
             System Synchronized Memo
           </p>
         </div>
@@ -67,7 +67,7 @@ const AddNote = () => {
       >
         <div className="bg-slate-900 p-8 border-b border-white/5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-600/30">
+            <div className="w-12 h-12 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-lg shadow-sky-600/30">
               <Edit3 size={24} />
             </div>
             <div>
@@ -80,7 +80,7 @@ const AddNote = () => {
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20"
+                className="px-4 py-2 rounded-xl bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest border border-sky-500/20"
               >
                 Committed
               </motion.div>

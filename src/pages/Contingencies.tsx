@@ -164,7 +164,7 @@ const Contingencies = () => {
       {/* Overview Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 glass-card p-6 border-slate-200/10 shadow-glow-sm">
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
+          <div className="p-3 rounded-xl bg-sky-50 text-sky-600 border border-sky-100">
             <AlertCircle size={24} />
           </div>
           <div>
@@ -245,12 +245,12 @@ const Contingencies = () => {
                     <TableCell className="px-6 py-5">
                       <button
                         onClick={() => toggleExpand(item.id)}
-                        className="flex items-center gap-3.5 text-slate-700 group-hover:text-emerald-600 font-bold transition-all text-left font-display text-sm"
+                        className="flex items-center gap-3.5 text-slate-700 group-hover:text-sky-600 font-bold transition-all text-left font-display text-sm"
                       >
-                        <span className={`w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-emerald-50 group-hover:text-emerald-600 ${isExpanded ? 'rotate-180 bg-emerald-600 shadow-lg shadow-emerald-600/20 text-white' : ''}`}>
+                        <span className={`w-8 h-8 flex items-center justify-center rounded-lg bg-slate-50 text-slate-400 transition-all duration-300 group-hover:bg-sky-50 group-hover:text-sky-600 ${isExpanded ? 'rotate-180 bg-sky-600 shadow-lg shadow-sky-600/20 text-white' : ''}`}>
                           <ChevronDown size={14} />
                         </span>
-                        <span className="group-hover:underline decoration-emerald-600/30 underline-offset-4">{item.description || '-'}</span>
+                        <span className="group-hover:underline decoration-sky-600/30 underline-offset-4">{item.description || '-'}</span>
                       </button>
                     </TableCell>
                     <TableCell className="px-6 py-5 text-slate-500 font-bold text-center font-display text-xs">
@@ -270,7 +270,7 @@ const Contingencies = () => {
                           ? 'bg-red-50 text-red-700 border-red-200' 
                           : balance < parseFloat(item.totalAmount) * 0.25 
                             ? 'bg-amber-50 text-amber-700 border-amber-200' 
-                            : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-sky-50 text-sky-700 border-sky-200'
                           }`}>
                             <span className="opacity-70 mr-1 text-xs">₹</span>
                             {balance.toLocaleString('en-IN')}
@@ -323,7 +323,7 @@ const Contingencies = () => {
                                     <div key={exp.id} className="group/item flex flex-col p-5 rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                                       <div className="flex items-center justify-between mb-4">
                                         <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{exp.date}</span>
-                                        <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                                        <div className="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
                                       </div>
                                       <div className="mb-4">
                                         <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.1em] mb-1">Amount Debited</p>

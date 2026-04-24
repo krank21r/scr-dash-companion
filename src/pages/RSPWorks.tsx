@@ -47,7 +47,7 @@ const getStatusLabel = (status: string) => {
 const getStatusStyles = (status: string) => {
   switch (status) {
     case "completed":
-      return "bg-[#059669]/10 text-[#059669] border-[#059669]/20";
+      return "bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/20";
     case "work_process":
     case "de_process":
       return "bg-[#0369A1]/10 text-[#0369A1] border-[#0369A1]/20";
@@ -127,13 +127,13 @@ const RSPWorks = () => {
       {/* Dynamic Filter Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 pointer-events-auto">
         <div className="flex items-center gap-5">
-          <div className="w-14 h-14 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+          <div className="w-14 h-14 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
             <FileText size={28} />
           </div>
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-display">RSP Works</h1>
             <p className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
               {filteredWorks.length} Records Registered
             </p>
           </div>
@@ -143,7 +143,7 @@ const RSPWorks = () => {
           <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-slate-100/50 border border-slate-200/40">
             <button
               onClick={() => setSelectedYear("all")}
-              className={`px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${selectedYear === "all" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+              className={`px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${selectedYear === "all" ? "bg-white text-sky-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
             >
               Overview
             </button>
@@ -151,7 +151,7 @@ const RSPWorks = () => {
               <button
                 key={year}
                 onClick={() => setSelectedYear(year)}
-                className={`px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${selectedYear === year ? "bg-white text-emerald-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+                className={`px-6 py-2.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.2em] transition-all ${selectedYear === year ? "bg-white text-sky-600 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
               >
                 {year}
               </button>
@@ -207,7 +207,7 @@ const RSPWorks = () => {
                   <tr key={work.id} className="premium-table-row transition-all duration-500 group border-l-4 border-l-transparent hover:border-l-primary">
                     <TableCell className="px-8 py-6">
                       <div className="flex flex-col gap-1">
-                        <span className="font-bold text-slate-800 text-sm leading-snug group-hover:text-emerald-600 transition-colors font-display">{work.description || '-'}</span>
+                        <span className="font-bold text-slate-800 text-sm leading-snug group-hover:text-sky-600 transition-colors font-display">{work.description || '-'}</span>
                         {work.remarks && <span className="text-[10px] text-slate-400 font-medium uppercase tracking-widest line-clamp-1 opacity-60">"{work.remarks}"</span>}
                       </div>
                     </TableCell>
@@ -219,7 +219,7 @@ const RSPWorks = () => {
                     </TableCell>
                     <TableCell className="px-6 py-6">
                       <div className="flex items-baseline gap-1">
-                        <span className="text-[10px] font-bold text-emerald-600/40 leading-none">₹</span>
+                        <span className="text-[10px] font-bold text-sky-600/40 leading-none">₹</span>
                         <span className="text-base font-bold text-slate-900 font-display tracking-tight">{work.rbSanctionedCost || '-'}</span>
                       </div>
                     </TableCell>

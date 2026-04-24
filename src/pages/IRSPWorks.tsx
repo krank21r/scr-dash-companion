@@ -52,7 +52,7 @@ const getStatusLabel = (status: string) => {
 const getStatusStyles = (status: string) => {
   switch (status) {
     case "completed":
-      return "bg-[#059669]/10 text-[#059669] border-[#059669]/20";
+      return "bg-[#0284c7]/10 text-[#0284c7] border-[#0284c7]/20";
     case "work_process":
     case "de_process":
     case "indents_placed":

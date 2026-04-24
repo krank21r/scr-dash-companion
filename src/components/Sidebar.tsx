@@ -36,8 +36,8 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
     <div className={`h-full flex flex-col transition-all duration-300 ${collapsed ? 'w-20' : 'w-64'}`}>
       <div className="h-20 flex items-center px-6 shrink-0 mt-2">
         <Link to="/" className="flex items-center gap-3.5 group">
-          <div className="w-10 h-10 rounded-2xl bg-[#059669]/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shrink-0">
-            <div className="w-6 h-6 rounded-lg bg-[#059669] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-[#0284c7]/10 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 shrink-0">
+            <div className="w-6 h-6 rounded-lg bg-[#0284c7] flex items-center justify-center">
               <Home size={14} className="text-white" />
             </div>
           </div>
@@ -48,7 +48,7 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
               className="flex flex-col"
             >
               <span className="font-bold text-slate-900 tracking-tight text-lg leading-none font-display">
-                Budget <span className="text-[#059669] italic">Portal</span>
+                Budget <span className="text-[#0284c7] italic">Portal</span>
               </span>
             </motion.div>
           )}
@@ -70,7 +70,7 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
             <item.icon
               size={20}
               className={`shrink-0 transition-colors duration-200 ${
-                isActive(item.path) ? "text-[#059669]" : "text-slate-400 group-hover:text-slate-600"
+                isActive(item.path) ? "text-[#0284c7]" : "text-slate-400 group-hover:text-slate-600"
               }`}
             />
             {!collapsed && (

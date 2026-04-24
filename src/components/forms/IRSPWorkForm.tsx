@@ -129,7 +129,7 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
               <SelectItem value="de_hqrs" className="rounded-lg font-bold">DE sent to HQrs</SelectItem>
               <SelectItem value="indents_placed" className="rounded-lg font-black text-cyan-600 bg-cyan-50">Indents placed</SelectItem>
               <SelectItem value="work_process" className="rounded-lg font-bold">Work under process</SelectItem>
-              <SelectItem value="completed" className="rounded-lg font-black text-emerald-600 bg-emerald-50">Work Completed</SelectItem>
+              <SelectItem value="completed" className="rounded-lg font-black text-sky-600 bg-sky-50">Work Completed</SelectItem>
             </SelectContent>
           </Select>
         </div>
