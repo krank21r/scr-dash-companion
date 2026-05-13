@@ -24,8 +24,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Satoshi", "sans-serif"],
-        display: ["General Sans", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "sans-serif"],
+        display: ["Plus Jakarta Sans", "sans-serif"],
+        mono: ["JetBrains Mono", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",

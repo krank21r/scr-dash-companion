@@ -1,7 +1,7 @@
 import { useState, useEffect, ReactNode } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { Search, Bell, Menu, Plus, User, LogOut, Settings, FileText } from "lucide-react";
+import { Menu, Plus, LogOut, FileText, LayoutDashboard } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -38,94 +38,126 @@ export const Layout = ({ children }: LayoutProps) => {
     if (path === "/irsp-works") return "IRSP Works";
     if (path === "/contingencies") return "Contingencies";
     if (path === "/unit-cost") return "Unit Cost";
-    if (path === "/weblinks") return "Weblinks";
-    if (path.startsWith("/add-")) return "Create New Record";
+    if (path === "/weblinks") return "Web Links";
+    if (path.startsWith("/add-")) return "Create Record";
     if (path.startsWith("/edit-")) return "Edit Record";
     return "Budget Portal";
   };
 
   return (
-    <div className="min-h-screen bg-background flex overflow-x-hidden">
-      <Sidebar 
-        isOpen={isSidebarOpen} 
-        onClose={() => setIsSidebarOpen(false)} 
+    <div className="min-h-screen bg-background flex">
+      <Sidebar
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
       />
-      
-      <div className="flex-1 flex flex-col min-w-0 transition-all duration-500">
-        {/* Unified Top Header */}
-        <header 
-          className={`h-16 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-40 transition-all duration-300 ${
-            scrolled ? "glass-navbar shadow-sm" : "bg-transparent"
+
+      <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
+        {/* Top Header */}
+        <header
+          className={`h-16 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-40 transition-all duration-200 ${
+            scrolled ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100/60" : "bg-transparent"
           }`}
         >
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setIsSidebarOpen(true)} 
-              className="md:hidden text-slate-600 hover:bg-slate-100 rounded-xl"
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsSidebarOpen(true)}
+              className="md:hidden text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-lg"
             >
               <Menu size={20} />
             </Button>
-            
-            <div className="hidden sm:block">
-              <h2 className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.25em] font-display">
+
+            <div className="hidden sm:flex items-center gap-2">
+              <LayoutDashboard size={16} className="text-slate-400" />
+              <h2 className="text-sm font-semibold text-slate-600">
                 {getPageTitle()}
               </h2>
             </div>
           </div>
-          
-          <div className="flex items-center gap-2 lg:gap-4">
-            <div className="flex items-center gap-1.5">
-              <Button variant="ghost" size="icon" className="relative h-10 w-10 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full">
-                <Bell size={20} />
-                <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white" />
-              </Button>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-10 px-2 rounded-full hover:bg-slate-100 flex items-center gap-2 group transition-all">
-                    <div className="w-8 h-8 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center font-bold text-xs ring-4 ring-sky-50 group-hover:ring-sky-100 transition-all">
-                      AD
+          <div className="flex items-center gap-2">
+            {/* Quick Add Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="btn-primary h-10 px-4 rounded-lg text-sm font-semibold gap-2">
+                  <Plus size={16} />
+                  <span className="hidden sm:inline">New</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-xl p-2 bg-white border border-slate-100 shadow-lg shadow-slate-200/40">
+                <DropdownMenuItem asChild>
+                  <Link to="/add-works" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                      <FileText size={16} />
                     </div>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-64 rounded-2xl p-2 shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-slate-100 bg-white">
-                  <DropdownMenuLabel className="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest font-display">Administrator</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-slate-50" />
-                  <DropdownMenuItem asChild>
-                    <Link to="/add-works" className="rounded-xl p-3 cursor-pointer hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center"><Plus size={16} /></div>
-                      Add Work Element
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/add-note" className="rounded-xl p-3 cursor-pointer hover:bg-slate-50 text-slate-700 font-semibold text-sm flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center"><FileText size={16} /></div>
-                      New To-Do Note
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator className="bg-slate-50" />
-                  <DropdownMenuItem className="rounded-xl p-3 cursor-pointer hover:bg-red-50 text-red-600 font-bold focus:text-red-700 focus:bg-red-50">
-                    <LogOut size={16} className="mr-3" /> Log out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+                    <div>
+                      <p className="font-medium text-slate-700 text-sm">New Work</p>
+                      <p className="text-xs text-slate-400">Add RSP/IRSP work</p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/add-contingency" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
+                      <FileText size={16} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-700 text-sm">New Contingency</p>
+                      <p className="text-xs text-slate-400">Add contingency item</p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="my-2 bg-slate-100" />
+                <DropdownMenuItem asChild>
+                  <Link to="/add-note" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
+                      <FileText size={16} />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-700 text-sm">New Note</p>
+                      <p className="text-xs text-slate-400">Add reminder</p>
+                    </div>
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-10 w-10 p-0 rounded-full hover:bg-slate-100 transition-colors">
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white flex items-center justify-center font-semibold text-sm shadow-sm">
+                    AD
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 rounded-xl p-2 bg-white border border-slate-100 shadow-lg shadow-slate-200/40">
+                <DropdownMenuLabel className="px-3 py-2">
+                  <p className="font-semibold text-slate-900">Administrator</p>
+                  <p className="text-xs text-slate-400 font-normal">admin@workshop.com</p>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="my-2 bg-slate-100" />
+                <DropdownMenuItem className="px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors text-red-600 focus:text-red-600 focus:bg-red-50">
+                  <LogOut size={16} className="mr-3" />
+                  <span className="font-medium text-sm">Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
-        <main className="flex-1 px-4 lg:px-8 w-full transition-all duration-300">
+        <main className="flex-1 px-6 lg:px-8 w-full">
           <div className="max-w-[1600px] mx-auto py-8">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
               >
                 {children}
               </motion.div>

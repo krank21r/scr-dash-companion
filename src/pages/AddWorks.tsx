@@ -45,7 +45,7 @@ const AddWorks = () => {
         const workRef = doc(db, "works", formData.id);
         const { id, ...updateData } = formData;
         await updateDoc(workRef, updateData);
-        toast({ title: "Update Successful", description: "Project ledger has been synchronized." });
+        toast({ title: "Updated", description: "Record updated successfully." });
       } else {
         const { id, ...newWorkData } = formData;
         await addDoc(collection(db, "works"), {
@@ -53,7 +53,7 @@ const AddWorks = () => {
           type: workType,
           createdAt: new Date(),
         });
-        toast({ title: "Entry Created", description: "New project has been added to the database." });
+        toast({ title: "Created", description: "New record added successfully." });
       }
       localStorage.removeItem('editWork');
       navigate(workType === 'rsp' ? '/rsp-works' : '/irsp-works');
@@ -63,102 +63,105 @@ const AddWorks = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20 px-4">
-      {/* Header with Navigation */}
-      <div className="flex items-center gap-6 group">
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          onClick={() => navigate(-1)} 
-          className="h-14 w-14 shrink-0 rounded-xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-100 transition-all active:scale-95"
+    <div className="max-w-3xl mx-auto space-y-6 pb-20">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => navigate(-1)}
+          className="h-11 w-11 rounded-lg border-slate-200 hover:bg-slate-50"
         >
-          <ArrowLeft size={24} />
+          <ArrowLeft size={20} />
         </Button>
-        <div className="space-y-1">
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight font-display">
-            {formData.id ? 'Refine Entry' : 'New Assignment'}
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">
+            {formData.id ? 'Edit Work' : 'New Work'}
           </h2>
-          <p className="text-sm text-slate-500 font-medium uppercase tracking-[0.1em] flex items-center gap-2">
-            <span className="w-1 h-1 rounded-full bg-sky-500 mb-0.5"></span>
-            {formData.id ? `ID: ${formData.id.slice(0, 8)}...` : 'Database Protocol Alpha'}
+          <p className="text-sm text-slate-500 font-medium">
+            {formData.id ? `ID: ${formData.id.slice(0, 8)}...` : 'Fill in the form details below'}
           </p>
         </div>
       </div>
 
       <AnimatePresence mode="wait">
         {!showForm ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 gap-5"
           >
-            <Card 
-              className="glass-card group relative p-10 border-none cursor-pointer hover:shadow-xl transition-all duration-500 overflow-hidden"
+            {/* RSP Card */}
+            <Card
+              className="glass-card p-8 cursor-pointer hover:shadow-lg hover:border-primary/20 transition-all duration-300"
               onClick={() => { setWorkType("rsp"); setFormData({ ...formData, type: "rsp" }); setShowForm(true); }}
             >
-              <div className="relative z-10 space-y-8">
-                <div className="w-16 h-16 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-lg shadow-sky-600/20 group-hover:scale-110 transition-all duration-500 border-4 border-white/20">
-                  <FileText size={32} />
+              <div className="space-y-5">
+                <div className="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                  <FileText size={28} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-900 font-display">RSP Work</h3>
-                  <p className="text-slate-500 font-medium mt-2 leading-relaxed">Rolling Stock Program</p>
+                  <h3 className="text-xl font-bold text-slate-900">RSP Work</h3>
+                  <p className="text-sm text-slate-500 mt-1">Rolling Stock Programme</p>
                 </div>
-                <div className="flex items-center gap-2 text-sky-600 font-bold text-xs uppercase tracking-widest pt-2 group-hover:gap-4 transition-all">
-                  Initialize <ChevronRight size={16} />
+                <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+                  Start <ChevronRight size={16} />
                 </div>
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-sky-600/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl group-hover:bg-sky-600/10 transition-colors" />
             </Card>
 
-            <Card 
-              className="glass-card group relative p-10 border-none cursor-pointer hover:shadow-xl transition-all duration-500 overflow-hidden"
+            {/* IRSP Card */}
+            <Card
+              className="glass-card p-8 cursor-pointer hover:shadow-lg hover:border-amber-200 transition-all duration-300"
               onClick={() => { setWorkType("irsp"); setFormData({ ...formData, type: "irsp" }); setShowForm(true); }}
             >
-              <div className="relative z-10 space-y-8">
-                <div className="w-16 h-16 rounded-xl bg-sky-600 text-white flex items-center justify-center shadow-lg shadow-sky-600/20 group-hover:scale-110 transition-all duration-500 border-4 border-white/20">
-                  <Component size={32} />
+              <div className="space-y-5">
+                <div className="w-14 h-14 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <Component size={28} />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-slate-900 font-display">IRSP Work</h3>
-                  <p className="text-slate-500 font-medium mt-2 leading-relaxed">Itemized Rolling Stock</p>
+                  <h3 className="text-xl font-bold text-slate-900">IRSP Work</h3>
+                  <p className="text-sm text-slate-500 mt-1">Itemised RSP Programme</p>
                 </div>
-                <div className="flex items-center gap-2 text-sky-600 font-bold text-xs uppercase tracking-widest pt-2 group-hover:gap-4 transition-all">
-                  Initialize <ChevronRight size={16} />
+                <div className="flex items-center gap-2 text-amber-600 font-semibold text-sm">
+                  Start <ChevronRight size={16} />
                 </div>
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-sky-600/5 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl group-hover:bg-sky-600/10 transition-colors" />
             </Card>
           </motion.div>
         ) : (
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="glass-card border-none shadow-2xl overflow-hidden"
+            className="bg-white rounded-xl border border-slate-100 overflow-hidden"
           >
-            <div className="bg-slate-900 p-8 border-b border-white/5 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold shadow-lg ${workType === 'rsp' ? 'bg-sky-600' : 'bg-sky-600'}`}>
+            {/* Form Header */}
+            <div className="bg-slate-50 p-6 border-b border-slate-100 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold ${workType === 'rsp' ? 'bg-primary' : 'bg-amber-500'}`}>
                   {workType === 'rsp' ? 'R' : 'I'}
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-lg tracking-tight font-display uppercase">{workType === 'rsp' ? 'Rolling Stock Program' : 'Itemized Rolling Stock'}</h3>
-                  <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">Manual Ledger Entry</p>
+                  <h3 className="font-semibold text-slate-900">
+                    {workType === 'rsp' ? 'Rolling Stock Programme' : 'Itemised RSP Programme'}
+                  </h3>
+                  <p className="text-xs text-slate-400">Registration Form</p>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => { setShowForm(false); setWorkType(""); localStorage.removeItem('editWork'); }}
-                className="text-slate-400 hover:text-white hover:bg-white/5 rounded-lg px-4 font-bold"
+                className="text-slate-500 hover:text-slate-700 font-semibold"
               >
-                Change Protocol
+                Change
               </Button>
             </div>
-            
-            <form onSubmit={handleSubmit} className="p-10 space-y-10 bg-white">
-              <div className="space-y-8">
+
+            {/* Form Body */}
+            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+              <div className="space-y-6">
                 {workType === "rsp" ? (
                   <RSPWorkForm formData={formData} setFormData={setFormData} />
                 ) : (
@@ -166,18 +169,19 @@ const AddWorks = () => {
                 )}
               </div>
 
-              <div className="flex items-center gap-4 pt-10 border-t border-slate-50">
-                <Button type="submit" className="btn-primary flex-1 h-14">
-                  <CheckCircle2 size={20} className="mr-2" />
-                  {formData.id ? 'Synchronize Record' : 'Commit to Database'}
+              {/* Actions */}
+              <div className="flex items-center gap-3 pt-6 border-t border-slate-100">
+                <Button type="submit" className="btn-primary flex-1 h-12">
+                  <CheckCircle2 size={18} className="mr-2" />
+                  {formData.id ? 'Update' : 'Save'}
                 </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
+                <Button
+                  type="button"
+                  variant="outline"
                   onClick={() => navigate(-1)}
-                  className="h-14 px-10 rounded-xl font-bold border-slate-100 text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all"
+                  className="h-12 px-6 rounded-lg font-semibold border-slate-200"
                 >
-                  Discard
+                  Cancel
                 </Button>
               </div>
             </form>
