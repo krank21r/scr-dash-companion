@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { notesCollection } from '../lib/firebase';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
-import { Card } from '../components/ui/card';
-import { ArrowLeft, Save, FileText, CheckCircle, AlertCircle, RefreshCcw } from "lucide-react";
+import { ArrowLeft, Save, AlertCircle, RefreshCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const EditNote = () => {
@@ -15,6 +14,14 @@ const EditNote = () => {
   const [loading, setLoading] = useState(true);
   const [saved, setSaved] = useState(false);
   const navigate = useNavigate();
+  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the delayed navigation if the user leaves before it fires
+  useEffect(() => {
+    return () => {
+      if (navigateTimer.current) clearTimeout(navigateTimer.current);
+    };
+  }, []);
 
   useEffect(() => {
     const fetchNote = async () => {
@@ -51,12 +58,12 @@ const EditNote = () => {
       setLoading(true);
       const noteRef = doc(notesCollection, id);
       await updateDoc(noteRef, {
-        text: noteText,
+        text: noteText.trim(),
         updatedAt: new Date()
       });
       setError('');
       setSaved(true);
-      setTimeout(() => {
+      navigateTimer.current = setTimeout(() => {
         setSaved(false);
         navigate(-1);
       }, 1500);
@@ -78,13 +85,14 @@ const EditNote = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 pb-20 px-4">
+    <div className="max-w-2xl mx-auto space-y-8 pb-20">
       {/* Header */}
       <div className="flex items-center gap-6 group">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => navigate(-1)} 
+          aria-label="Go back"
           className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-500 active:scale-95"
         >
           <ArrowLeft size={24} />
@@ -137,11 +145,13 @@ const EditNote = () => {
           )}
 
           <div className="space-y-3">
-             <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Memo Content *</label>
+             <label htmlFor="edit-note-content" className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Memo Content *</label>
              <Textarea
+              id="edit-note-content"
               placeholder="Refine the recorded note..."
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
+              maxLength={10000}
               className="min-h-[220px] rounded-[1.5rem] border-slate-100 bg-slate-50/50 p-6 focus-visible:bg-white focus-visible:ring-indigo-500/10 transition-all font-medium text-lg leading-relaxed shadow-inner"
               autoFocus
              />

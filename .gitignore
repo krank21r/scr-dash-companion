@@ -27,4 +27,10 @@ dist-ssr
 .netlify
 .vercel
 
-.vercel
+# Environment / secrets
+.env
+.env.*
+
+# Stale build artifacts
+build
+.firebase

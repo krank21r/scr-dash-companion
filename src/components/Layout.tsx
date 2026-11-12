@@ -1,7 +1,7 @@
 import { useState, useEffect, ReactNode } from "react";
 import { useLocation, Link } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { Menu, Plus, LogOut, FileText, LayoutDashboard } from "lucide-react";
+import { Menu, Plus, FileText, LayoutDashboard } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -136,21 +136,16 @@ export const Layout = ({ children }: LayoutProps) => {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 rounded-xl p-2 bg-white border border-slate-100 shadow-lg shadow-slate-200/40">
                 <DropdownMenuLabel className="px-3 py-2">
-                  <p className="font-semibold text-slate-900">Administrator</p>
-                  <p className="text-xs text-slate-400 font-normal">admin@workshop.com</p>
+                  <p className="font-semibold text-slate-900">Local Session</p>
+                  <p className="text-xs text-slate-400 font-normal">No sign-in required</p>
                 </DropdownMenuLabel>
-                <DropdownMenuSeparator className="my-2 bg-slate-100" />
-                <DropdownMenuItem className="px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors text-red-600 focus:text-red-600 focus:bg-red-50">
-                  <LogOut size={16} className="mr-3" />
-                  <span className="font-medium text-sm">Log out</span>
-                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </header>
 
         <main className="flex-1 px-6 lg:px-8 w-full">
-          <div className="max-w-[1600px] mx-auto py-8">
+          <div className="max-w-[1600px] mx-auto py-6">
             <AnimatePresence mode="wait">
               <motion.div
                 key={location.pathname}

@@ -8,27 +8,31 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface Column {
+export interface Column<T> {
   header: string | React.ReactNode;
-  accessorKey: string;
-  cell?: (info: { getValue: () => any; row: any }) => React.ReactNode;
+  accessorKey: Extract<keyof T, string>;
+  cell?: (info: { getValue: () => T[Extract<keyof T, string>]; row: T }) => React.ReactNode;
 }
 
-interface DataTableProps {
-  columns: Column[];
-  data: any[];
+interface DataTableProps<T> {
+  columns: Column<T>[];
+  data: T[];
   className?: string;
 }
 
-export function DataTable({ columns, data, className }: DataTableProps) {
+export function DataTable<T extends { id?: string | number }>({
+  columns,
+  data,
+  className,
+}: DataTableProps<T>) {
   return (
     <div className={`w-full overflow-x-auto ${className}`}>
       <Table>
         <TableHeader className="bg-slate-50/50">
           <TableRow className="hover:bg-transparent border-slate-100/50">
             {columns.map((column) => (
-              <TableHead 
-                key={column.accessorKey} 
+              <TableHead
+                key={column.accessorKey}
                 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 py-4 h-12"
               >
                 {column.header}
@@ -45,12 +49,15 @@ export function DataTable({ columns, data, className }: DataTableProps) {
             </TableRow>
           ) : (
             data.map((row, rowIndex) => (
-              <TableRow key={rowIndex} className="group hover:bg-slate-50/30 border-slate-50/50 transition-colors">
+              <TableRow
+                key={row.id ?? rowIndex}
+                className="group hover:bg-slate-50/30 border-slate-50/50 transition-colors"
+              >
                 {columns.map((column) => (
                   <TableCell key={`${rowIndex}-${column.accessorKey}`} className="py-4 text-sm">
-                    {column.cell 
+                    {column.cell
                       ? column.cell({ getValue: () => row[column.accessorKey], row })
-                      : row[column.accessorKey]}
+                      : String(row[column.accessorKey] ?? '-')}
                   </TableCell>
                 ))}
               </TableRow>

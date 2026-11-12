@@ -6,21 +6,19 @@ import RSPWorkForm from '../components/forms/RSPWorkForm';
 import IRSPWorkForm from '../components/forms/IRSPWorkForm';
 import { useNavigate } from "react-router-dom";
 import { collection, addDoc, updateDoc, doc } from "firebase/firestore";
-import { db } from '../main';
-import { ArrowLeft, FileText, Plus, Component, CheckCircle2, ChevronRight } from "lucide-react";
+import { db } from '../lib/firebase';
+import { parseAmount } from '../lib/utils';
+import { WorkFormFields, emptyWorkForm as emptyForm } from '../lib/types';
+import { ArrowLeft, FileText, Component, CheckCircle2, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AddWorks = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [workType, setWorkType] = useState<"rsp" | "irsp" | "">("");
-  const [formData, setFormData] = useState<any>({
-    type: "",
-    description: "",
-    yearOfSanction: "",
-    status: "",
-  });
+  const [formData, setFormData] = useState<WorkFormFields>(emptyForm);
 
   useEffect(() => {
     const storedWork = localStorage.getItem('editWork');
@@ -28,7 +26,8 @@ const AddWorks = () => {
       try {
         const parsedWork = JSON.parse(storedWork);
         if (parsedWork) {
-          setFormData(parsedWork);
+          // Merge over defaults so every input starts controlled
+          setFormData({ ...emptyForm, ...parsedWork });
           setWorkType(parsedWork.type);
           setShowForm(true);
         }
@@ -40,16 +39,42 @@ const AddWorks = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Radix Select bypasses native `required` validation
+    if (!formData.status) {
+      toast({ title: "Missing status", description: "Please select the current milestone.", variant: "destructive" });
+      return;
+    }
+    if (!/^\d{4}(-\d{2,4})?$/.test(formData.yearOfSanction.trim())) {
+      toast({ title: "Invalid year", description: "Use a format like 2024 or 2024-25.", variant: "destructive" });
+      return;
+    }
+
+    // Money fields must be real numbers (stored as numbers, not strings)
+    const payload: Record<string, unknown> = { ...formData };
+    const moneyFields: Array<[keyof WorkFormFields, string]> =
+      workType === "rsp"
+        ? [["rbSanctionedCost", "RB Sanctioned Cost"], ["deTotalValue", "DE Ledger Value"]]
+        : [["totalValue", "Total Value"]];
+    for (const [field, label] of moneyFields) {
+      const parsed = parseAmount(formData[field] as string);
+      if (parsed === null) {
+        toast({ title: "Invalid amount", description: `Enter a valid number for "${label}".`, variant: "destructive" });
+        return;
+      }
+      payload[field] = parsed;
+    }
+
+    setSaving(true);
     try {
-      if (formData.id) {
-        const workRef = doc(db, "works", formData.id);
-        const { id, ...updateData } = formData;
-        await updateDoc(workRef, updateData);
+      const { id, ...data } = payload;
+      if (id) {
+        const workRef = doc(db, "works", id as string);
+        await updateDoc(workRef, { ...data, type: workType, updatedAt: new Date() });
         toast({ title: "Updated", description: "Record updated successfully." });
       } else {
-        const { id, ...newWorkData } = formData;
         await addDoc(collection(db, "works"), {
-          ...newWorkData,
+          ...data,
           type: workType,
           createdAt: new Date(),
         });
@@ -57,8 +82,11 @@ const AddWorks = () => {
       }
       localStorage.removeItem('editWork');
       navigate(workType === 'rsp' ? '/rsp-works' : '/irsp-works');
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({ title: "Error", description: message, variant: "destructive" });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -70,6 +98,7 @@ const AddWorks = () => {
           variant="outline"
           size="icon"
           onClick={() => navigate(-1)}
+          aria-label="Go back"
           className="h-11 w-11 rounded-lg border-slate-200 hover:bg-slate-50"
         >
           <ArrowLeft size={20} />
@@ -171,9 +200,9 @@ const AddWorks = () => {
 
               {/* Actions */}
               <div className="flex items-center gap-3 pt-6 border-t border-slate-100">
-                <Button type="submit" className="btn-primary flex-1 h-12">
+                <Button type="submit" disabled={saving} className="btn-primary flex-1 h-12">
                   <CheckCircle2 size={18} className="mr-2" />
-                  {formData.id ? 'Update' : 'Save'}
+                  {saving ? 'Saving...' : formData.id ? 'Update' : 'Save'}
                 </Button>
                 <Button
                   type="button"

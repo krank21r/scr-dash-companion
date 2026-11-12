@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { TableCell } from "../components/ui/table";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { Textarea } from "../components/ui/textarea";
-import { Pencil, Trash2, Plus, Filter, AlertCircle, ChevronDown, IndianRupee } from "lucide-react";
+import { Pencil, Trash2, Plus, AlertCircle, ChevronDown } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,8 +16,9 @@ import {
 } from "../components/ui/alert-dialog";
 import { useToast } from "../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { db } from "../main";
-import { collection, getDocs, deleteDoc, doc, updateDoc, addDoc, query, orderBy } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "firebase/firestore";
+import { parseAmount, formatINR, formatDisplayDate } from "../lib/utils";
 import {
   Select,
   SelectContent,
@@ -32,7 +32,7 @@ interface ContingencyItem {
   description: string;
   yearOfSanction: string;
   totalAmount: string;
-  createdAt: any;
+  createdAt: unknown;
   expenditures?: ExpenditureEntry[];
 }
 
@@ -46,6 +46,7 @@ interface ExpenditureEntry {
 
 const Contingencies = () => {
   const [contingencies, setContingencies] = useState<ContingencyItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [years, setYears] = useState<string[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -54,7 +55,7 @@ const Contingencies = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const loadContingencies = async () => {
+  const loadContingencies = useCallback(async () => {
     try {
       const q = query(collection(db, "contingencies"), orderBy("createdAt", "desc"));
       const querySnapshot = await getDocs(q);
@@ -74,28 +75,32 @@ const Contingencies = () => {
 
       const uniqueYears = [...new Set(fetchedData.map(c => c.yearOfSanction).filter(Boolean))].sort().reverse();
       setYears(uniqueYears);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching contingencies:", error);
-      toast({ title: "Error fetching data", description: error.message, variant: "destructive" });
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({ title: "Error fetching data", description: message, variant: "destructive" });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
-    loadContingencies();
-  }, []);
+    void loadContingencies();
+  }, [loadContingencies]);
 
   const filteredContingencies = selectedYear === "all"
     ? contingencies
     : contingencies.filter(c => c.yearOfSanction === selectedYear);
 
   const getBalance = (item: ContingencyItem) => {
-    const total = parseFloat(item.totalAmount) || 0;
-    const spent = (item.expenditures || []).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+    // parseAmount returns null for missing/invalid amounts; treat as 0
+    const total = parseAmount(item.totalAmount) ?? 0;
+    const spent = (item.expenditures || []).reduce((sum, e) => sum + (parseAmount(e.amount) ?? 0), 0);
     return total - spent;
   };
 
   const getTotalSpent = (item: ContingencyItem) => {
-    return (item.expenditures || []).reduce((sum, e) => sum + (parseFloat(e.amount) || 0), 0);
+    return (item.expenditures || []).reduce((sum, e) => sum + (parseAmount(e.amount) ?? 0), 0);
   };
 
   const handleDelete = async (id: string) => {
@@ -104,8 +109,9 @@ const Contingencies = () => {
       await deleteDoc(doc(db, "contingencies", id));
       await loadContingencies();
       toast({ title: "Deleted", description: "Contingency entry removed successfully." });
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -125,23 +131,24 @@ const Contingencies = () => {
   };
 
   const addExpenditure = async (item: ContingencyItem) => {
-    const amount = parseFloat(expenditureAmount);
-    if (!amount || amount <= 0) {
+    const amount = parseAmount(expenditureAmount);
+    if (amount === null || amount <= 0) {
       toast({ title: "Error", description: "Please enter a valid amount", variant: "destructive" });
       return;
     }
     const balance = getBalance(item);
     if (amount > balance) {
-      toast({ title: "Error", description: `Amount exceeds available balance (₹${balance.toLocaleString('en-IN')})`, variant: "destructive" });
+      toast({ title: "Error", description: `Amount exceeds available balance (${formatINR(balance)})`, variant: "destructive" });
       return;
     }
 
     const newEntry: ExpenditureEntry = {
-      id: Date.now().toString(),
-      amount: expenditureAmount,
-      balance: (balance - amount).toString(),
+      id: crypto.randomUUID(),
+      amount: String(amount),
+      balance: String(balance - amount),
       remarks: expenditureRemarks,
-      date: new Date().toLocaleDateString('en-IN'),
+      // ISO string: unambiguous, sortable; legacy locale strings still display
+      date: new Date().toISOString(),
     };
 
     const updatedExpenditures = [...(item.expenditures || []), newEntry];
@@ -153,9 +160,10 @@ const Contingencies = () => {
       toast({ title: "Success", description: "Expenditure recorded" });
       setExpenditureAmount("");
       setExpenditureRemarks("");
-      loadContingencies();
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      await loadContingencies();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -218,7 +226,14 @@ const Contingencies = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredContingencies.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="px-4 py-16 text-center">
+                    <div className="w-8 h-8 border-2 border-slate-200 border-t-primary rounded-full animate-spin mx-auto" />
+                    <p className="text-sm text-slate-400 mt-4">Loading entries...</p>
+                  </td>
+                </tr>
+              ) : filteredContingencies.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-16 text-center">
                     <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
@@ -237,7 +252,9 @@ const Contingencies = () => {
               ) : (
                 filteredContingencies.map((item, index) => {
                   const spent = getTotalSpent(item);
-                  const balance = parseFloat(item.totalAmount) - spent;
+                  // Guarded: never NaN even if totalAmount is missing/invalid
+                  const total = parseAmount(item.totalAmount) ?? 0;
+                  const balance = total - spent;
                   const isExpanded = expandedId === item.id;
                   return (
                     <React.Fragment key={item.id}>
@@ -257,27 +274,27 @@ const Contingencies = () => {
                           </button>
                         </TableCell>
                         <TableCell className="px-4 py-4 text-center">
-                          <span className="text-xs font-semibold text-slate-500">{item.yearOfSanction || '-'}</span>
+                          <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">{item.yearOfSanction || '-'}</span>
                         </TableCell>
                         <TableCell className="px-4 py-4">
                           <span className="text-sm font-semibold text-slate-900">
-                            ₹{parseFloat(item.totalAmount).toLocaleString('en-IN')}
+                            {formatINR(item.totalAmount)}
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-4">
                           <span className="text-sm font-medium text-slate-600">
-                            ₹{spent.toLocaleString('en-IN')}
+                            {formatINR(spent)}
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-4">
                           <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-semibold ${
                             balance <= 0
                               ? 'bg-red-50 text-red-700'
-                              : balance < parseFloat(item.totalAmount) * 0.25
+                              : balance < total * 0.25
                                 ? 'bg-amber-50 text-amber-700'
                                 : 'bg-emerald-50 text-emerald-700'
                           }`}>
-                            ₹{balance.toLocaleString('en-IN')}
+                            {formatINR(balance)}
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-4 text-right">
@@ -285,6 +302,7 @@ const Contingencies = () => {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label={`Edit ${item.description || 'entry'}`}
                               className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
                               onClick={() => handleEdit(item)}
                             >
@@ -295,6 +313,7 @@ const Contingencies = () => {
                                 <Button
                                   variant="ghost"
                                   size="icon"
+                                  aria-label={`Delete ${item.description || 'entry'}`}
                                   className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md"
                                 >
                                   <Trash2 size={15} />
@@ -341,14 +360,14 @@ const Contingencies = () => {
                                   {item.expenditures.map((exp) => (
                                     <div key={exp.id} className="bg-white rounded-lg border border-slate-100 p-4">
                                       <div className="flex items-center justify-between mb-2">
-                                        <span className="text-xs font-medium text-slate-400">{exp.date}</span>
+                                        <span className="text-xs font-medium text-slate-400">{formatDisplayDate(exp.date)}</span>
                                         <div className="w-2 h-2 rounded-full bg-emerald-500" />
                                       </div>
                                       <p className="text-lg font-bold text-slate-900">
-                                        ₹{parseFloat(exp.amount).toLocaleString('en-IN')}
+                                        {formatINR(exp.amount)}
                                       </p>
                                       <p className="text-xs text-slate-400 mt-1">
-                                        Balance: ₹{parseFloat(exp.balance).toLocaleString('en-IN')}
+                                        Balance: {formatINR(exp.balance)}
                                       </p>
                                       {exp.remarks && (
                                         <p className="text-xs text-slate-500 mt-2 italic">"{exp.remarks}"</p>

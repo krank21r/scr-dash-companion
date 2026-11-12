@@ -1,11 +1,11 @@
 import { Toaster } from './components/ui/toaster';
-import { Toaster as Sonner } from './components/ui/sonner';
 import { TooltipProvider } from './components/ui/tooltip';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { Layout } from './components/Layout';
 import { ThemeProvider } from 'next-themes';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import NotFound from './pages/NotFound';
 
 const HomePage = lazy(() => import('./pages/Home'));
 const RSPWorks = lazy(() => import('./pages/RSPWorks'));
@@ -20,8 +20,6 @@ const Info = lazy(() => import('./pages/Info'));
 const Holidays = lazy(() => import('./pages/Holidays'));
 const Weblinks = lazy(() => import('./pages/Weblinks'));
 
-const queryClient = new QueryClient();
-
 const PageLoader = () => (
   <div className="h-full w-full flex items-center justify-center p-20">
     <div className="w-8 h-8 border-2 border-slate-200 border-t-primary rounded-full animate-spin" />
@@ -29,12 +27,11 @@ const PageLoader = () => (
 );
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
-      <TooltipProvider>
-        <Layout>
-          <Toaster />
-          <Sonner />
+  <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
+    <TooltipProvider>
+      <Layout>
+        <Toaster />
+        <ErrorBoundary>
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<HomePage />} />
@@ -49,12 +46,13 @@ const App = () => (
               <Route path="/info" element={<Info />} />
               <Route path="/holidays" element={<Holidays />} />
               <Route path="/weblinks" element={<Weblinks />} />
+              <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
-        </Layout>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
+        </ErrorBoundary>
+      </Layout>
+    </TooltipProvider>
+  </ThemeProvider>
 );
 
 export default App;

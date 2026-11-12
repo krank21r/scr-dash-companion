@@ -1,5 +1,3 @@
-import React from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CalendarDays } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -27,12 +25,13 @@ const Holidays = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20 px-4">
+    <div className="max-w-4xl mx-auto space-y-8 pb-20">
       <div className="flex items-center gap-6 group">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => navigate(-1)} 
+          aria-label="Go back"
           className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-500 active:scale-95"
         >
           <ArrowLeft size={24} />
@@ -63,7 +62,7 @@ const Holidays = () => {
               <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">Official Calendar 2026</p>
             </div>
           </div>
-          <div className="px-4 py-2 rounded-xl bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest border border-sky-500/20">
+          <div className="px-4 py-2 rounded-xl bg-sky-500/10 text-sky-400 text-[10px] font-black uppercase tracking-widest border border-sky-500/20 whitespace-nowrap">
             {holidays.length} Days
           </div>
         </div>
@@ -83,7 +82,7 @@ const Holidays = () => {
               <tbody>
                 {holidays.map((holiday, index) => (
                   <motion.tr 
-                    key={index}
+                    key={holiday.date}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.03 }}
@@ -91,7 +90,7 @@ const Holidays = () => {
                   >
                     <td className="py-4 px-6 text-sm font-bold text-slate-400">{String(index + 1).padStart(2, '0')}</td>
                     <td className="py-4 px-6 text-sm font-semibold text-slate-900">{holiday.name}</td>
-                    <td className="py-4 px-6 text-sm font-medium text-slate-600">{holiday.date}</td>
+                    <td className="py-4 px-6 text-sm font-medium text-slate-600 whitespace-nowrap">{holiday.date}</td>
                     <td className="py-4 px-6 text-sm font-medium text-slate-600">{holiday.day}</td>
                     <td className="py-4 px-6 text-center">
                       {holiday.type === "NH" ? (

@@ -1,15 +1,12 @@
-import React from "react";
+import type { WorkFormFields } from "@/lib/types";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { FileText, Calendar, Hash, IndianRupee, Layers, CheckCircle, Tag } from "lucide-react";
+import { FileText, Calendar, IndianRupee, Layers, CheckCircle, Tag } from "lucide-react";
 
-interface IRSPWorkFormProps {
-  formData: any;
-  setFormData: (data: any) => void;
-}
 
-const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
+
+const IRSPWorkForm = ({ formData, setFormData }: { formData: WorkFormFields; setFormData: (data: WorkFormFields) => void }) => {
   return (
     <div className="space-y-10">
       {/* Primary Info Section */}
@@ -19,11 +16,13 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Asset Specification</h4>
         </div>
         <div className="space-y-2.5">
-          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Asset Description</label>
+          <label htmlFor="irsp-description" className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Asset Description</label>
           <Textarea
+            id="irsp-description"
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             placeholder="Describe the rolling stock itemized module..."
+            maxLength={2000}
             required
             className="min-h-[120px] rounded-2xl border-slate-100 bg-slate-50/50 p-4 focus-visible:bg-white focus-visible:ring-cyan-500/10 transition-all font-medium text-sm leading-relaxed"
           />
@@ -35,12 +34,14 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2 mb-1 ml-1">
             <Tag size={14} className="text-slate-400" />
-            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">LAW Reference No</label>
+            <label htmlFor="irsp-law-no" className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">LAW Reference No</label>
           </div>
           <Input
+            id="irsp-law-no"
             value={formData.lawNo}
             onChange={(e) => setFormData({ ...formData, lawNo: e.target.value })}
             placeholder="Unique LAW-ID..."
+            maxLength={50}
             required
             className="h-12 rounded-xl border-slate-100 bg-slate-50/50 px-4 font-bold text-sm font-mono"
           />
@@ -49,14 +50,18 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2 mb-1 ml-1">
             <Calendar size={14} className="text-slate-400" />
-            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Sanction Period</label>
+            <label htmlFor="irsp-year" className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Sanction Period</label>
           </div>
           <Input
+            id="irsp-year"
             type="text"
             inputMode="numeric"
             value={formData.yearOfSanction}
             onChange={(e) => setFormData({ ...formData, yearOfSanction: e.target.value })}
             placeholder="YYYY"
+            pattern="\d{4}(-\d{2,4})?"
+            title="Enter a year like 2024 or 2024-25"
+            maxLength={9}
             required
             className="h-12 rounded-xl border-slate-100 bg-slate-50/50 px-4 font-bold text-sm"
           />
@@ -68,14 +73,16 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2 mb-1 ml-1">
             <IndianRupee size={14} className="text-cyan-500" />
-            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Unit Rate Allocation</label>
+            <label htmlFor="irsp-rate" className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Unit Rate Allocation</label>
           </div>
           <Input
+            id="irsp-rate"
             type="text"
             inputMode="decimal"
             value={formData.rate}
             onChange={(e) => setFormData({ ...formData, rate: e.target.value })}
             placeholder="0.00"
+            maxLength={100}
             required
             className="h-12 rounded-xl border-slate-100 bg-cyan-50/10 px-4 font-black text-slate-900 shadow-inner"
           />
@@ -84,12 +91,14 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
         <div className="space-y-2.5">
           <div className="flex items-center gap-2 mb-1 ml-1">
             <Layers size={14} className="text-slate-400" />
-            <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Quantity Threshold</label>
+            <label htmlFor="irsp-qty" className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">Quantity Threshold</label>
           </div>
           <Input
+            id="irsp-qty"
             value={formData.qtySanctioned}
             onChange={(e) => setFormData({ ...formData, qtySanctioned: e.target.value })}
             placeholder="Volume units..."
+            maxLength={100}
             required
             className="h-12 rounded-xl border-slate-100 bg-slate-50/50 px-4 font-bold"
           />
@@ -98,8 +107,13 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
 
       {/* Cumulative Value */}
       <div className="space-y-2.5">
-        <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Total Aggregate Valuation</label>
+        <label htmlFor="irsp-total-value" className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Total Aggregate Valuation</label>
         <Input
+          id="irsp-total-value"
+          type="number"
+          inputMode="decimal"
+          step="0.01"
+          min="0"
           value={formData.totalValue}
           onChange={(e) => setFormData({ ...formData, totalValue: e.target.value })}
           placeholder="Calculated aggregate sum..."
@@ -115,12 +129,12 @@ const IRSPWorkForm = ({ formData, setFormData }: IRSPWorkFormProps) => {
           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Assignment Standing</h4>
         </div>
         <div className="space-y-2.5 max-w-md">
-          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Strategic Milestone</label>
+          <label htmlFor="irsp-status" className="text-[11px] font-bold text-slate-500 uppercase tracking-widest ml-1">Strategic Milestone</label>
           <Select
             value={formData.status}
             onValueChange={(value) => setFormData({ ...formData, status: value })}
           >
-            <SelectTrigger className="h-12 rounded-xl border-slate-100 bg-slate-50/50 px-4 font-bold focus:ring-cyan-500/10 transition-all">
+            <SelectTrigger id="irsp-status" className="h-12 rounded-xl border-slate-100 bg-slate-50/50 px-4 font-bold focus:ring-cyan-500/10 transition-all">
               <SelectValue placeholder="Current phase..." />
             </SelectTrigger>
             <SelectContent className="bg-white border-slate-100 shadow-2xl rounded-2xl p-1">

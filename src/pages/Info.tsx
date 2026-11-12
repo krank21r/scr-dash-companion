@@ -1,5 +1,3 @@
-import React from "react";
-import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Info as InfoIcon, CalendarDays, ArrowRight } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
@@ -9,7 +7,7 @@ const Info = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4 px-4">
+    <div className="max-w-4xl mx-auto space-y-4">
       <div className="flex items-center gap-4 group">
         <Button
           variant="ghost"

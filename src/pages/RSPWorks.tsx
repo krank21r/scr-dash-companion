@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { TableCell } from '../components/ui/table';
 import { Button } from '../components/ui/button';
-import { Pencil, Trash2, Plus, FileText, Calendar, Filter, AlertCircle, IndianRupee } from "lucide-react";
+import { Pencil, Trash2, Plus, FileText, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,8 +15,9 @@ import {
 } from '../components/ui/alert-dialog';
 import { useToast } from '../hooks/use-toast';
 import { useNavigate } from "react-router-dom";
-import { db } from '../main';
+import { db } from '../lib/firebase';
 import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
+import { formatINR } from '../lib/utils';
 
 interface WorkItem {
   id: string;
@@ -40,6 +41,7 @@ const getStatusLabel = (status: string) => {
     work_process: "Work under Process",
     tender: "Tender",
     completed: "Completed",
+    indents_placed: "Indents Placed",
   };
   return statusMap[status] || status;
 };
@@ -64,12 +66,13 @@ const getStatusStyles = (status: string) => {
 
 const RSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [years, setYears] = useState<string[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const loadWorks = async () => {
+  const loadWorks = useCallback(async () => {
     try {
       const worksQuery = query(collection(db, "works"), where("type", "==", "rsp"));
       const querySnapshot = await getDocs(worksQuery);
@@ -84,19 +87,22 @@ const RSPWorks = () => {
 
       const uniqueYears = [...new Set(fetchedWorks.map(w => w.yearOfSanction).filter(Boolean))].sort().reverse();
       setYears(uniqueYears);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching works:", error);
+      const message = error instanceof Error ? error.message : "Please try again.";
       toast({
         title: "Error fetching works",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
-    loadWorks();
-  }, []);
+    void loadWorks();
+  }, [loadWorks]);
 
   const handleDelete = async (workId: string) => {
     try {
@@ -104,8 +110,9 @@ const RSPWorks = () => {
       await deleteDoc(doc(db, "works", workId));
       toast({ title: "Deleted", description: "Record removed successfully." });
       await loadWorks();
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -190,7 +197,14 @@ const RSPWorks = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredWorks.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-5 py-16 text-center">
+                    <div className="w-8 h-8 border-2 border-slate-200 border-t-primary rounded-full animate-spin mx-auto" />
+                    <p className="text-sm text-slate-400 mt-4">Loading records...</p>
+                  </td>
+                </tr>
+              ) : filteredWorks.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-16 text-center">
                     <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
@@ -224,22 +238,34 @@ const RSPWorks = () => {
                       <span className="text-xs font-mono font-semibold text-slate-400">{work.pbNo || '-'}</span>
                     </TableCell>
                     <TableCell className="px-4 py-4">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xs text-slate-400">₹</span>
-                        <span className="text-sm font-semibold text-slate-900">{work.rbSanctionedCost || '-'}</span>
-                      </div>
+                      {formatINR(work.rbSanctionedCost) !== '-' ? (
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xs text-slate-400">₹</span>
+                          <span className="text-sm font-semibold text-slate-900">
+                            {formatINR(work.rbSanctionedCost).replace('₹', '')}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-slate-400">-</span>
+                      )}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-center">
                       <span className="text-xs font-semibold text-slate-600">{work.qtySanctioned || '-'}</span>
                     </TableCell>
                     <TableCell className="px-4 py-4">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-xs text-slate-400">₹</span>
-                        <span className="text-sm font-medium text-slate-600">{work.deTotalValue || '-'}</span>
-                      </div>
+                      {formatINR(work.deTotalValue) !== '-' ? (
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xs text-slate-400">₹</span>
+                          <span className="text-sm font-medium text-slate-600">
+                            {formatINR(work.deTotalValue).replace('₹', '')}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-slate-400">-</span>
+                      )}
                     </TableCell>
                     <TableCell className="px-4 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border ${getStatusStyles(work.status)}`}>
+                      <span className={`inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-md text-xs font-semibold border ${getStatusStyles(work.status)}`}>
                         {getStatusLabel(work.status)}
                       </span>
                     </TableCell>
@@ -248,6 +274,7 @@ const RSPWorks = () => {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label={`Edit ${work.description || 'work'}`}
                           className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
                           onClick={() => handleEdit(work)}
                         >
@@ -258,6 +285,7 @@ const RSPWorks = () => {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label={`Delete ${work.description || 'work'}`}
                               className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md"
                             >
                               <Trash2 size={15} />

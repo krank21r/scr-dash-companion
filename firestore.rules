@@ -1,13 +1,76 @@
 rules_version = '2';
+
+// HOW TO ENFORCE: `firebase deploy --only firestore:rules`
+//
+// This app currently has NO authentication. Compared to the previous rules
+// (open read/write on notes+works only), these rules:
+//   1. Cover EVERY collection the app reads/writes, so no page silently
+//      fails with permission-denied, and no collection is unprotected.
+//   2. Validate the shape and size of every write, rejecting malformed or
+//      abusive documents (e.g. javascript: URLs, oversized strings).
+//
+// WHEN FIREBASE AUTH IS ADDED, tighten all writes to `request.auth != null`
+// (see the commented variant at the bottom).
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isStr(v, maxLen) {
+      return v is string && v.size() <= maxLen;
+    }
+
+    // Task list / notes (Home, AddNote, EditNote)
     match /notes/{noteId} {
       allow read: if true;
-      allow write: if true;
+      allow create: if isStr(request.resource.data.title, 200)
+                    && isStr(request.resource.data.content, 10000)
+                    && request.resource.data.createdAt is timestamp;
+      allow update: if isStr(request.resource.data.title, 200)
+                    && isStr(request.resource.data.content, 10000);
+      allow delete: if true;
     }
+
+    // RSP + IRSP works (Home, RSPWorks, IRSPWorks, AddWorks)
     match /works/{workId} {
       allow read: if true;
-      allow write: if true;
+      allow create, update: if request.resource.data.type in ['rsp', 'irsp']
+                    && isStr(request.resource.data.description, 2000)
+                    && isStr(request.resource.data.status, 50);
+      allow delete: if true;
     }
+
+    // Contingency allocations + expenditures
+    match /contingencies/{contingencyId} {
+      allow read: if true;
+      allow create, update: if isStr(request.resource.data.description, 2000)
+                    && (request.resource.data.totalAmount is string
+                        || request.resource.data.totalAmount is int
+                        || request.resource.data.totalAmount is number);
+      allow delete: if true;
+    }
+
+    // Quick-access web links (Weblinks) - URL scheme enforced
+    match /weblinks/{linkId} {
+      allow read: if true;
+      allow create, update: if isStr(request.resource.data.title, 200)
+                    && isStr(request.resource.data.url, 2000)
+                    && request.resource.data.url.matches('https?://.*');
+      allow delete: if true;
+    }
+
+    // Collections referenced by lib/firebase.ts. Open for now (unused by the
+    // UI) but explicitly matched so future features are not default-denied.
+    match /unitCost/{docId}   { allow read, write: if true; }
+    match /irspWorks/{docId}  { allow read, write: if true; }
+    match /rspWorks/{docId}   { allow read, write: if true; }
+    match /reviews/{docId}    { allow read, write: if true; }
+
+    // ---------- AUTH-REQUIRED VARIANT (recommended next step) ----------
+    // After wiring firebase/auth into the app, replace each
+    //   allow create, update: if <validators>;
+    //   allow delete: if true;
+    // with:
+    //   allow create, update: if request.auth != null && <validators>;
+    //   allow delete: if request.auth != null;
   }
 }

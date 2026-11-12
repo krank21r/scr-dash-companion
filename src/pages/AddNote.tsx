@@ -1,50 +1,62 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useRef } from "react";
 import { addDoc } from 'firebase/firestore';
 import { notesCollection } from '../lib/firebase';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
-import { Card } from '../components/ui/card';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save, FileText, CheckCircle, AlertCircle, Edit3 } from "lucide-react";
+import { ArrowLeft, Save, AlertCircle, Edit3 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AddNote = () => {
   const [noteText, setNoteText] = useState('');
   const [error, setError] = useState('');
   const [saved, setSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+  const navigateTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the delayed navigation if the user leaves before it fires
+  useEffect(() => {
+    return () => {
+      if (navigateTimer.current) clearTimeout(navigateTimer.current);
+    };
+  }, []);
 
   const handleSaveNote = async () => {
     if (!noteText.trim()) {
       setError('Task description mandatory for synchronization.');
       return;
     }
+    setSaving(true);
     try {
       await addDoc(notesCollection, {
-        text: noteText,
+        text: noteText.trim(),
         createdAt: new Date()
       });
       setError('');
       setNoteText('');
       setSaved(true);
-      setTimeout(() => {
+      navigateTimer.current = setTimeout(() => {
         setSaved(false);
         navigate(-1);
       }, 1500);
     } catch (e) {
       setError('Global Sync Error: Logic layer connection failed.');
       console.error("Error adding document: ", e);
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8 pb-20 px-4">
+    <div className="max-w-2xl mx-auto space-y-8 pb-20">
       {/* Navigation Header */}
       <div className="flex items-center gap-6 group">
         <Button 
           variant="ghost" 
           size="icon" 
           onClick={() => navigate(-1)} 
+          aria-label="Go back"
           className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-500 active:scale-95"
         >
           <ArrowLeft size={24} />
@@ -101,11 +113,13 @@ const AddNote = () => {
           )}
 
           <div className="space-y-3">
-             <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Memo Content *</label>
+             <label htmlFor="note-content" className="text-[11px] font-black text-slate-500 uppercase tracking-widest ml-1">Memo Content *</label>
              <Textarea
+              id="note-content"
               placeholder="Record your pending assignment description..."
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
+              maxLength={10000}
               className="min-h-[220px] rounded-[1.5rem] border-slate-100 bg-slate-50/50 p-6 focus-visible:bg-white focus-visible:ring-violet-500/10 transition-all font-medium text-lg leading-relaxed placeholder:font-normal shadow-inner"
               autoFocus
              />
@@ -114,10 +128,11 @@ const AddNote = () => {
           <div className="flex items-center gap-4 pt-8 border-t border-slate-50">
             <Button 
               onClick={handleSaveNote} 
+              disabled={saving}
               className="btn-primary flex-1 h-14 rounded-2xl font-bold text-base transition-all hover:-translate-y-0.5 active:scale-95 group"
             >
               <Save size={20} className="mr-3 group-hover:rotate-12 transition-transform" />
-              Synchronize Memo
+              {saving ? 'Saving...' : 'Synchronize Memo'}
             </Button>
             <Button 
               variant="outline" 

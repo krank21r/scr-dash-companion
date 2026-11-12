@@ -1,9 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Link2, ExternalLink, Plus, Trash2, Edit3, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { collection, getDocs, addDoc, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 interface Weblink {
@@ -13,14 +24,31 @@ interface Weblink {
   category: string;
 }
 
+/** Only http(s) links may be rendered or saved (blocks javascript: URLs). */
+const toSafeUrl = (raw: string): string | null => {
+  const value = raw.trim();
+  const candidate = /^https?:\/\//i.test(value) ? value : `https://${value}`;
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return null;
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+};
+
 const Weblinks = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [weblinks, setWeblinks] = useState<Weblink[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Weblink | null>(null);
   const [formData, setFormData] = useState({ title: "", url: "", category: "" });
 
-  const loadWeblinks = async () => {
+  const loadWeblinks = useCallback(async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "weblinks"));
       const links: Weblink[] = [];
@@ -30,43 +58,83 @@ const Weblinks = () => {
       setWeblinks(links);
     } catch (error) {
       console.error("Error fetching weblinks:", error);
+      toast({
+        title: "Could not load links",
+        description: "Check your connection and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
     loadWeblinks();
-  }, []);
+  }, [loadWeblinks]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title.trim() || !formData.url.trim()) return;
-
-    try {
-      if (editingId) {
-        const docRef = doc(db, "weblinks", editingId);
-        await deleteDoc(docRef);
-      }
-      await addDoc(collection(db, "weblinks"), {
-        title: formData.title,
-        url: formData.url,
-        category: formData.category || "General",
-        createdAt: new Date()
+    const title = formData.title.trim();
+    if (!title) {
+      toast({ title: "Title is required", variant: "destructive" });
+      return;
+    }
+    const safeUrl = toSafeUrl(formData.url);
+    if (!safeUrl) {
+      toast({
+        title: "Invalid URL",
+        description: "Enter a valid link starting with http:// or https://",
+        variant: "destructive",
       });
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const payload = {
+        title,
+        url: safeUrl,
+        category: formData.category.trim() || "General",
+      };
+      if (editingId) {
+        // In-place update; never delete-then-recreate (risk of data loss).
+        await updateDoc(doc(db, "weblinks", editingId), payload);
+        toast({ title: "Link updated" });
+      } else {
+        await addDoc(collection(db, "weblinks"), { ...payload, createdAt: new Date() });
+        toast({ title: "Link added" });
+      }
       setFormData({ title: "", url: "", category: "" });
       setShowForm(false);
       setEditingId(null);
-      loadWeblinks();
+      await loadWeblinks();
     } catch (error) {
       console.error("Error saving weblink:", error);
+      toast({
+        title: "Could not save link",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteDoc(doc(db, "weblinks", id));
-      loadWeblinks();
+      await deleteDoc(doc(db, "weblinks", deleteTarget.id));
+      toast({ title: "Link deleted" });
+      await loadWeblinks();
     } catch (error) {
       console.error("Error deleting weblink:", error);
+      toast({
+        title: "Could not delete link",
+        description: "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -77,13 +145,14 @@ const Weblinks = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 pb-20 px-4">
-      <div className="flex items-center justify-between">
+    <div className="max-w-5xl mx-auto space-y-8 pb-20">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-6 group">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => navigate(-1)} 
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            aria-label="Go back"
             className="h-14 w-14 shrink-0 rounded-2xl bg-white border border-slate-100 shadow-sm text-slate-400 hover:text-sky-600 hover:bg-sky-50 hover:border-sky-200 transition-all duration-500 active:scale-95"
           >
             <ArrowLeft size={24} />
@@ -96,7 +165,7 @@ const Weblinks = () => {
             </p>
           </div>
         </div>
-        <Button 
+        <Button
           onClick={() => { setShowForm(true); setEditingId(null); setFormData({ title: "", url: "", category: "" }); }}
           className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-6 rounded-xl font-bold transition-all shadow-lg shadow-sky-600/20"
         >
@@ -106,7 +175,7 @@ const Weblinks = () => {
       </div>
 
       {showForm && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           className="bg-white rounded-3xl border border-slate-100 shadow-xl overflow-hidden"
@@ -119,30 +188,35 @@ const Weblinks = () => {
           <form onSubmit={handleSubmit} className="p-8 bg-white space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Title *</label>
+                <label htmlFor="weblink-title" className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Title *</label>
                 <input
+                  id="weblink-title"
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   placeholder="Enter link title"
+                  maxLength={200}
                   className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Category</label>
+                <label htmlFor="weblink-category" className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Category</label>
                 <input
+                  id="weblink-category"
                   type="text"
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
                   placeholder="e.g. Official, Reference"
+                  maxLength={100}
                   className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <label className="text-[11px] font-black text-slate-500 uppercase tracking-widest">URL *</label>
+              <label htmlFor="weblink-url" className="text-[11px] font-black text-slate-500 uppercase tracking-widest">URL *</label>
               <input
+                id="weblink-url"
                 type="url"
                 value={formData.url}
                 onChange={(e) => setFormData({ ...formData, url: e.target.value })}
@@ -152,8 +226,8 @@ const Weblinks = () => {
               />
             </div>
             <div className="flex items-center gap-4 pt-4">
-              <Button type="submit" className="bg-sky-600 hover:bg-sky-700 h-12 px-8 rounded-xl font-bold">
-                {editingId ? "Update Link" : "Save Link"}
+              <Button type="submit" disabled={saving} className="bg-sky-600 hover:bg-sky-700 h-12 px-8 rounded-xl font-bold">
+                {saving ? "Saving..." : editingId ? "Update Link" : "Save Link"}
               </Button>
               <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditingId(null); }} className="h-12 px-8 rounded-xl font-bold text-slate-500">
                 Cancel
@@ -163,58 +237,87 @@ const Weblinks = () => {
         </motion.div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {weblinks.map((link, index) => (
-          <motion.div
-            key={link.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-            className="group rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-sky-200 transition-all duration-300 overflow-hidden"
-          >
-            <div className="p-5">
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 group-hover:bg-sky-100 transition-colors">
-                    <Globe size={20} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-bold text-slate-900 truncate">{link.title}</h3>
-                    <p className="text-xs text-slate-400 mt-0.5 font-bold uppercase tracking-wide">{link.category}</p>
-                  </div>
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rounded-2xl bg-white border border-slate-200 p-5 animate-pulse">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-slate-100" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-slate-100 rounded w-2/3" />
+                  <div className="h-3 bg-slate-100 rounded w-1/3" />
                 </div>
               </div>
-              <p className="text-sm text-slate-500 mt-3 truncate">{link.url}</p>
-              <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-50">
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-sky-50 text-sky-600 text-xs font-bold hover:bg-sky-100 transition-colors"
-                >
-                  <ExternalLink size={14} />
-                  Open
-                </a>
-                <button
-                  onClick={() => handleEdit(link)}
-                  className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-sky-50 hover:text-sky-600 flex items-center justify-center transition-colors"
-                >
-                  <Edit3 size={14} />
-                </button>
-                <button
-                  onClick={() => handleDelete(link.id)}
-                  className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-colors"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
+              <div className="h-9 bg-slate-100 rounded-lg mt-4" />
             </div>
-          </motion.div>
-        ))}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {weblinks.map((link, index) => {
+            // Defensive: legacy docs could contain non-http(s) URLs
+            const safeHref = toSafeUrl(link.url);
+            return (
+              <motion.div
+                key={link.id}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="group rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-lg hover:border-sky-200 transition-all duration-300 overflow-hidden"
+              >
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 group-hover:bg-sky-100 transition-colors">
+                        <Globe size={20} />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-slate-900 truncate">{link.title}</h3>
+                        <p className="text-xs text-slate-400 mt-0.5 font-bold uppercase tracking-wide">{link.category}</p>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-sm text-slate-500 mt-3 truncate">{link.url}</p>
+                  <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-50">
+                    {safeHref ? (
+                      <a
+                        href={safeHref}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-sky-50 text-sky-600 text-xs font-bold hover:bg-sky-100 transition-colors"
+                      >
+                        <ExternalLink size={14} />
+                        Open
+                      </a>
+                    ) : (
+                      <span className="flex-1 flex items-center justify-center gap-2 h-9 rounded-lg bg-slate-50 text-slate-400 text-xs font-bold">
+                        Invalid link
+                      </span>
+                    )}
+                    <button
+                      onClick={() => handleEdit(link)}
+                      aria-label={`Edit ${link.title}`}
+                      className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-sky-50 hover:text-sky-600 flex items-center justify-center transition-colors"
+                    >
+                      <Edit3 size={14} />
+                    </button>
+                    <button
+                      onClick={() => setDeleteTarget(link)}
+                      aria-label={`Delete ${link.title}`}
+                      className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-colors"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
-      {weblinks.length === 0 && !showForm && (
-        <motion.div 
+      {!loading && weblinks.length === 0 && !showForm && (
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200"
@@ -226,7 +329,7 @@ const Weblinks = () => {
             <h2 className="text-xl font-bold text-slate-900 font-display">No Weblinks Yet</h2>
             <p className="text-slate-500 text-sm mt-1">Add your first resource link to get started.</p>
           </div>
-          <Button 
+          <Button
             onClick={() => setShowForm(true)}
             className="mt-6 bg-sky-600 hover:bg-sky-700 h-12 px-8 rounded-xl font-bold"
           >
@@ -235,6 +338,26 @@ const Weblinks = () => {
           </Button>
         </motion.div>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this link?</AlertDialogTitle>
+            <AlertDialogDescription>
+              &ldquo;{deleteTarget?.title}&rdquo; will be permanently removed. This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

@@ -1,9 +1,7 @@
-import React, { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import ExcelUploader from "@/components/ExcelUploader";
-import { DataTable } from "@/components/ui/data-table";
-import { useToast } from "@/hooks/use-toast";
+import { DataTable, type Column } from "@/components/ui/data-table";
 import * as XLSX from 'xlsx';
 import { Upload, TrendingUp, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,13 +13,25 @@ interface UnitCostData {
   unit: string;
 }
 
+/** Read a File as binary string; rejects on read failure. */
+const readFileAsBinary = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) resolve(String(event.target.result));
+      else reject(new Error("Failed to read file"));
+    };
+    reader.onerror = () => reject(new Error("The file could not be read. It may be corrupted or unreadable."));
+    reader.readAsBinaryString(file);
+  });
+
 const UnitCost = () => {
   const [unitCosts, setUnitCosts] = useState<UnitCostData[]>([]);
-  const { toast } = useToast();
 
-  const validateUnitCostData = (data: any[]): { isValid: boolean; errors?: string[] } => {
+  const validateUnitCostData = (data: unknown[]): { isValid: boolean; errors?: string[] } => {
     const errors: string[] = [];
-    data.forEach((item, index) => {
+    data.forEach((entry, index) => {
+      const item = entry as Record<string, unknown>;
       if (!item.item || !item.rate || !item.unit) {
         errors.push(`Row ${index + 1} is missing required fields`);
       }
@@ -36,35 +46,63 @@ const UnitCost = () => {
     };
   };
 
+  // Throws on any failure; ExcelUploader owns the success/error toasts so the
+  // user never sees a false "success" after a failed parse.
   const handleFileUpload = async (file: File): Promise<void> => {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        if (!event.target?.result) throw new Error("Failed to read file");
-        const workbook = XLSX.read(event.target.result, { type: 'binary' });
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        const validationResult = validateUnitCostData(jsonData);
-        if (!validationResult.isValid) throw new Error(validationResult.errors?.join('\n'));
+    const binary = await readFileAsBinary(file);
+    const workbook = XLSX.read(binary, { type: 'binary' });
+    if (!workbook.SheetNames.length) {
+      throw new Error("The workbook contains no sheets.");
+    }
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    if (!worksheet) {
+      throw new Error("Could not read the first worksheet.");
+    }
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+    if (jsonData.length === 0) {
+      throw new Error("The first sheet is empty. Expected columns: item, rate, unit.");
+    }
+    const validationResult = validateUnitCostData(jsonData);
+    if (!validationResult.isValid) throw new Error(validationResult.errors?.join('\n'));
 
-        const validatedData = jsonData.map((item: any, index: number) => ({
-          id: index + 1,
-          item: String(item.item),
-          rate: Number(item.rate),
-          unit: String(item.unit)
-        }));
+    const validatedData: UnitCostData[] = jsonData.map((entry, index) => {
+      const item = entry as Record<string, unknown>;
+      return {
+        id: index + 1,
+        item: String(item.item),
+        rate: Number(item.rate),
+        unit: String(item.unit)
+      };
+    });
 
-        setUnitCosts(validatedData);
-        toast({ title: "Operation Successful", description: "Excel datastream parsed and synchronized." });
-      } catch (error: any) {
-        toast({ variant: "destructive", title: "Parsing Error", description: error.message });
-      }
-    };
-    reader.readAsBinaryString(file);
+    setUnitCosts(validatedData);
   };
 
+  const columns: Column<UnitCostData>[] = [
+    {
+      header: "ITEM SPECIFICATION",
+      accessorKey: "item",
+      cell: (info) => <span className="font-bold text-slate-700">{info.getValue()}</span>
+    },
+    {
+      header: "ALLOCATED RATE",
+      accessorKey: "rate",
+      cell: (info) => (
+        <div className="flex items-baseline gap-1 text-primary font-black">
+          <span className="text-[10px] opacity-40">₹</span>
+          <span>{Number(info.getValue()).toLocaleString('en-IN')}</span>
+        </div>
+      )
+    },
+    {
+      header: "MEASUREMENT UNIT",
+      accessorKey: "unit",
+      cell: (info) => <span className="text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-500 px-2.5 py-1 rounded-md">{info.getValue()}</span>
+    },
+  ];
+
   return (
-    <div className="max-w-6xl mx-auto space-y-10 pb-20 px-4">
+    <div className="max-w-6xl mx-auto space-y-10 pb-20">
       {/* Dynamic Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="flex items-center gap-5">
@@ -85,7 +123,7 @@ const UnitCost = () => {
       </div>
 
       {/* Modern Upload Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="glass-card p-10 border-none shadow-premium-shadow relative overflow-hidden"
@@ -100,12 +138,9 @@ const UnitCost = () => {
               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-0.5">Import normalized Excel tables</p>
             </div>
           </div>
-          
+
           <div className="w-full">
-            <ExcelUploader 
-              onFileUpload={handleFileUpload} 
-              validateData={validateUnitCostData}
-            />
+            <ExcelUploader onFileUpload={handleFileUpload} />
           </div>
         </div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/20 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl" />
@@ -114,7 +149,7 @@ const UnitCost = () => {
       {/* Result Section */}
       <AnimatePresence>
         {unitCosts.length > 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             className="glass-card border-none shadow-premium-shadow overflow-hidden"
@@ -129,9 +164,9 @@ const UnitCost = () => {
                   <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest opacity-60">{unitCosts.length} Entries Synchronized</p>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => setUnitCosts([])}
                 className="text-slate-400 hover:text-white hover:bg-white/5 rounded-lg px-4 font-bold"
               >
@@ -140,31 +175,7 @@ const UnitCost = () => {
             </div>
 
             <div className="overflow-x-auto scrollbar-none">
-              <DataTable
-                columns={[
-                  { 
-                    header: "ITEM SPECIFICATION", 
-                    accessorKey: "item",
-                    cell: (info: any) => <span className="font-bold text-slate-700">{info.getValue()}</span>
-                  },
-                  { 
-                    header: "ALLOCATED RATE", 
-                    accessorKey: "rate",
-                    cell: (info: any) => (
-                      <div className="flex items-baseline gap-1 text-primary font-black">
-                        <span className="text-[10px] opacity-40">₹</span>
-                        <span>{info.getValue().toLocaleString('en-IN')}</span>
-                      </div>
-                    )
-                  },
-                  { 
-                    header: "MEASUREMENT UNIT", 
-                    accessorKey: "unit",
-                    cell: (info: any) => <span className="text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-500 px-2.5 py-1 rounded-md">{info.getValue()}</span>
-                  },
-                ]}
-                data={unitCosts}
-              />
+              <DataTable columns={columns} data={unitCosts} />
             </div>
           </motion.div>
         )}

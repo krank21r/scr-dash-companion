@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { TableCell } from "../components/ui/table";
 import { Button } from "../components/ui/button";
-import { Pencil, Trash2, Plus, Filter, FileText, AlertCircle, IndianRupee } from "lucide-react";
+import { Pencil, Trash2, Plus, Filter, FileText, AlertCircle } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,8 +15,9 @@ import {
 } from "../components/ui/alert-dialog";
 import { useToast } from "../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { db } from "../main";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { db } from "../lib/firebase";
+import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
+import { formatINR } from '../lib/utils';
 import {
   Select,
   SelectContent,
@@ -68,46 +69,50 @@ const getStatusStyles = (status: string) => {
 
 const IRSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [years, setYears] = useState<string[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const loadWorks = async () => {
+  const loadWorks = useCallback(async () => {
     try {
-      const querySnapshot = await getDocs(collection(db, "works"));
+      // Server-side filter instead of downloading the whole collection
+      const worksQuery = query(collection(db, "works"), where("type", "==", "irsp"));
+      const querySnapshot = await getDocs(worksQuery);
       const fetchedWorks: WorkItem[] = [];
       querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.type === 'irsp') {
-          fetchedWorks.push({ id: doc.id, ...data } as WorkItem);
-        }
+        fetchedWorks.push({ id: doc.id, ...doc.data() } as WorkItem);
       });
       setWorks(fetchedWorks);
-      
+
       const uniqueYears = [...new Set(fetchedWorks.map(w => w.yearOfSanction).filter(Boolean))].sort().reverse();
       setYears(uniqueYears);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error fetching works:", error);
+      const message = error instanceof Error ? error.message : "Please try again.";
       toast({
         title: "Error fetching works",
-        description: error.message,
+        description: message,
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
-    loadWorks();
-  }, []);
+    void loadWorks();
+  }, [loadWorks]);
 
   const handleDelete = async (id: string) => {
     try {
       await deleteDoc(doc(db, "works", id));
       await loadWorks();
       toast({ title: "Work Removed", description: "Record successfully excised from system." });
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Please try again.";
+      toast({ title: "Error", description: message, variant: "destructive" });
     }
   };
 
@@ -121,16 +126,16 @@ const IRSPWorks = () => {
     : works.filter(w => w.yearOfSanction === selectedYear);
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-6">
       {/* Header Section */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-        <div className="flex items-center gap-5">
-          <div className="w-14 h-14 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
-            <FileText size={28} />
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
+            <FileText size={24} />
           </div>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 font-display">IRSP Works</h1>
-            <p className="text-sm text-slate-500 font-medium mt-1 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900">IRSP Works</h1>
+            <p className="text-sm text-slate-500 font-medium flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
               {filteredWorks.length} Tracking Elements active
             </p>
@@ -170,7 +175,7 @@ const IRSPWorks = () => {
         <div className="overflow-x-auto scrollbar-none">
           <table className="w-full text-left border-collapse min-w-[1100px]">
             <thead className="sticky top-0 z-20 bg-white/80 backdrop-blur-md">
-              <tr className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 font-display">
+              <tr className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 font-display whitespace-nowrap">
                 <th className="px-8 py-6 w-[30%]">Project Description</th>
                 <th className="px-6 py-6 w-[10%] text-center">Period</th>
                 <th className="px-6 py-6 w-[10%] text-center">LAW Ref</th>
@@ -182,7 +187,14 @@ const IRSPWorks = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50/50">
-              {filteredWorks.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={8} className="px-8 py-32 text-center">
+                    <div className="w-8 h-8 border-2 border-slate-200 border-t-sky-500 rounded-full animate-spin mx-auto" />
+                    <p className="text-slate-400 font-medium mt-6">Loading records...</p>
+                  </td>
+                </tr>
+              ) : filteredWorks.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-8 py-32 text-center">
                     <div className="mx-auto w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 border border-slate-100">
@@ -210,24 +222,30 @@ const IRSPWorks = () => {
                       <span className="text-[11px] font-black text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">{work.qtySanctioned || '-'}</span>
                     </TableCell>
                     <TableCell className="px-6 py-6">
-                      <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-[10px] font-bold border uppercase tracking-wider transition-all font-display ${getStatusStyles(work.status)}`}>
+                      <span className={`inline-flex items-center whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold border uppercase tracking-wider transition-all font-display ${getStatusStyles(work.status)}`}>
                         {getStatusLabel(work.status)}
                       </span>
                     </TableCell>
                     <TableCell className="px-6 py-6">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[10px] font-bold text-sky-600/40 leading-none">₹</span>
-                        <span className="text-base font-bold text-slate-900 font-display tracking-tight">{work.totalValue || '-'}</span>
-                      </div>
+                      {formatINR(work.totalValue) !== '-' ? (
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-[10px] font-bold text-sky-600/40 leading-none">₹</span>
+                          <span className="text-base font-bold text-slate-900 font-display tracking-tight">
+                            {formatINR(work.totalValue).replace('₹', '')}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-sm text-slate-400">-</span>
+                      )}
                     </TableCell>
                     <TableCell className="px-6 py-6 text-right pr-10">
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl" onClick={() => handleEdit(work)}>
+                        <Button variant="ghost" size="icon" aria-label={`Edit ${work.description || 'work'}`} className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl" onClick={() => handleEdit(work)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl">
+                            <Button variant="ghost" size="icon" aria-label={`Delete ${work.description || 'work'}`} className="h-9 w-9 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
