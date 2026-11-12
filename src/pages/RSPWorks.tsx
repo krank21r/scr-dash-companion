@@ -185,27 +185,27 @@ const RSPWorks = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+      <div className="bg-white overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1100px]">
+          <table className="w-full table-fixed text-left text-xs border-collapse border border-slate-300">
             <thead>
-              <tr className="bg-slate-50/50 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-                <th className="px-5 py-4">Description</th>
-                <th className="px-4 py-4 text-center">Year</th>
-                <th className="px-4 py-4 text-center">PB No</th>
-                <th className="px-4 py-4">Sanctioned Cost</th>
-                <th className="px-4 py-4 text-center">Quantity</th>
-                <th className="px-4 py-4">DE Value</th>
-                <th className="px-4 py-4">Status</th>
-                <th className="px-4 py-4 text-right">Actions</th>
+              <tr className="bg-slate-100 text-xs font-semibold text-slate-700">
+                <th className="w-[22%] px-3 py-2 text-left border border-slate-300">Description</th>
+                <th className="w-[8%] px-2 py-2 text-center border border-slate-300">Year</th>
+                <th className="w-[10%] px-2 py-2 text-center border border-slate-300">PB No</th>
+                <th className="w-[15%] px-2 py-2 text-right border border-slate-300">Sanctioned Cost</th>
+                <th className="w-[8%] px-2 py-2 text-center border border-slate-300">Qty</th>
+                <th className="w-[15%] px-2 py-2 text-right border border-slate-300">DE Value</th>
+                <th className="w-[12%] px-2 py-2 text-center border border-slate-300">Status</th>
+                <th className="w-[10%] px-2 py-2 text-right border border-slate-300">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50">
+            <tbody>
               {loading ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-16 text-center">
                     <div className="w-8 h-8 border-2 border-slate-200 border-t-primary rounded-full animate-spin mx-auto" />
-                    <p className="text-sm text-slate-400 mt-4">Loading records...</p>
+                    <p className="text-xs text-slate-400 mt-4">Loading records...</p>
                   </td>
                 </tr>
               ) : filteredWorks.length === 0 ? (
@@ -215,7 +215,7 @@ const RSPWorks = () => {
                       <AlertCircle size={24} className="text-slate-300" />
                     </div>
                     <h3 className="text-lg font-semibold text-slate-700">No RSP works registered</h3>
-                    <p className="text-sm text-slate-400 mt-1 mb-4">
+                    <p className="text-xs text-slate-400 mt-1 mb-4">
                       Start by adding your first RSP work to the system.
                     </p>
                     {isAdmin && (
@@ -228,61 +228,50 @@ const RSPWorks = () => {
                 </tr>
               ) : (
                 filteredWorks.map((work) => (
-                  <tr key={work.id} className="hover:bg-slate-50/50 transition-colors group">
-                    <TableCell className="px-5 py-4">
-                      <div>
-                        <p className="font-medium text-slate-800 text-sm">{work.description || '-'}</p>
+                  <tr
+                    key={work.id}
+                    className="hover:bg-sky-50/60 transition-colors group [&>td]:border [&>td]:border-slate-300 [&>td]:overflow-hidden"
+                  >
+                    <TableCell className="px-3 py-1.5">
+                      <div className="min-w-0">
+                        <p className="text-xs font-medium text-slate-800 truncate" title={work.description || '-'}>{work.description || '-'}</p>
                         {work.remarks && (
-                          <p className="text-xs text-slate-400 mt-0.5 truncate max-w-[250px]">"{work.remarks}"</p>
+                          <p className="text-xs text-slate-400 mt-0.5 truncate" title={work.remarks}>"{work.remarks}"</p>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-center">
-                      <span className="text-xs font-semibold text-slate-500">{work.yearOfSanction || '-'}</span>
+                    <TableCell className="px-2 py-1.5 text-center">
+                      <span className="block truncate text-xs font-semibold text-slate-500" title={work.yearOfSanction || '-'}>{work.yearOfSanction || '-'}</span>
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-center">
-                      <span className="text-xs font-mono font-semibold text-slate-400">{work.pbNo || '-'}</span>
+                    <TableCell className="px-2 py-1.5 text-center">
+                      <span className="block truncate text-xs font-mono font-semibold text-slate-400" title={work.pbNo || '-'}>{work.pbNo || '-'}</span>
                     </TableCell>
-                    <TableCell className="px-4 py-4">
-                      {formatINR(work.rbSanctionedCost) !== '-' ? (
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-xs text-slate-400">₹</span>
-                          <span className="text-sm font-semibold text-slate-900">
-                            {formatINR(work.rbSanctionedCost).replace('₹', '')}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-slate-400">-</span>
-                      )}
+                    <TableCell className="px-2 py-1.5 text-right">
+                      <span className="block truncate text-xs font-semibold text-slate-900 tabular-nums" title={formatINR(work.rbSanctionedCost)}>
+                        {formatINR(work.rbSanctionedCost)}
+                      </span>
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-center">
-                      <span className="text-xs font-semibold text-slate-600">{work.qtySanctioned || '-'}</span>
+                    <TableCell className="px-2 py-1.5 text-center">
+                      <span className="block truncate text-xs font-semibold text-slate-600" title={work.qtySanctioned || '-'}>{work.qtySanctioned || '-'}</span>
                     </TableCell>
-                    <TableCell className="px-4 py-4">
-                      {formatINR(work.deTotalValue) !== '-' ? (
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-xs text-slate-400">₹</span>
-                          <span className="text-sm font-medium text-slate-600">
-                            {formatINR(work.deTotalValue).replace('₹', '')}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-slate-400">-</span>
-                      )}
+                    <TableCell className="px-2 py-1.5 text-right">
+                      <span className="block truncate text-xs font-medium text-slate-600 tabular-nums" title={formatINR(work.deTotalValue)}>
+                        {formatINR(work.deTotalValue)}
+                      </span>
                     </TableCell>
-                    <TableCell className="px-4 py-4">
-                      <span className={`inline-flex items-center whitespace-nowrap px-2.5 py-1 rounded-md text-xs font-semibold border ${getStatusStyles(work.status)}`}>
+                    <TableCell className="px-2 py-1.5 text-center">
+                      <span className={`inline-block max-w-full break-words rounded-md border px-1.5 py-0.5 text-xs font-semibold leading-tight ${getStatusStyles(work.status)}`} title={getStatusLabel(work.status)}>
                         {getStatusLabel(work.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-right">
+                    <TableCell className="px-2 py-1.5 text-right">
                       {isAdmin ? (
-                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="ghost"
                             size="icon"
                             aria-label={`Edit ${work.description || 'work'}`}
-                            className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
+                            className="h-6 w-6 xl:h-8 xl:w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
                             onClick={() => handleEdit(work)}
                           >
                             <Pencil size={15} />
@@ -293,7 +282,7 @@ const RSPWorks = () => {
                                 variant="ghost"
                                 size="icon"
                                 aria-label={`Delete ${work.description || 'work'}`}
-                                className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md"
+                                className="h-6 w-6 xl:h-8 xl:w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md"
                               >
                                 <Trash2 size={15} />
                               </Button>

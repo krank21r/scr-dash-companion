@@ -175,32 +175,32 @@ const IRSPWorks = () => {
       </div>
 
       {/* Modern Table Grid */}
-      <div className="glass-card border-none shadow-premium-shadow overflow-hidden">
-        <div className="overflow-x-auto scrollbar-none">
-          <table className="w-full text-left border-collapse min-w-[1100px]">
-            <thead className="sticky top-0 z-20 bg-white/80 backdrop-blur-md">
-              <tr className="text-[10px] font-bold uppercase tracking-[0.25em] text-slate-400 font-display whitespace-nowrap">
-                <th className="px-8 py-6 w-[30%]">Project Description</th>
-                <th className="px-6 py-6 w-[10%] text-center">Period</th>
-                <th className="px-6 py-6 w-[10%] text-center">LAW Ref</th>
-                <th className="px-6 py-6 w-[10%] text-center">Rate Unit</th>
-                <th className="px-6 py-6 w-[8%] text-center">Quantity</th>
-                <th className="px-6 py-6 w-[14%]">Current Status</th>
-                <th className="px-6 py-6 w-[12%]">Valuation</th>
-                <th className="px-6 py-6 w-[6%] text-right pr-10">Actions</th>
+      <div className="bg-white overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full table-fixed text-left text-xs border-collapse border border-slate-300">
+            <thead>
+              <tr className="bg-slate-100 text-xs font-semibold text-slate-700">
+                <th className="w-[23%] px-3 py-2 text-left border border-slate-300">Project Description</th>
+                <th className="w-[9%] px-2 py-2 text-center border border-slate-300">Period</th>
+                <th className="w-[10%] px-2 py-2 text-center border border-slate-300">LAW Ref</th>
+                <th className="w-[12%] px-2 py-2 text-right border border-slate-300">Rate Unit</th>
+                <th className="w-[8%] px-2 py-2 text-center border border-slate-300">Qty</th>
+                <th className="w-[14%] px-2 py-2 text-center border border-slate-300">Status</th>
+                <th className="w-[14%] px-2 py-2 text-right border border-slate-300">Valuation</th>
+                <th className="w-[10%] px-2 py-2 text-right border border-slate-300">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-50/50">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-8 py-32 text-center">
+                  <td colSpan={8} className="px-8 py-32 text-center border border-slate-300">
                     <div className="w-8 h-8 border-2 border-slate-200 border-t-sky-500 rounded-full animate-spin mx-auto" />
                     <p className="text-slate-400 font-medium mt-6">Loading records...</p>
                   </td>
                 </tr>
               ) : filteredWorks.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-8 py-32 text-center">
+                  <td colSpan={8} className="px-8 py-32 text-center border border-slate-300">
                     <div className="mx-auto w-20 h-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6 border border-slate-100">
                       <AlertCircle size={32} className="text-slate-200" />
                     </div>
@@ -215,44 +215,44 @@ const IRSPWorks = () => {
                 </tr>
               ) : (
                 filteredWorks.map((work) => (
-                  <tr key={work.id} className="premium-table-row transition-all duration-500 group border-l-4 border-l-transparent hover:border-l-sky-500">
-                    <TableCell className="px-8 py-6 font-bold text-slate-800 text-sm leading-snug group-hover:text-sky-600 transition-colors font-display">{work.description || '-'}</TableCell>
-                    <TableCell className="px-6 py-6 text-center">
-                      <span className="px-3 py-1 bg-slate-50 text-[11px] font-bold font-display text-slate-500 rounded-lg border border-slate-100">{work.yearOfSanction || '-'}</span>
+                  <tr
+                    key={work.id}
+                    className="hover:bg-sky-50/60 transition-colors group [&>td]:border [&>td]:border-slate-300 [&>td]:overflow-hidden"
+                  >
+                    <TableCell className="px-3 py-1.5">
+                      <span className="block truncate text-xs font-semibold text-slate-800 group-hover:text-sky-600 transition-colors" title={work.description || '-'}>{work.description || '-'}</span>
                     </TableCell>
-                    <TableCell className="px-6 py-6 text-center">
-                      <span className="font-mono text-xs font-black tracking-widest text-slate-400">{work.lawNo || '-'}</span>
+                    <TableCell className="px-2 py-1.5 text-center">
+                      <span className="block truncate text-xs font-semibold text-slate-500" title={work.yearOfSanction || '-'}>{work.yearOfSanction || '-'}</span>
                     </TableCell>
-                    <TableCell className="px-6 py-6 text-center text-slate-500 font-bold text-xs">{work.rate || '-'}</TableCell>
-                    <TableCell className="px-6 py-6 text-center">
-                      <span className="text-[11px] font-black text-slate-600 bg-slate-50 px-2.5 py-1 rounded-full border border-slate-100">{work.qtySanctioned || '-'}</span>
+                    <TableCell className="px-2 py-1.5 text-center">
+                      <span className="block truncate text-xs font-mono font-semibold text-slate-400" title={work.lawNo || '-'}>{work.lawNo || '-'}</span>
                     </TableCell>
-                    <TableCell className="px-6 py-6">
-                      <span className={`inline-flex items-center whitespace-nowrap px-4 py-1.5 rounded-full text-[10px] font-bold border uppercase tracking-wider transition-all font-display ${getStatusStyles(work.status)}`}>
+                    <TableCell className="px-2 py-1.5 text-right">
+                      <span className="block truncate text-xs font-semibold text-slate-600 tabular-nums" title={work.rate || '-'}>{work.rate || '-'}</span>
+                    </TableCell>
+                    <TableCell className="px-2 py-1.5 text-center">
+                      <span className="block truncate text-xs font-semibold text-slate-600" title={work.qtySanctioned || '-'}>{work.qtySanctioned || '-'}</span>
+                    </TableCell>
+                    <TableCell className="px-2 py-1.5 text-center">
+                      <span className={`inline-block max-w-full break-words rounded-md border px-1.5 py-0.5 text-xs font-semibold uppercase leading-tight ${getStatusStyles(work.status)}`} title={getStatusLabel(work.status)}>
                         {getStatusLabel(work.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="px-6 py-6">
-                      {formatINR(work.totalValue) !== '-' ? (
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-[10px] font-bold text-sky-600/40 leading-none">₹</span>
-                          <span className="text-base font-bold text-slate-900 font-display tracking-tight">
-                            {formatINR(work.totalValue).replace('₹', '')}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-sm text-slate-400">-</span>
-                      )}
+                    <TableCell className="px-2 py-1.5 text-right">
+                      <span className="block truncate text-xs font-semibold text-slate-900 tabular-nums" title={formatINR(work.totalValue)}>
+                        {formatINR(work.totalValue)}
+                      </span>
                     </TableCell>
-                    <TableCell className="px-6 py-6 text-right pr-10">
+                    <TableCell className="px-2 py-1.5 text-right">
                       {isAdmin ? (
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0">
-                        <Button variant="ghost" size="icon" aria-label={`Edit ${work.description || 'work'}`} className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl" onClick={() => handleEdit(work)}>
+                      <div className="flex items-center justify-end gap-1 xl:gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0">
+                        <Button variant="ghost" size="icon" aria-label={`Edit ${work.description || 'work'}`} className="h-6 w-6 xl:h-8 xl:w-8 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl" onClick={() => handleEdit(work)}>
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label={`Delete ${work.description || 'work'}`} className="h-9 w-9 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl">
+                            <Button variant="ghost" size="icon" aria-label={`Delete ${work.description || 'work'}`} className="h-6 w-6 xl:h-8 xl:w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl">
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>

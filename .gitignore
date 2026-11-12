@@ -34,3 +34,9 @@ dist-ssr
 # Stale build artifacts
 build
 .firebase
+
+# SWC native cache
+.swc-cache
+
+# npm lockfile (project uses bun.lock)
+package-lock.json
