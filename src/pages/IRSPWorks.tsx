@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { db } from "../lib/firebase";
 import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
 import { formatINR } from '../lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 import {
   Select,
   SelectContent,
@@ -74,6 +75,7 @@ const IRSPWorks = () => {
   const [years, setYears] = useState<string[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   const loadWorks = useCallback(async () => {
     try {
@@ -158,15 +160,17 @@ const IRSPWorks = () => {
             </Select>
           </div>
 
-          <Button 
-            onClick={() => {
-              localStorage.removeItem('editWork');
-              navigate('/add-works');
-            }} 
-            className="btn-primary h-12 px-8"
-          >
-            <Plus size={20} /> New Entry
-          </Button>
+          {isAdmin && (
+            <Button 
+              onClick={() => {
+                localStorage.removeItem('editWork');
+                navigate('/add-works');
+              }} 
+              className="btn-primary h-12 px-8"
+            >
+              <Plus size={20} /> New Entry
+            </Button>
+          )}
         </div>
       </div>
 
@@ -202,9 +206,11 @@ const IRSPWorks = () => {
                     </div>
                     <h3 className="text-2xl font-bold text-slate-800 font-display tracking-tight">System holds no IRSP records</h3>
                     <p className="text-slate-400 font-medium text-lg mt-2 mb-8">No work elements match your current filter criteria.</p>
-                    <Button onClick={() => navigate('/add-works')} className="btn-primary-glow h-12 px-8 rounded-xl font-bold">
-                      Add Initial Entry
-                    </Button>
+                    {isAdmin && (
+                      <Button onClick={() => navigate('/add-works')} className="btn-primary-glow h-12 px-8 rounded-xl font-bold">
+                        Add Initial Entry
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -239,6 +245,7 @@ const IRSPWorks = () => {
                       )}
                     </TableCell>
                     <TableCell className="px-6 py-6 text-right pr-10">
+                      {isAdmin ? (
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-1 group-hover:translate-x-0">
                         <Button variant="ghost" size="icon" aria-label={`Edit ${work.description || 'work'}`} className="h-9 w-9 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-xl" onClick={() => handleEdit(work)}>
                           <Pencil className="h-4 w-4" />
@@ -268,6 +275,9 @@ const IRSPWorks = () => {
                           </AlertDialogContent>
                         </AlertDialog>
                       </div>
+                      ) : (
+                        <span className="text-xs text-slate-300">&mdash;</span>
+                      )}
                     </TableCell>
                   </tr>
                 ))

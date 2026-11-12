@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { db } from '../lib/firebase';
 import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
 import { formatINR } from '../lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
 interface WorkItem {
   id: string;
@@ -71,6 +72,7 @@ const RSPWorks = () => {
   const [years, setYears] = useState<string[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   const loadWorks = useCallback(async () => {
     try {
@@ -167,16 +169,18 @@ const RSPWorks = () => {
             </div>
           )}
 
-          <Button
-            onClick={() => {
-              localStorage.removeItem('editWork');
-              navigate('/add-works');
-            }}
-            className="btn-primary h-10 px-5"
-          >
-            <Plus size={18} />
-            New
-          </Button>
+          {isAdmin && (
+            <Button
+              onClick={() => {
+                localStorage.removeItem('editWork');
+                navigate('/add-works');
+              }}
+              className="btn-primary h-10 px-5"
+            >
+              <Plus size={18} />
+              New
+            </Button>
+          )}
         </div>
       </div>
 
@@ -214,10 +218,12 @@ const RSPWorks = () => {
                     <p className="text-sm text-slate-400 mt-1 mb-4">
                       Start by adding your first RSP work to the system.
                     </p>
-                    <Button onClick={() => navigate('/add-works')} className="btn-primary px-6">
-                      <Plus size={16} className="mr-2" />
-                      Add Work
-                    </Button>
+                    {isAdmin && (
+                      <Button onClick={() => navigate('/add-works')} className="btn-primary px-6">
+                        <Plus size={16} className="mr-2" />
+                        Add Work
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -270,27 +276,28 @@ const RSPWorks = () => {
                       </span>
                     </TableCell>
                     <TableCell className="px-4 py-4 text-right">
-                      <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label={`Edit ${work.description || 'work'}`}
-                          className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
-                          onClick={() => handleEdit(work)}
-                        >
-                          <Pencil size={15} />
-                        </Button>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              aria-label={`Delete ${work.description || 'work'}`}
-                              className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md"
-                            >
-                              <Trash2 size={15} />
-                            </Button>
-                          </AlertDialogTrigger>
+                      {isAdmin ? (
+                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Edit ${work.description || 'work'}`}
+                            className="h-8 w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
+                            onClick={() => handleEdit(work)}
+                          >
+                            <Pencil size={15} />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label={`Delete ${work.description || 'work'}`}
+                                className="h-8 w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md"
+                              >
+                                <Trash2 size={15} />
+                              </Button>
+                            </AlertDialogTrigger>
                           <AlertDialogContent className="rounded-xl border-none shadow-xl max-w-md">
                             <AlertDialogHeader>
                               <div className="w-12 h-12 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4">
@@ -316,7 +323,10 @@ const RSPWorks = () => {
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
-                      </div>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-300">&mdash;</span>
+                      )}
                     </TableCell>
                   </tr>
                 ))

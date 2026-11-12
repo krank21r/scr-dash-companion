@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { collection, getDocs, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Weblink {
   id: string;
@@ -39,6 +40,7 @@ const toSafeUrl = (raw: string): string | null => {
 
 const Weblinks = () => {
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const { toast } = useToast();
   const [weblinks, setWeblinks] = useState<Weblink[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,13 +167,15 @@ const Weblinks = () => {
             </p>
           </div>
         </div>
-        <Button
-          onClick={() => { setShowForm(true); setEditingId(null); setFormData({ title: "", url: "", category: "" }); }}
-          className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-6 rounded-xl font-bold transition-all shadow-lg shadow-sky-600/20"
-        >
-          <Plus size={18} className="mr-2" />
-          Add Link
-        </Button>
+        {isAdmin && (
+          <Button
+            onClick={() => { setShowForm(true); setEditingId(null); setFormData({ title: "", url: "", category: "" }); }}
+            className="bg-sky-600 hover:bg-sky-700 text-white h-12 px-6 rounded-xl font-bold transition-all shadow-lg shadow-sky-600/20"
+          >
+            <Plus size={18} className="mr-2" />
+            Add Link
+          </Button>
+        )}
       </div>
 
       {showForm && (
@@ -294,20 +298,24 @@ const Weblinks = () => {
                         Invalid link
                       </span>
                     )}
-                    <button
-                      onClick={() => handleEdit(link)}
-                      aria-label={`Edit ${link.title}`}
-                      className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-sky-50 hover:text-sky-600 flex items-center justify-center transition-colors"
-                    >
-                      <Edit3 size={14} />
-                    </button>
-                    <button
-                      onClick={() => setDeleteTarget(link)}
-                      aria-label={`Delete ${link.title}`}
-                      className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {isAdmin && (
+                      <button
+                        onClick={() => handleEdit(link)}
+                        aria-label={`Edit ${link.title}`}
+                        className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-sky-50 hover:text-sky-600 flex items-center justify-center transition-colors"
+                      >
+                        <Edit3 size={14} />
+                      </button>
+                    )}
+                    {isAdmin && (
+                      <button
+                        onClick={() => setDeleteTarget(link)}
+                        aria-label={`Delete ${link.title}`}
+                        className="h-9 w-9 rounded-lg bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 flex items-center justify-center transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -329,13 +337,15 @@ const Weblinks = () => {
             <h2 className="text-xl font-bold text-slate-900 font-display">No Weblinks Yet</h2>
             <p className="text-slate-500 text-sm mt-1">Add your first resource link to get started.</p>
           </div>
-          <Button
-            onClick={() => setShowForm(true)}
-            className="mt-6 bg-sky-600 hover:bg-sky-700 h-12 px-8 rounded-xl font-bold"
-          >
-            <Plus size={18} className="mr-2" />
-            Add First Link
-          </Button>
+          {isAdmin && (
+            <Button
+              onClick={() => setShowForm(true)}
+              className="mt-6 bg-sky-600 hover:bg-sky-700 h-12 px-8 rounded-xl font-bold"
+            >
+              <Plus size={18} className="mr-2" />
+              Add First Link
+            </Button>
+          )}
         </motion.div>
       )}
 

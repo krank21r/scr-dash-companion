@@ -1,7 +1,8 @@
 import { useState, useEffect, ReactNode } from "react";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { Menu, Plus, FileText, LayoutDashboard } from "lucide-react";
+import { Menu, Plus, FileText, LayoutDashboard, LogOut, ShieldCheck, Eye } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -19,6 +20,8 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
+  const { user, isAdmin, logout } = useAuth();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -42,6 +45,18 @@ export const Layout = ({ children }: LayoutProps) => {
     if (path.startsWith("/add-")) return "Create Record";
     if (path.startsWith("/edit-")) return "Edit Record";
     return "Budget Portal";
+  };
+
+  const initials = (user?.name || user?.username || "U")
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -79,7 +94,8 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Quick Add Dropdown */}
+            {/* Quick Add Dropdown — admin only */}
+            {isAdmin && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button className="btn-primary h-10 px-4 rounded-lg text-sm font-semibold gap-2">
@@ -124,21 +140,42 @@ export const Layout = ({ children }: LayoutProps) => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            )}
 
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-10 w-10 p-0 rounded-full hover:bg-slate-100 transition-colors">
+                <Button variant="ghost" className="h-10 w-10 p-0 rounded-full hover:bg-slate-100 transition-colors" aria-label="Account menu">
                   <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white flex items-center justify-center font-semibold text-sm shadow-sm">
-                    AD
+                    {initials}
                   </div>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 rounded-xl p-2 bg-white border border-slate-100 shadow-lg shadow-slate-200/40">
                 <DropdownMenuLabel className="px-3 py-2">
-                  <p className="font-semibold text-slate-900">Local Session</p>
-                  <p className="text-xs text-slate-400 font-normal">No sign-in required</p>
+                  <p className="font-semibold text-slate-900">{user?.name}</p>
+                  <p className="text-xs text-slate-400 font-normal flex items-center gap-1.5 mt-0.5">
+                    {isAdmin ? (
+                      <>
+                        <ShieldCheck size={12} className="text-primary" />
+                        Admin &middot; Full access
+                      </>
+                    ) : (
+                      <>
+                        <Eye size={12} className="text-slate-400" />
+                        View only
+                      </>
+                    )}
+                  </p>
                 </DropdownMenuLabel>
+                <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer transition-colors focus:bg-red-50 focus:text-red-600"
+                >
+                  <LogOut size={15} />
+                  <span className="text-sm font-semibold">Sign out</span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

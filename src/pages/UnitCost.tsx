@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import ExcelUploader from "@/components/ExcelUploader";
 import { DataTable, type Column } from "@/components/ui/data-table";
 import * as XLSX from 'xlsx';
-import { Upload, TrendingUp, FileSpreadsheet, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Upload, TrendingUp, FileSpreadsheet, AlertCircle, CheckCircle2, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 interface UnitCostData {
   id: number;
@@ -27,6 +28,7 @@ const readFileAsBinary = (file: File): Promise<string> =>
 
 const UnitCost = () => {
   const [unitCosts, setUnitCosts] = useState<UnitCostData[]>([]);
+  const { isAdmin } = useAuth();
 
   const validateUnitCostData = (data: unknown[]): { isValid: boolean; errors?: string[] } => {
     const errors: string[] = [];
@@ -122,7 +124,8 @@ const UnitCost = () => {
         </div>
       </div>
 
-      {/* Modern Upload Section */}
+      {/* Modern Upload Section — admin only */}
+      {isAdmin ? (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -145,6 +148,17 @@ const UnitCost = () => {
         </div>
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/20 rounded-full translate-x-1/2 -translate-y-1/2 blur-3xl" />
       </motion.div>
+      ) : (
+        <div className="flex items-center gap-3 p-5 rounded-xl bg-white border border-slate-100 shadow-sm">
+          <div className="w-9 h-9 rounded-lg bg-slate-100 text-slate-400 flex items-center justify-center shrink-0">
+            <Lock size={16} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-slate-600">Data import is restricted to administrators</p>
+            <p className="text-xs text-slate-400 mt-0.5">Sign in with an admin account to upload unit cost data.</p>
+          </div>
+        </div>
+      )}
 
       {/* Result Section */}
       <AnimatePresence>

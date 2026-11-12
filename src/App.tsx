@@ -5,6 +5,9 @@ import { lazy, Suspense } from 'react';
 import { Layout } from './components/Layout';
 import { ThemeProvider } from 'next-themes';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { AuthProvider } from './hooks/useAuth';
+import { RequireAuth, RequireAdmin } from './components/RequireAuth';
+import LoginPage from './pages/Login';
 import NotFound from './pages/NotFound';
 
 const HomePage = lazy(() => import('./pages/Home'));
@@ -26,32 +29,43 @@ const PageLoader = () => (
   </div>
 );
 
+const ProtectedApp = () => (
+  <RequireAuth>
+    <Layout>
+      <Toaster />
+      <ErrorBoundary>
+        <Suspense fallback={<PageLoader />}>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/rsp-works" element={<RSPWorks />} />
+            <Route path="/irsp-works" element={<IRSPWorks />} />
+            <Route path="/contingencies" element={<Contingencies />} />
+            <Route path="/add-contingency" element={<RequireAdmin><AddContingency /></RequireAdmin>} />
+            <Route path="/add-works" element={<RequireAdmin><AddWorks /></RequireAdmin>} />
+            <Route path="/unit-cost" element={<UnitCost />} />
+            <Route path="/add-note" element={<RequireAdmin><AddNote /></RequireAdmin>} />
+            <Route path="/edit-note/:id" element={<RequireAdmin><EditNote /></RequireAdmin>} />
+            <Route path="/info" element={<Info />} />
+            <Route path="/holidays" element={<Holidays />} />
+            <Route path="/weblinks" element={<Weblinks />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </ErrorBoundary>
+    </Layout>
+  </RequireAuth>
+);
+
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" forcedTheme="light">
-    <TooltipProvider>
-      <Layout>
-        <Toaster />
-        <ErrorBoundary>
-          <Suspense fallback={<PageLoader />}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/rsp-works" element={<RSPWorks />} />
-              <Route path="/irsp-works" element={<IRSPWorks />} />
-              <Route path="/contingencies" element={<Contingencies />} />
-              <Route path="/add-contingency" element={<AddContingency />} />
-              <Route path="/add-works" element={<AddWorks />} />
-              <Route path="/unit-cost" element={<UnitCost />} />
-              <Route path="/add-note" element={<AddNote />} />
-              <Route path="/edit-note/:id" element={<EditNote />} />
-              <Route path="/info" element={<Info />} />
-              <Route path="/holidays" element={<Holidays />} />
-              <Route path="/weblinks" element={<Weblinks />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </ErrorBoundary>
-      </Layout>
-    </TooltipProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<ProtectedApp />} />
+        </Routes>
+      </TooltipProvider>
+    </AuthProvider>
   </ThemeProvider>
 );
 

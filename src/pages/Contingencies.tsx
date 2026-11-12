@@ -19,6 +19,7 @@ import { useNavigate } from "react-router-dom";
 import { db } from "../lib/firebase";
 import { collection, getDocs, deleteDoc, doc, updateDoc, query, orderBy } from "firebase/firestore";
 import { parseAmount, formatINR, formatDisplayDate } from "../lib/utils";
+import { useAuth } from '@/hooks/useAuth';
 import {
   Select,
   SelectContent,
@@ -54,6 +55,7 @@ const Contingencies = () => {
   const [expenditureRemarks, setExpenditureRemarks] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
 
   const loadContingencies = useCallback(async () => {
     try {
@@ -197,16 +199,18 @@ const Contingencies = () => {
               </SelectContent>
             </Select>
           )}
-          <Button
-            onClick={() => {
-              localStorage.removeItem('editContingency');
-              navigate('/add-contingency');
-            }}
-            className="btn-primary h-10 px-5"
-          >
-            <Plus size={18} />
-            Add
-          </Button>
+          {isAdmin && (
+            <Button
+              onClick={() => {
+                localStorage.removeItem('editContingency');
+                navigate('/add-contingency');
+              }}
+              className="btn-primary h-10 px-5"
+            >
+              <Plus size={18} />
+              Add
+            </Button>
+          )}
         </div>
       </div>
 
@@ -243,10 +247,12 @@ const Contingencies = () => {
                     <p className="text-sm text-slate-400 mt-1 mb-4">
                       Start by adding a new contingency allocation.
                     </p>
-                    <Button onClick={() => navigate('/add-contingency')} className="btn-primary px-6">
-                      <Plus size={16} className="mr-2" />
-                      Add Entry
-                    </Button>
+                    {isAdmin && (
+                      <Button onClick={() => navigate('/add-contingency')} className="btn-primary px-6">
+                        <Plus size={16} className="mr-2" />
+                        Add Entry
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -298,6 +304,7 @@ const Contingencies = () => {
                           </span>
                         </TableCell>
                         <TableCell className="px-4 py-4 text-right">
+                          {isAdmin ? (
                           <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                               variant="ghost"
@@ -345,6 +352,9 @@ const Contingencies = () => {
                               </AlertDialogContent>
                             </AlertDialog>
                           </div>
+                          ) : (
+                            <span className="text-xs text-slate-300">&mdash;</span>
+                          )}
                         </TableCell>
                       </tr>
                       {isExpanded && (
@@ -382,35 +392,37 @@ const Contingencies = () => {
                                 </div>
                               )}
 
-                              {balance > 0 ? (
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 rounded-lg bg-white border border-slate-100">
-                                  <div className="relative flex-1">
-                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold">₹</span>
+                              {isAdmin ? (
+                                balance > 0 ? (
+                                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-4 rounded-lg bg-white border border-slate-100">
+                                    <div className="relative flex-1">
+                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold">₹</span>
+                                      <Input
+                                        type="number"
+                                        inputMode="decimal"
+                                        value={expenditureAmount}
+                                        onChange={(e) => setExpenditureAmount(e.target.value)}
+                                        placeholder="Amount to record"
+                                        className="pl-7 h-11 rounded-lg border-slate-200 bg-slate-50 focus:bg-white font-semibold"
+                                      />
+                                    </div>
                                     <Input
-                                      type="number"
-                                      inputMode="decimal"
-                                      value={expenditureAmount}
-                                      onChange={(e) => setExpenditureAmount(e.target.value)}
-                                      placeholder="Amount to record"
-                                      className="pl-7 h-11 rounded-lg border-slate-200 bg-slate-50 focus:bg-white font-semibold"
+                                      value={expenditureRemarks}
+                                      onChange={(e) => setExpenditureRemarks(e.target.value)}
+                                      placeholder="Notes / Remarks..."
+                                      className="flex-1 h-11 rounded-lg border-slate-200 bg-slate-50 focus:bg-white"
                                     />
+                                    <Button onClick={() => addExpenditure(item)} className="btn-primary h-11 px-6">
+                                      Record
+                                    </Button>
                                   </div>
-                                  <Input
-                                    value={expenditureRemarks}
-                                    onChange={(e) => setExpenditureRemarks(e.target.value)}
-                                    placeholder="Notes / Remarks..."
-                                    className="flex-1 h-11 rounded-lg border-slate-200 bg-slate-50 focus:bg-white"
-                                  />
-                                  <Button onClick={() => addExpenditure(item)} className="btn-primary h-11 px-6">
-                                    Record
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-3 p-4 rounded-lg bg-red-50 text-red-700">
-                                  <AlertCircle size={18} />
-                                  <p className="text-sm font-semibold">Allocation exhausted: No funds available</p>
-                                </div>
-                              )}
+                                ) : (
+                                  <div className="flex items-center gap-3 p-4 rounded-lg bg-red-50 text-red-700">
+                                    <AlertCircle size={18} />
+                                    <p className="text-sm font-semibold">Allocation exhausted: No funds available</p>
+                                  </div>
+                                )
+                              ) : null}
                             </div>
                           </td>
                         </tr>

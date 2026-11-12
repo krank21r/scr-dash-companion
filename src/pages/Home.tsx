@@ -23,6 +23,7 @@ import { useToast } from "../hooks/use-toast";
 import { parseAmount, formatDisplayDate } from "../lib/utils";
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
+import { useAuth } from "@/hooks/useAuth";
 
 interface WorkItem {
   id: string;
@@ -77,6 +78,7 @@ const HomePage = () => {
   const [deleteTarget, setDeleteTarget] = useState<NoteItem | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -159,10 +161,12 @@ const HomePage = () => {
             Carriage Workshop LGD
           </p>
         </div>
-        <Button onClick={() => navigate('/add-works')} className="btn-primary h-10 px-5 rounded-lg">
-          <Plus size={18} />
-          New Work
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => navigate('/add-works')} className="btn-primary h-10 px-5 rounded-lg">
+            <Plus size={18} />
+            New Work
+          </Button>
+        )}
       </div>
 
       {/* Stats Cards */}
@@ -339,15 +343,17 @@ const HomePage = () => {
                   <p className="text-xs text-slate-400">{notes.length} recent</p>
                 </div>
               </div>
-              <Button
-                onClick={() => navigate('/add-note')}
-                variant="ghost"
-                size="sm"
-                className="h-8 text-xs font-semibold text-primary hover:bg-primary/5 hover:text-primary"
-              >
-                <Plus size={14} className="mr-1" />
-                Add
-              </Button>
+              {isAdmin && (
+                <Button
+                  onClick={() => navigate('/add-note')}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs font-semibold text-primary hover:bg-primary/5 hover:text-primary"
+                >
+                  <Plus size={14} className="mr-1" />
+                  Add
+                </Button>
+              )}
             </div>
 
             <div className="p-3 flex-1 max-h-[300px] overflow-y-auto">
@@ -360,15 +366,17 @@ const HomePage = () => {
                 ) : notes.length === 0 ? (
                   <div className="py-8 text-center">
                     <p className="text-sm text-slate-400">No pending tasks</p>
-                    <Button
-                      onClick={() => navigate('/add-note')}
-                      variant="ghost"
-                      size="sm"
-                      className="mt-2 text-xs text-primary"
-                    >
-                      <Plus size={14} className="mr-1" />
-                      Add task
-                    </Button>
+                    {isAdmin && (
+                      <Button
+                        onClick={() => navigate('/add-note')}
+                        variant="ghost"
+                        size="sm"
+                        className="mt-2 text-xs text-primary"
+                      >
+                        <Plus size={14} className="mr-1" />
+                        Add task
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   notes.map((note) => (
@@ -380,26 +388,28 @@ const HomePage = () => {
                         <p className="text-sm font-medium text-slate-700 truncate">{note.text}</p>
                         <p className="text-[10px] text-slate-400 mt-0.5">{note.createdAt}</p>
                       </div>
-                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label={`Edit task: ${note.text}`}
-                          className="h-7 w-7 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
-                          onClick={() => navigate(`/edit-note/${note.id}`)}
-                        >
-                          <Edit3 size={13} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label={`Delete task: ${note.text}`}
-                          className="h-7 w-7 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md"
-                          onClick={() => setDeleteTarget(note)}
-                        >
-                          <Trash2 size={13} />
-                        </Button>
-                      </div>
+                      {isAdmin && (
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Edit task: ${note.text}`}
+                            className="h-7 w-7 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
+                            onClick={() => navigate(`/edit-note/${note.id}`)}
+                          >
+                            <Edit3 size={13} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`Delete task: ${note.text}`}
+                            className="h-7 w-7 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md"
+                            onClick={() => setDeleteTarget(note)}
+                          >
+                            <Trash2 size={13} />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   ))
                 )}
