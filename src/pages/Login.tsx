@@ -51,10 +51,10 @@ const LoginPage = () => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">
-      {/* Abstract teal background */}
+      {/* Abstract teal background (slightly blurred) */}
       <div
         aria-hidden="true"
-        className="absolute inset-0 bg-teal-900 bg-cover bg-center"
+        className="absolute -inset-2 bg-teal-900 bg-cover bg-center blur-[6px]"
         style={{ backgroundImage: `url(${loginBg})` }}
       />
       {/* Soft overlay for depth and card legibility */}
