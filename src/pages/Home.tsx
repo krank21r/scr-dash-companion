@@ -14,7 +14,6 @@ import {
   Layers,
   ArrowUpRight,
   PieChart,
-  Calendar,
   CheckCircle2,
 } from "lucide-react";
 import { Card } from "../components/ui/card";
@@ -172,95 +171,8 @@ const HomePage = () => {
   const rspCount = works.filter((w) => w.type === "rsp").length;
   const irspCount = works.filter((w) => w.type === "irsp").length;
   const availableBalance = totalAllocation - totalSpent;
-  const utilizationPercentage =
-    totalAllocation > 0 ? Math.min(Math.round((totalSpent / totalAllocation) * 100), 100) : 0;
-
   return (
     <div className="space-y-6 pb-8">
-      {/* Executive Hero Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 p-6 md:p-8 text-white shadow-xl shadow-teal-950/20 relative overflow-hidden">
-        {/* Subtle decorative background shapes */}
-        <div className="absolute right-0 top-0 -mt-10 -mr-10 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute left-1/3 bottom-0 -mb-12 w-48 h-48 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-teal-500/20 text-teal-200 border border-teal-400/30">
-                South Central Railway
-              </span>
-              <span className="text-xs text-teal-200/60 font-medium">&middot;</span>
-              <span className="text-xs text-teal-100/80 font-medium">
-                Carriage Workshop LGD
-              </span>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-              Budget &amp; Works Overview
-            </h1>
-            <p className="text-xs md:text-sm text-teal-100/70 max-w-xl leading-relaxed">
-              Real-time monitoring of RSP &amp; IRSP rolling stock works, contingency fund allocations,
-              and workshop expenditures.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            {isAdmin && (
-              <Button
-                onClick={() => navigate("/add-works")}
-                className="bg-white text-teal-950 hover:bg-teal-50 hover:text-teal-900 font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-black/20 text-xs gap-1.5 transition-all"
-              >
-                <Plus size={16} />
-                <span>Create New Work</span>
-              </Button>
-            )}
-          </div>
-        </div>
-
-        {/* Budget Utilization Progress Bar */}
-        <div className="mt-6 pt-5 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-1">
-            <p className="text-[11px] font-medium text-teal-200/70 uppercase tracking-wider">
-              Total Sanctioned Allocation
-            </p>
-            <p className="text-lg font-bold text-white font-mono">
-              ₹<AnimatedNumber value={totalAllocation} />
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-[11px] font-medium text-teal-200/70 uppercase tracking-wider">
-              Total Recorded Expenditure
-            </p>
-            <p className="text-lg font-bold text-amber-300 font-mono">
-              ₹<AnimatedNumber value={totalSpent} />
-            </p>
-          </div>
-
-          <div className="space-y-1">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="font-medium text-teal-200/70 uppercase tracking-wider">
-                Available Contingency Balance
-              </span>
-              <span className="font-bold text-emerald-300 font-mono">
-                {100 - utilizationPercentage}% Free
-              </span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-bold text-emerald-300 font-mono">
-                ₹<AnimatedNumber value={availableBalance} />
-              </span>
-            </div>
-            {/* Visual mini progress bar */}
-            <div className="w-full bg-white/15 h-1.5 rounded-full overflow-hidden mt-1.5">
-              <div
-                className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full transition-all duration-700"
-                style={{ width: `${Math.max(100 - utilizationPercentage, 2)}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Primary KPI Cards (Animation preserved) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* RSP Card */}
