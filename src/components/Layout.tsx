@@ -1,10 +1,11 @@
 import { useState, useEffect, ReactNode } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { Menu, Plus, FileText, LayoutDashboard, LogOut, ShieldCheck, Eye } from "lucide-react";
+import { Menu, Plus, FileText, LayoutDashboard, LogOut, ShieldCheck, Eye, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { UserAccessModal } from "./UserAccessModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,6 +26,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isUserAccessModalOpen, setIsUserAccessModalOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -66,6 +68,7 @@ export const Layout = ({ children }: LayoutProps) => {
         onClose={() => setIsSidebarOpen(false)}
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
+        onOpenUserAccess={() => setIsUserAccessModalOpen(true)}
       />
 
       <div className="flex-1 flex flex-col min-w-0 transition-all duration-300">
@@ -169,6 +172,18 @@ export const Layout = ({ children }: LayoutProps) => {
                   </p>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                {isAdmin && (
+                  <>
+                    <DropdownMenuItem
+                      onClick={() => setIsUserAccessModalOpen(true)}
+                      className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors focus:bg-slate-50 focus:text-slate-900"
+                    >
+                      <Users size={15} className="text-primary" />
+                      <span className="text-sm font-medium">Manage User Access</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                  </>
+                )}
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer transition-colors focus:bg-red-50 focus:text-red-600"
@@ -197,6 +212,14 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
         </main>
       </div>
+
+      {/* Admin User Access Modal */}
+      {isAdmin && (
+        <UserAccessModal
+          open={isUserAccessModalOpen}
+          onOpenChange={setIsUserAccessModalOpen}
+        />
+      )}
     </div>
   );
 };

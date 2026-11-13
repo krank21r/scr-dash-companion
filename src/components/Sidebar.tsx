@@ -1,18 +1,21 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, FileText, AlertCircle, TrendingUp, LayoutDashboard, Link as LinkIcon, Info, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Home, FileText, AlertCircle, TrendingUp, LayoutDashboard, Link as LinkIcon, Info, ChevronLeft, ChevronRight, X, Users } from "lucide-react";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
+  onOpenUserAccess?: () => void;
 }
 
-export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) => {
+export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse, onOpenUserAccess }: SidebarProps) => {
   const location = useLocation();
+  const { isAdmin } = useAuth();
   const isActive = (path: string) => location.pathname === path;
   const [collapsed, setCollapsed] = useState(false);
 
@@ -70,9 +73,8 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
           >
             <item.icon
               size={18}
-              className={`shrink-0 transition-colors duration-150 ${
-                isActive(item.path) ? "text-primary" : "text-slate-500 group-hover:text-slate-700"
-              }`}
+              className={`shrink-0 transition-colors duration-150 ${isActive(item.path) ? "text-primary" : "text-slate-500 group-hover:text-slate-700"
+                }`}
             />
             {!collapsed && (
               <motion.span
@@ -85,6 +87,40 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse }: Side
             )}
           </Link>
         ))}
+
+        {isAdmin && (
+          <div className="pt-3 mt-3 border-t border-slate-200/60">
+            {!collapsed && (
+              <p className="px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                Administration
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => {
+                onClose?.();
+                onOpenUserAccess?.();
+              }}
+              className={`w-full sidebar-nav-item group h-11 flex items-center text-left ${collapsed ? "justify-center px-0" : "px-3"
+                }`}
+              title={collapsed ? "User Access" : ""}
+            >
+              <Users
+                size={18}
+                className="shrink-0 text-slate-500 group-hover:text-primary transition-colors duration-150"
+              />
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-sm font-medium ml-3 text-slate-600 group-hover:text-slate-900"
+                >
+                  User Access
+                </motion.span>
+              )}
+            </button>
+          </div>
+        )}
       </nav>
 
       {/* Collapse Toggle */}
