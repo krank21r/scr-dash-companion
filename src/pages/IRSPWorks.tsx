@@ -230,13 +230,6 @@ const IRSPWorks = () => {
             <span className="font-bold font-mono">{completedCount}</span>
           </div>
 
-          {totalSanctionedValue > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-50 text-amber-800 border border-amber-200/60">
-              <IndianRupee size={13} className="text-amber-600" />
-              <span className="font-medium">Total Value:</span>
-              <span className="font-bold font-mono">₹{totalSanctionedValue.toLocaleString("en-IN")}</span>
-            </div>
-          )}
         </div>
 
         {/* Year Pills Filter */}

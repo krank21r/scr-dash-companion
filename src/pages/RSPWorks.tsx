@@ -244,13 +244,6 @@ const RSPWorks = () => {
             <span className="font-bold font-mono">{completedCount}</span>
           </div>
 
-          {totalSanctionedCost > 0 && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/60">
-              <IndianRupee size={13} className="text-teal-600" />
-              <span className="font-medium">Sanctioned:</span>
-              <span className="font-bold font-mono">₹{totalSanctionedCost.toLocaleString("en-IN")}</span>
-            </div>
-          )}
         </div>
 
         {/* Year Pills Filter */}
