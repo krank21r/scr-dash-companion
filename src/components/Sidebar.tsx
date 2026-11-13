@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { APP_VERSION } from "@/config/version";
 
 interface SidebarProps {
   isOpen?: boolean;
@@ -52,7 +53,9 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse, onOpen
               <span className="font-bold text-slate-900 tracking-tight text-base leading-none">
                 Budget <span className="text-primary">Portal</span>
               </span>
-              <span className="text-[10px] text-slate-400 font-medium mt-0.5">Carriage Workshop LGD</span>
+              <span className="text-[10px] text-slate-400 font-medium mt-0.5">
+                Carriage Workshop LGD &middot; v{APP_VERSION}
+              </span>
             </motion.div>
           )}
         </Link>
@@ -123,8 +126,8 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse, onOpen
         )}
       </nav>
 
-      {/* Collapse Toggle */}
-      <div className="p-3 border-t border-slate-100">
+      {/* Collapse Toggle & Version */}
+      <div className="p-3 border-t border-slate-100 flex flex-col gap-2">
         <button
           onClick={onToggleCollapse}
           className="hidden md:flex w-full h-10 items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
@@ -138,6 +141,20 @@ export const Sidebar = ({ isOpen, onClose, isCollapsed, onToggleCollapse, onOpen
             </div>
           )}
         </button>
+
+        <Link
+          to="/info"
+          className={`flex items-center justify-center text-[10px] font-mono text-slate-400 hover:text-primary transition-colors py-1 rounded ${
+            collapsed ? "px-0" : "px-2"
+          }`}
+          title={`Version ${APP_VERSION} (Click for info)`}
+        >
+          {collapsed ? (
+            <span>v{APP_VERSION}</span>
+          ) : (
+            <span>v{APP_VERSION} &middot; SCR LGD</span>
+          )}
+        </Link>
       </div>
     </div>
   );

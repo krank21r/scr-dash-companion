@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Info as InfoIcon, CalendarDays, ArrowRight } from "lucide-react";
+import { ArrowLeft, Info as InfoIcon, CalendarDays, ArrowRight, Sparkles, CheckCircle2, Tag } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { APP_VERSION, APP_RELEASE_DATE, RELEASES } from "@/config/version";
 
 const Info = () => {
   const navigate = useNavigate();
@@ -78,14 +79,23 @@ const Info = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-3 border-t border-slate-50">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-3 border-t border-slate-50">
             <div>
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Version</p>
-              <p className="text-sm font-medium text-slate-900">1.0.0</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="text-sm font-bold text-slate-900">v{APP_VERSION}</span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Latest
+                </span>
+              </div>
             </div>
             <div>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Release Date</p>
+              <p className="text-sm font-medium text-slate-900 mt-0.5">{APP_RELEASE_DATE}</p>
+            </div>
+            <div className="col-span-2 sm:col-span-1">
               <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Department</p>
-              <p className="text-sm font-medium text-slate-900">Budget Section</p>
+              <p className="text-sm font-medium text-slate-900 mt-0.5">Budget Section</p>
             </div>
           </div>
 
@@ -120,6 +130,49 @@ const Info = () => {
                   <p className="text-[10px] font-medium text-slate-500 uppercase">Tech-I</p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Version History & Updates */}
+          <div className="pt-4 border-t border-slate-100">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles size={15} className="text-sky-600" />
+              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest">
+                Version History &amp; Release Notes
+              </h4>
+            </div>
+
+            <div className="space-y-3">
+              {RELEASES.map((rel) => (
+                <div
+                  key={rel.version}
+                  className="rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 space-y-2"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-sm text-slate-900">v{rel.version}</span>
+                      <span className="text-xs font-medium text-slate-600">— {rel.title}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {rel.badge && (
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-primary/10 text-primary border border-primary/20">
+                          {rel.badge}
+                        </span>
+                      )}
+                      <span className="text-[11px] text-slate-400">{rel.date}</span>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-1.5 pt-1">
+                    {rel.highlights.map((item, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-xs text-slate-600">
+                        <CheckCircle2 size={13} className="text-emerald-500 mt-0.5 shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           </div>
         </div>

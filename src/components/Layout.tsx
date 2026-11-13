@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserAccessModal } from "./UserAccessModal";
+import { APP_VERSION } from "@/config/version";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -191,6 +192,10 @@ export const Layout = ({ children }: LayoutProps) => {
                   <LogOut size={15} />
                   <span className="text-sm font-semibold">Sign out</span>
                 </DropdownMenuItem>
+                <DropdownMenuSeparator className="my-1 bg-slate-100" />
+                <div className="px-3 py-1.5 text-[10px] text-slate-400 text-center font-mono">
+                  v{APP_VERSION} &middot; Budget Portal
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

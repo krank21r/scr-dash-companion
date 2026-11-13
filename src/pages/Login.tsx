@@ -5,6 +5,7 @@ import { Home, Lock, LogIn, Eye, EyeOff, User, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import loginBg from "@/assets/login-bg.png";
+import { APP_VERSION } from "@/config/version";
 
 const LoginPage = () => {
   const { user, login } = useAuth();
@@ -172,11 +173,16 @@ const LoginPage = () => {
           </form>
         </div>
 
-        <p className="text-center mt-5">
-          <span className="inline-block rounded-full bg-teal-950/40 backdrop-blur-sm px-4 py-1.5 text-[10px] font-medium text-white/90">
-            Restricted access &middot; Authorized users only
-          </span>
-        </p>
+        <div className="text-center mt-5 space-y-1.5">
+          <p>
+            <span className="inline-block rounded-full bg-teal-950/40 backdrop-blur-sm px-4 py-1.5 text-[10px] font-medium text-white/90">
+              Restricted access &middot; Authorized users only
+            </span>
+          </p>
+          <p className="text-[10px] font-mono text-white/60">
+            Budget Portal v{APP_VERSION} &middot; Carriage Workshop LGD
+          </p>
+        </div>
       </motion.div>
     </div>
   );
