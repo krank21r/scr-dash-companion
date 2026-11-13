@@ -178,7 +178,7 @@ const RSPWorks = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                RSP Works Program
+                RSP Works
               </h1>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
                 {filteredWorks.length} Records

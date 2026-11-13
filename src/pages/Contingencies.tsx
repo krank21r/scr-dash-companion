@@ -227,15 +227,12 @@ const Contingencies = () => {
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                Contingency Allocations
+                Contingency
               </h1>
               <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                 {filteredContingencies.length} Head Entries
               </span>
             </div>
-            <p className="text-xs text-slate-400 font-medium mt-0.5">
-              Sanctioned funds &amp; expenditure tracking &middot; Carriage Workshop LGD
-            </p>
           </div>
         </div>
 
@@ -300,7 +297,7 @@ const Contingencies = () => {
           </div>
           <div>
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-              Total Allocation
+              Total Contingencies
             </p>
             <p className="text-base font-extrabold text-slate-900 font-mono">
               ₹{totalAllocation.toLocaleString("en-IN")}
@@ -314,7 +311,7 @@ const Contingencies = () => {
           </div>
           <div>
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-              Recorded Expenditures
+              Expenditures
             </p>
             <p className="text-base font-extrabold text-amber-700 font-mono">
               ₹{totalSpentAll.toLocaleString("en-IN")}
