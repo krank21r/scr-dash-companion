@@ -48,7 +48,7 @@ const LoginPage = () => {
   };
 
   const inputClass =
-    "w-full h-10 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all";
+    "w-full h-11 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-800 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-600 transition-all shadow-sm";
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 overflow-hidden">

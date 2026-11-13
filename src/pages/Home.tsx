@@ -1,6 +1,22 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FileText, TrendingUp, Plus, ChevronRight, AlertCircle, Layout, Clock, Trash2, Edit3 } from "lucide-react";
+import {
+  FileText,
+  TrendingUp,
+  Plus,
+  ChevronRight,
+  AlertCircle,
+  Layout,
+  Clock,
+  Trash2,
+  Edit3,
+  IndianRupee,
+  Layers,
+  ArrowUpRight,
+  PieChart,
+  Calendar,
+  CheckCircle2,
+} from "lucide-react";
 import { Card } from "../components/ui/card";
 import {
   Dialog,
@@ -18,9 +34,9 @@ import {
 } from "../components/ui/alert-dialog";
 import { DataTable } from "../components/ui/data-table";
 import { collection, deleteDoc, doc, getDocs, query, orderBy, limit } from "firebase/firestore";
-import { db, notesCollection } from '@/lib/firebase';
+import { db, notesCollection } from "@/lib/firebase";
 import { useToast } from "../hooks/use-toast";
-import { parseAmount, formatDisplayDate } from "../lib/utils";
+import { parseAmount, formatDisplayDate, formatINR } from "../lib/utils";
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
@@ -62,10 +78,9 @@ const AnimatedNumber = ({ value }: { value: number }) => {
       if (progress < 1) rafId = requestAnimationFrame(animate);
     };
     rafId = requestAnimationFrame(animate);
-    // Cancel the loop on unmount to avoid setting state on a dead component
     return () => cancelAnimationFrame(rafId);
   }, [value]);
-  return <span>{display.toLocaleString('en-IN')}</span>;
+  return <span>{display.toLocaleString("en-IN")}</span>;
 };
 
 const HomePage = () => {
@@ -89,14 +104,17 @@ const HomePage = () => {
           getDocs(collection(db, "contingencies")),
         ]);
 
-        setWorks(worksSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as WorkItem[]);
-        setNotes(notesSnapshot.docs.map(doc => ({
-          id: doc.id,
-          text: doc.data().text,
-          // Safe for Timestamps, Dates and legacy string values alike
-          createdAt: formatDisplayDate(doc.data().createdAt, 'Recent'),
-        })) as NoteItem[]);
-        setContingencies(contingenciesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as ContingencyItem[]);
+        setWorks(worksSnapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as WorkItem[]);
+        setNotes(
+          notesSnapshot.docs.map((d) => ({
+            id: d.id,
+            text: d.data().text,
+            createdAt: formatDisplayDate(d.data().createdAt, "Recent"),
+          })) as NoteItem[]
+        );
+        setContingencies(
+          contingenciesSnapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as ContingencyItem[]
+        );
       } catch (error) {
         console.error("Error:", error);
         toast({
@@ -115,7 +133,7 @@ const HomePage = () => {
     if (!deleteTarget) return;
     try {
       await deleteDoc(doc(notesCollection, deleteTarget.id));
-      setNotes(prev => prev.filter(n => n.id !== deleteTarget.id));
+      setNotes((prev) => prev.filter((n) => n.id !== deleteTarget.id));
     } catch (e) {
       console.error(e);
       toast({ title: "Could not delete task", variant: "destructive" });
@@ -130,46 +148,120 @@ const HomePage = () => {
   };
 
   const statusLabels: Record<string, string> = {
-    'de_process': 'DE under Process',
-    'de_finance': 'DE Sent to Finance',
-    'de_hqrs': 'DE Sent to HQrs',
-    'work_process': 'Work under Process',
-    'tender': 'Tender Stage',
-    'completed': 'Work Completed',
-    'indents_placed': 'Indents Placed'
+    de_process: "DE under Process",
+    de_finance: "DE Sent to Finance",
+    de_hqrs: "DE Sent to HQrs",
+    work_process: "Work under Process",
+    tender: "Tender Stage",
+    completed: "Work Completed",
+    indents_placed: "Indents Placed",
   };
 
-  const totalSpent = contingencies.reduce((sum, c) =>
-    sum + (c.expenditures || []).reduce((s, e) => s + (parseAmount(e.amount) ?? 0), 0), 0
+  const totalSpent = contingencies.reduce(
+    (sum, c) =>
+      sum +
+      (c.expenditures || []).reduce((s, e) => s + (parseAmount(e.amount) ?? 0), 0),
+    0
   );
 
-  const totalAllocation = contingencies.reduce((sum, c) => sum + (parseAmount(c.totalAmount) ?? 0), 0);
+  const totalAllocation = contingencies.reduce(
+    (sum, c) => sum + (parseAmount(c.totalAmount) ?? 0),
+    0
+  );
 
-  const rspCount = works.filter(w => w.type === 'rsp').length;
-  const irspCount = works.filter(w => w.type === 'irsp').length;
+  const rspCount = works.filter((w) => w.type === "rsp").length;
+  const irspCount = works.filter((w) => w.type === "irsp").length;
   const availableBalance = totalAllocation - totalSpent;
+  const utilizationPercentage =
+    totalAllocation > 0 ? Math.min(Math.round((totalSpent / totalAllocation) * 100), 100) : 0;
 
   return (
-    <div className="space-y-4 pb-6">
-      {/* Hero Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900">
-            <span className="text-primary">Dashboard</span>
-          </h1>
-          <p className="text-sm text-slate-500 font-medium">
-            Carriage Workshop LGD
-          </p>
+    <div className="space-y-6 pb-8">
+      {/* Executive Hero Banner */}
+      <div className="rounded-2xl bg-gradient-to-r from-teal-900 via-teal-800 to-slate-900 p-6 md:p-8 text-white shadow-xl shadow-teal-950/20 relative overflow-hidden">
+        {/* Subtle decorative background shapes */}
+        <div className="absolute right-0 top-0 -mt-10 -mr-10 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute left-1/3 bottom-0 -mb-12 w-48 h-48 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-teal-500/20 text-teal-200 border border-teal-400/30">
+                South Central Railway
+              </span>
+              <span className="text-xs text-teal-200/60 font-medium">&middot;</span>
+              <span className="text-xs text-teal-100/80 font-medium">
+                Carriage Workshop LGD
+              </span>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
+              Budget &amp; Works Overview
+            </h1>
+            <p className="text-xs md:text-sm text-teal-100/70 max-w-xl leading-relaxed">
+              Real-time monitoring of RSP &amp; IRSP rolling stock works, contingency fund allocations,
+              and workshop expenditures.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {isAdmin && (
+              <Button
+                onClick={() => navigate("/add-works")}
+                className="bg-white text-teal-950 hover:bg-teal-50 hover:text-teal-900 font-bold px-4 py-2.5 rounded-xl shadow-lg shadow-black/20 text-xs gap-1.5 transition-all"
+              >
+                <Plus size={16} />
+                <span>Create New Work</span>
+              </Button>
+            )}
+          </div>
         </div>
-        {isAdmin && (
-          <Button onClick={() => navigate('/add-works')} className="btn-primary h-10 px-5 rounded-lg">
-            <Plus size={18} />
-            New Work
-          </Button>
-        )}
+
+        {/* Budget Utilization Progress Bar */}
+        <div className="mt-6 pt-5 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="space-y-1">
+            <p className="text-[11px] font-medium text-teal-200/70 uppercase tracking-wider">
+              Total Sanctioned Allocation
+            </p>
+            <p className="text-lg font-bold text-white font-mono">
+              ₹<AnimatedNumber value={totalAllocation} />
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-[11px] font-medium text-teal-200/70 uppercase tracking-wider">
+              Total Recorded Expenditure
+            </p>
+            <p className="text-lg font-bold text-amber-300 font-mono">
+              ₹<AnimatedNumber value={totalSpent} />
+            </p>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="font-medium text-teal-200/70 uppercase tracking-wider">
+                Available Contingency Balance
+              </span>
+              <span className="font-bold text-emerald-300 font-mono">
+                {100 - utilizationPercentage}% Free
+              </span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-lg font-bold text-emerald-300 font-mono">
+                ₹<AnimatedNumber value={availableBalance} />
+              </span>
+            </div>
+            {/* Visual mini progress bar */}
+            <div className="w-full bg-white/15 h-1.5 rounded-full overflow-hidden mt-1.5">
+              <div
+                className="h-full bg-gradient-to-r from-emerald-400 to-teal-300 rounded-full transition-all duration-700"
+                style={{ width: `${Math.max(100 - utilizationPercentage, 2)}%` }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Primary KPI Cards (Animation preserved) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* RSP Card */}
         <motion.div
@@ -179,25 +271,33 @@ const HomePage = () => {
           className="group"
         >
           <Link to="/rsp-works" className="block h-full">
-            <Card className="glass-card p-5 h-full flex flex-col hover:shadow-md transition-all duration-300 group cursor-pointer">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                  <FileText size={18} />
+            <Card className="glass-card p-5 h-full flex flex-col hover:border-teal-300 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0 border border-teal-100 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+                    <FileText size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+                      RSP Works
+                    </h3>
+                    <p className="text-xs text-slate-400">Rolling Stock Program</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold text-slate-900 leading-tight">RSP</h3>
-                  <p className="text-xs text-slate-400 truncate">Rolling Stock Program</p>
-                </div>
+                <span className="p-1.5 rounded-lg text-slate-400 group-hover:text-teal-600 group-hover:bg-teal-50 transition-colors">
+                  <ArrowUpRight size={16} />
+                </span>
               </div>
-              <div className="mt-4 flex items-baseline justify-between gap-2">
-                <span className="flex items-baseline gap-2 min-w-0">
-                  <span className="text-3xl font-bold text-slate-900 tracking-tight leading-none">
+
+              <div className="mt-5 flex items-baseline justify-between">
+                <div>
+                  <span className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight leading-none">
                     <AnimatedNumber value={rspCount} />
                   </span>
-                  <span className="text-xs font-medium text-slate-400">works</span>
-                </span>
-                <span className="flex items-center gap-1 text-primary text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                  View Works <ChevronRight size={14} />
+                  <span className="text-xs font-semibold text-slate-400 ml-2">sanctioned works</span>
+                </div>
+                <span className="text-xs font-bold text-teal-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                  View table <ChevronRight size={14} />
                 </span>
               </div>
             </Card>
@@ -212,25 +312,33 @@ const HomePage = () => {
           className="group"
         >
           <Link to="/irsp-works" className="block h-full">
-            <Card className="glass-card p-5 h-full flex flex-col hover:shadow-md transition-all duration-300 group cursor-pointer">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                  <Layout size={18} />
+            <Card className="glass-card p-5 h-full flex flex-col hover:border-amber-300 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0 border border-amber-100 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+                    <Layers size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+                      IRSP Works
+                    </h3>
+                    <p className="text-xs text-slate-400">Itemised RSP Programme</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold text-slate-900 leading-tight">IRSP</h3>
-                  <p className="text-xs text-slate-400 truncate">Itemised RSP Programme</p>
-                </div>
+                <span className="p-1.5 rounded-lg text-slate-400 group-hover:text-amber-600 group-hover:bg-amber-50 transition-colors">
+                  <ArrowUpRight size={16} />
+                </span>
               </div>
-              <div className="mt-4 flex items-baseline justify-between gap-2">
-                <span className="flex items-baseline gap-2 min-w-0">
-                  <span className="text-3xl font-bold text-slate-900 tracking-tight leading-none">
+
+              <div className="mt-5 flex items-baseline justify-between">
+                <div>
+                  <span className="text-3xl font-extrabold text-slate-900 font-mono tracking-tight leading-none">
                     <AnimatedNumber value={irspCount} />
                   </span>
-                  <span className="text-xs font-medium text-slate-400">works</span>
-                </span>
-                <span className="flex items-center gap-1 text-amber-600 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                  View Works <ChevronRight size={14} />
+                  <span className="text-xs font-semibold text-slate-400 ml-2">itemised works</span>
+                </div>
+                <span className="text-xs font-bold text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                  View table <ChevronRight size={14} />
                 </span>
               </div>
             </Card>
@@ -245,25 +353,34 @@ const HomePage = () => {
           className="group"
         >
           <Link to="/contingencies" className="block h-full">
-            <Card className="glass-card p-5 h-full flex flex-col hover:shadow-md transition-all duration-300 group cursor-pointer">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                  <AlertCircle size={18} />
+            <Card className="glass-card p-5 h-full flex flex-col hover:border-emerald-300 transition-all duration-300 group cursor-pointer relative overflow-hidden">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-100 group-hover:scale-105 transition-transform duration-200 shadow-sm">
+                    <IndianRupee size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-extrabold text-slate-900 leading-tight">
+                      Contingencies
+                    </h3>
+                    <p className="text-xs text-slate-400">Available Net Balance</p>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-base font-bold text-slate-900 leading-tight">Contingencies</h3>
-                  <p className="text-xs text-slate-400 truncate">Contingency Allocations</p>
-                </div>
-              </div>
-              <div className="mt-4 flex items-baseline justify-between gap-2">
-                <span className="flex items-baseline gap-2 min-w-0">
-                  <span className="text-2xl font-bold text-emerald-600 tracking-tight leading-none">
-                    <span className="text-base">₹</span><AnimatedNumber value={availableBalance} />
-                  </span>
-                  <span className="text-xs font-medium text-slate-400">available</span>
+                <span className="p-1.5 rounded-lg text-slate-400 group-hover:text-emerald-600 group-hover:bg-emerald-50 transition-colors">
+                  <ArrowUpRight size={16} />
                 </span>
-                <span className="flex items-center gap-1 text-emerald-600 text-xs font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
-                  View Entries <ChevronRight size={14} />
+              </div>
+
+              <div className="mt-5 flex items-baseline justify-between">
+                <div>
+                  <span className="text-2xl font-extrabold text-emerald-600 font-mono tracking-tight leading-none">
+                    <span className="text-base">₹</span>
+                    <AnimatedNumber value={availableBalance} />
+                  </span>
+                  <span className="text-xs font-semibold text-slate-400 ml-2">unspent balance</span>
+                </div>
+                <span className="text-xs font-bold text-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                  View funds <ChevronRight size={14} />
                 </span>
               </div>
             </Card>
@@ -273,7 +390,7 @@ const HomePage = () => {
 
       {/* Status Overview & Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        {/* Status Grid */}
+        {/* Status Grid (Animation preserved) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -281,51 +398,67 @@ const HomePage = () => {
           className="lg:col-span-3"
         >
           <Card className="glass-card p-0 overflow-hidden h-full flex flex-col">
-            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-slate-100 text-slate-500 shrink-0">
+                <div className="p-2 rounded-xl bg-slate-100 text-slate-600 shrink-0">
                   <TrendingUp size={16} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Status Overview</h3>
-                  <p className="text-xs text-slate-400">{works.length} works registered</p>
+                  <h3 className="text-sm font-bold text-slate-900">Works Status Lifecycle</h3>
+                  <p className="text-[11px] text-slate-400 font-medium">
+                    {works.length} total works registered across all stages
+                  </p>
                 </div>
               </div>
             </div>
 
             <div className="p-5 flex-1">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {Object.entries(statusLabels).map(([key, label]) => {
-                const count = works.filter(w => w.status === key).length;
-                if (count === 0 && key !== 'completed') return null;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => handleStatusClick(key)}
-                    className="p-3.5 rounded-xl bg-slate-50/50 border border-slate-100 hover:border-slate-200 hover:bg-white transition-all text-left group/btn"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className={`w-2 h-2 rounded-full shrink-0 ${
-                        key === 'completed' ? 'bg-emerald-500' :
-                        key === 'tender' ? 'bg-amber-500' :
-                        key === 'de_finance' ? 'bg-blue-500' :
-                        'bg-slate-400'
-                      }`} />
-                      <p className="text-xs font-medium text-slate-500 leading-tight">{label}</p>
-                    </div>
-                    <div className="mt-2.5 flex items-center justify-between">
-                      <span className="text-xl font-bold text-slate-900">{count}</span>
-                      <ChevronRight size={14} className="text-slate-300 group-hover/btn:text-primary transition-colors" />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {Object.entries(statusLabels).map(([key, label]) => {
+                  const count = works.filter((w) => w.status === key).length;
+                  if (count === 0 && key !== "completed") return null;
+
+                  const dotColor =
+                    key === "completed"
+                      ? "bg-emerald-500 shadow-sm"
+                      : key === "tender"
+                      ? "bg-amber-500 shadow-sm"
+                      : key === "de_finance"
+                      ? "bg-blue-500 shadow-sm"
+                      : key === "de_hqrs"
+                      ? "bg-purple-500 shadow-sm"
+                      : "bg-slate-400";
+
+                  return (
+                    <button
+                      key={key}
+                      onClick={() => handleStatusClick(key)}
+                      className="p-3.5 rounded-xl bg-white border border-slate-200/80 hover:border-teal-300 hover:shadow-md hover:shadow-teal-900/5 transition-all text-left group/btn"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`w-2 h-2 rounded-full shrink-0 ${dotColor}`} />
+                        <p className="text-xs font-semibold text-slate-600 leading-tight truncate">
+                          {label}
+                        </p>
+                      </div>
+                      <div className="mt-3 flex items-baseline justify-between">
+                        <span className="text-2xl font-extrabold text-slate-900 font-mono">
+                          {count}
+                        </span>
+                        <ChevronRight
+                          size={14}
+                          className="text-slate-300 group-hover/btn:text-teal-600 group-hover/btn:translate-x-0.5 transition-all"
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* Tasks List */}
+        {/* Tasks List (Animation preserved) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -333,25 +466,25 @@ const HomePage = () => {
           className="lg:col-span-2"
         >
           <Card className="glass-card overflow-hidden h-full flex flex-col">
-            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/30 flex items-center justify-between">
+            <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+                <div className="p-2 rounded-xl bg-teal-50 text-teal-700 shrink-0">
                   <Clock size={16} />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">Task List</h3>
-                  <p className="text-xs text-slate-400">{notes.length} recent</p>
+                  <h3 className="text-sm font-bold text-slate-900">Task Notes &amp; Reminders</h3>
+                  <p className="text-[11px] text-slate-400 font-medium">{notes.length} recent entries</p>
                 </div>
               </div>
               {isAdmin && (
                 <Button
-                  onClick={() => navigate('/add-note')}
+                  onClick={() => navigate("/add-note")}
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-xs font-semibold text-primary hover:bg-primary/5 hover:text-primary"
+                  className="h-8 text-xs font-semibold text-teal-700 hover:bg-teal-50"
                 >
                   <Plus size={14} className="mr-1" />
-                  Add
+                  Add Note
                 </Button>
               )}
             </div>
@@ -360,21 +493,25 @@ const HomePage = () => {
               <div className="space-y-2">
                 {loading ? (
                   <div className="py-8 flex flex-col items-center gap-3">
-                    <div className="w-6 h-6 border-2 border-slate-200 border-t-primary rounded-full animate-spin" />
+                    <div className="w-6 h-6 border-2 border-slate-200 border-t-teal-600 rounded-full animate-spin" />
                     <p className="text-xs text-slate-400">Loading tasks...</p>
                   </div>
                 ) : notes.length === 0 ? (
-                  <div className="py-8 text-center">
-                    <p className="text-sm text-slate-400">No pending tasks</p>
+                  <div className="py-10 text-center">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-2">
+                      <CheckCircle2 size={18} />
+                    </div>
+                    <p className="text-xs font-semibold text-slate-600">No active tasks</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">Everything is up to date.</p>
                     {isAdmin && (
                       <Button
-                        onClick={() => navigate('/add-note')}
+                        onClick={() => navigate("/add-note")}
                         variant="ghost"
                         size="sm"
-                        className="mt-2 text-xs text-primary"
+                        className="mt-3 text-xs text-teal-700 hover:bg-teal-50"
                       >
                         <Plus size={14} className="mr-1" />
-                        Add task
+                        Create first task
                       </Button>
                     )}
                   </div>
@@ -382,11 +519,13 @@ const HomePage = () => {
                   notes.map((note) => (
                     <div
                       key={note.id}
-                      className="group flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 transition-colors"
+                      className="group flex items-center justify-between p-3 rounded-xl border border-slate-100 bg-white hover:border-slate-200 hover:bg-slate-50/50 transition-colors"
                     >
                       <div className="flex-1 min-w-0 mr-3">
-                        <p className="text-sm font-medium text-slate-700 truncate">{note.text}</p>
-                        <p className="text-[10px] text-slate-400 mt-0.5">{note.createdAt}</p>
+                        <p className="text-xs font-semibold text-slate-800 truncate">{note.text}</p>
+                        <p className="text-[10px] text-slate-400 font-medium mt-0.5">
+                          {note.createdAt}
+                        </p>
                       </div>
                       {isAdmin && (
                         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -394,7 +533,7 @@ const HomePage = () => {
                             variant="ghost"
                             size="icon"
                             aria-label={`Edit task: ${note.text}`}
-                            className="h-7 w-7 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
+                            className="h-7 w-7 text-slate-400 hover:text-teal-700 hover:bg-teal-50 rounded-lg"
                             onClick={() => navigate(`/edit-note/${note.id}`)}
                           >
                             <Edit3 size={13} />
@@ -403,7 +542,7 @@ const HomePage = () => {
                             variant="ghost"
                             size="icon"
                             aria-label={`Delete task: ${note.text}`}
-                            className="h-7 w-7 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md"
+                            className="h-7 w-7 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg"
                             onClick={() => setDeleteTarget(note)}
                           >
                             <Trash2 size={13} />
@@ -421,7 +560,7 @@ const HomePage = () => {
 
       {/* Delete task confirmation */}
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this task?</AlertDialogTitle>
             <AlertDialogDescription>
@@ -429,57 +568,75 @@ const HomePage = () => {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteNote}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white rounded-lg"
             >
-              Delete
+              Delete Task
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Status Modal */}
+      {/* Status Filter Modal */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-5xl w-[95vw] rounded-xl border-none bg-white p-0 overflow-hidden">
-          <div className="bg-primary p-6">
-            <h3 className="text-xl font-bold text-white">
+        <DialogContent className="max-w-4xl w-[95vw] rounded-2xl border-none bg-white p-0 overflow-hidden shadow-2xl">
+          <div className="bg-gradient-to-r from-teal-800 to-teal-950 p-6 text-white">
+            <h3 className="text-lg font-bold">
               {selectedStatus && statusLabels[selectedStatus]}
             </h3>
-            <p className="text-primary-foreground/70 text-sm mt-1">Filtered Items</p>
+            <p className="text-teal-200/70 text-xs mt-0.5">
+              Filtered Works in this lifecycle stage
+            </p>
           </div>
           <div className="p-6">
-            <div className="rounded-lg border border-slate-100 overflow-hidden max-h-[50vh] overflow-y-auto">
+            <div className="rounded-xl border border-slate-200 overflow-hidden max-h-[50vh] overflow-y-auto">
               <DataTable
                 columns={[
                   {
                     header: "DESCRIPTION",
                     accessorKey: "description",
-                    cell: (info) => <span className="font-semibold text-slate-800 text-sm">{info.getValue() || '-'}</span>
+                    cell: (info) => (
+                      <span className="font-semibold text-slate-800 text-xs">
+                        {info.getValue() || "-"}
+                      </span>
+                    ),
                   },
                   {
-                    header: "TIPO",
+                    header: "PROGRAM",
                     accessorKey: "type",
                     cell: (info) => (
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                        info.getValue() === 'rsp' ? 'bg-primary/10 text-primary' : 'bg-amber-100 text-amber-600'
-                      }`}>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                          info.getValue() === "rsp"
+                            ? "bg-teal-50 text-teal-700 border border-teal-200"
+                            : "bg-amber-50 text-amber-700 border border-amber-200"
+                        }`}
+                      >
                         {info.getValue()}
                       </span>
-                    )
+                    ),
                   },
                   {
                     header: "YEAR",
                     accessorKey: "yearOfSanction",
-                    cell: (info) => <span className="font-mono text-xs text-slate-400">{info.getValue() || '-'}</span>
+                    cell: (info) => (
+                      <span className="font-mono text-xs text-slate-500 font-semibold">
+                        {info.getValue() || "-"}
+                      </span>
+                    ),
                   },
                 ]}
-                data={works.filter(w => w.status === selectedStatus)}
+                data={works.filter((w) => w.status === selectedStatus)}
               />
             </div>
-            <div className="mt-6 flex justify-end">
-              <Button onClick={() => setDialogOpen(false)} variant="outline" className="rounded-lg font-semibold">
+            <div className="mt-5 flex justify-end">
+              <Button
+                onClick={() => setDialogOpen(false)}
+                variant="outline"
+                className="rounded-xl text-xs font-semibold px-5"
+              >
                 Close
               </Button>
             </div>

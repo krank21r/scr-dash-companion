@@ -1,7 +1,19 @@
 import { useState, useEffect, ReactNode } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import { Sidebar } from "./Sidebar";
-import { Menu, Plus, FileText, LayoutDashboard, LogOut, ShieldCheck, Eye, Users } from "lucide-react";
+import {
+  Menu,
+  Plus,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  ShieldCheck,
+  Eye,
+  Users,
+  ChevronRight,
+  Sparkles,
+  Calendar,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "framer-motion";
@@ -31,7 +43,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
+      setScrolled(window.scrollY > 8);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -45,6 +57,8 @@ export const Layout = ({ children }: LayoutProps) => {
     if (path === "/contingencies") return "Contingencies";
     if (path === "/unit-cost") return "Unit Cost";
     if (path === "/weblinks") return "Web Links";
+    if (path === "/info") return "Application Info";
+    if (path === "/holidays") return "Railway Holidays";
     if (path.startsWith("/add-")) return "Create Record";
     if (path.startsWith("/edit-")) return "Edit Record";
     return "Budget Portal";
@@ -63,7 +77,7 @@ export const Layout = ({ children }: LayoutProps) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-slate-50/50 flex">
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
@@ -76,98 +90,124 @@ export const Layout = ({ children }: LayoutProps) => {
         {/* Top Header */}
         <header
           className={`h-16 flex items-center justify-between px-6 lg:px-8 sticky top-0 z-40 transition-all duration-200 ${
-            scrolled ? "bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-100/60" : "bg-transparent"
+            scrolled
+              ? "bg-white/85 backdrop-blur-md shadow-sm border-b border-slate-200/70"
+              : "bg-white/50 backdrop-blur-xs border-b border-transparent"
           }`}
         >
-          <div className="flex items-center gap-4">
+          {/* Breadcrumb & Page title */}
+          <div className="flex items-center gap-3">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-lg"
+              className="md:hidden text-slate-500 hover:bg-slate-100 hover:text-slate-800 rounded-lg h-9 w-9"
             >
-              <Menu size={20} />
+              <Menu size={19} />
             </Button>
 
-            <div className="hidden sm:flex items-center gap-2">
-              <LayoutDashboard size={16} className="text-slate-400" />
-              <h2 className="text-sm font-semibold text-slate-600">
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline-block text-xs font-semibold text-slate-400">
+                LGD Workshop
+              </span>
+              <ChevronRight size={14} className="hidden sm:inline-block text-slate-300" />
+              <h2 className="text-sm font-bold text-slate-900 tracking-tight">
                 {getPageTitle()}
               </h2>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Quick Add Dropdown — admin only */}
+          {/* Right Header Actions */}
+          <div className="flex items-center gap-2.5">
+            {/* Quick Add Dropdown (Admin only) */}
             {isAdmin && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button className="btn-primary h-10 px-4 rounded-lg text-sm font-semibold gap-2">
-                  <Plus size={16} />
-                  <span className="hidden sm:inline">New</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-xl p-2 bg-white border border-slate-100 shadow-lg shadow-slate-200/40">
-                <DropdownMenuItem asChild>
-                  <Link to="/add-works" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                      <FileText size={16} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-700 text-sm">New Work</p>
-                      <p className="text-xs text-slate-400">Add RSP/IRSP work</p>
-                    </div>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/add-contingency" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center">
-                      <FileText size={16} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-700 text-sm">New Contingency</p>
-                      <p className="text-xs text-slate-400">Add contingency item</p>
-                    </div>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="my-2 bg-slate-100" />
-                <DropdownMenuItem asChild>
-                  <Link to="/add-note" className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors">
-                    <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
-                      <FileText size={16} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-slate-700 text-sm">New Note</p>
-                      <p className="text-xs text-slate-400">Add reminder</p>
-                    </div>
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button className="btn-primary h-9 px-3.5 rounded-xl text-xs font-semibold gap-1.5 shadow-sm">
+                    <Plus size={15} />
+                    <span className="hidden sm:inline">New Record</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 rounded-2xl p-2 bg-white border border-slate-200 shadow-xl shadow-slate-900/5"
+                >
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/add-works"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+                        <FileText size={16} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-800 text-xs">New Work</p>
+                        <p className="text-[11px] text-slate-400">RSP / IRSP item</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/add-contingency"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                        <FileText size={16} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-800 text-xs">New Contingency</p>
+                        <p className="text-[11px] text-slate-400">Allocation item</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator className="my-1.5 bg-slate-100" />
+                  <DropdownMenuItem asChild>
+                    <Link
+                      to="/add-note"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                        <FileText size={16} />
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-800 text-xs">New Task Note</p>
+                        <p className="text-[11px] text-slate-400">Dashboard reminder</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
 
-            {/* User Menu */}
+            {/* User Account Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-10 w-10 p-0 rounded-full hover:bg-slate-100 transition-colors" aria-label="Account menu">
-                  <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/70 text-white flex items-center justify-center font-semibold text-sm shadow-sm">
+                <Button
+                  variant="ghost"
+                  className="h-9 w-9 p-0 rounded-full hover:bg-slate-100 transition-colors relative"
+                  aria-label="Account menu"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-teal-700 to-teal-500 text-white flex items-center justify-center font-bold text-xs shadow-sm ring-2 ring-white">
                     {initials}
                   </div>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 rounded-xl p-2 bg-white border border-slate-100 shadow-lg shadow-slate-200/40">
-                <DropdownMenuLabel className="px-3 py-2">
-                  <p className="font-semibold text-slate-900">{user?.name}</p>
-                  <p className="text-xs text-slate-400 font-normal flex items-center gap-1.5 mt-0.5">
+              <DropdownMenuContent
+                align="end"
+                className="w-60 rounded-2xl p-2 bg-white border border-slate-200 shadow-xl shadow-slate-900/5"
+              >
+                <DropdownMenuLabel className="px-3 py-2.5">
+                  <p className="font-bold text-slate-900 text-xs">{user?.name}</p>
+                  <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5 mt-0.5">
                     {isAdmin ? (
                       <>
-                        <ShieldCheck size={12} className="text-primary" />
-                        Admin &middot; Full access
+                        <ShieldCheck size={12} className="text-teal-600" />
+                        Administrator &middot; Full access
                       </>
                     ) : (
                       <>
                         <Eye size={12} className="text-slate-400" />
-                        View only
+                        Viewer &middot; Read only
                       </>
                     )}
                   </p>
@@ -177,23 +217,23 @@ export const Layout = ({ children }: LayoutProps) => {
                   <>
                     <DropdownMenuItem
                       onClick={() => setIsUserAccessModalOpen(true)}
-                      className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors focus:bg-slate-50 focus:text-slate-900"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 cursor-pointer transition-colors focus:bg-slate-50 focus:text-slate-900"
                     >
-                      <Users size={15} className="text-primary" />
-                      <span className="text-sm font-medium">Manage User Access</span>
+                      <Users size={14} className="text-teal-600" />
+                      <span className="text-xs font-semibold">User Access Control</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="my-1 bg-slate-100" />
                   </>
                 )}
                 <DropdownMenuItem
                   onClick={handleLogout}
-                  className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-red-600 hover:bg-red-50 cursor-pointer transition-colors focus:bg-red-50 focus:text-red-600"
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-600 hover:bg-red-50 cursor-pointer transition-colors focus:bg-red-50 focus:text-red-600"
                 >
-                  <LogOut size={15} />
-                  <span className="text-sm font-semibold">Sign out</span>
+                  <LogOut size={14} />
+                  <span className="text-xs font-semibold">Sign out</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="my-1 bg-slate-100" />
-                <div className="px-3 py-1.5 text-[10px] text-slate-400 text-center font-mono">
+                <div className="px-3 py-1 text-[10px] text-slate-400 text-center font-mono">
                   v{APP_VERSION} &middot; Budget Portal
                 </div>
               </DropdownMenuContent>
@@ -201,6 +241,7 @@ export const Layout = ({ children }: LayoutProps) => {
           </div>
         </header>
 
+        {/* Content Area */}
         <main className="flex-1 px-6 lg:px-8 w-full">
           <div className="max-w-[1600px] mx-auto py-6">
             <AnimatePresence mode="wait">

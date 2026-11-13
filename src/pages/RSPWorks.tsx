@@ -1,7 +1,20 @@
-import { useState, useEffect, useCallback } from "react";
-import { TableCell } from '../components/ui/table';
-import { Button } from '../components/ui/button';
-import { Pencil, Trash2, Plus, FileText, AlertCircle } from "lucide-react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { TableCell } from "../components/ui/table";
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import {
+  Pencil,
+  Trash2,
+  Plus,
+  FileText,
+  AlertCircle,
+  Search,
+  X,
+  Filter,
+  CheckCircle2,
+  Clock,
+  IndianRupee,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,13 +25,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '../components/ui/alert-dialog';
-import { useToast } from '../hooks/use-toast';
+} from "../components/ui/alert-dialog";
+import { useToast } from "../hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { db } from '../lib/firebase';
+import { db } from "../lib/firebase";
 import { collection, getDocs, deleteDoc, doc, query, where } from "firebase/firestore";
-import { formatINR } from '../lib/utils';
-import { useAuth } from '@/hooks/useAuth';
+import { formatINR, parseAmount } from "../lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { motion } from "framer-motion";
 
 interface WorkItem {
   id: string;
@@ -40,7 +54,7 @@ const getStatusLabel = (status: string) => {
     de_finance: "DE Sent to Finance",
     de_hqrs: "DE Sent to HQrs",
     work_process: "Work under Process",
-    tender: "Tender",
+    tender: "Tender Stage",
     completed: "Completed",
     indents_placed: "Indents Placed",
   };
@@ -50,18 +64,18 @@ const getStatusLabel = (status: string) => {
 const getStatusStyles = (status: string) => {
   switch (status) {
     case "completed":
-      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+      return "bg-emerald-50 text-emerald-700 border-emerald-200/80";
     case "work_process":
     case "de_process":
-      return "bg-amber-50 text-amber-700 border-amber-200";
+      return "bg-amber-50 text-amber-700 border-amber-200/80";
     case "tender":
-      return "bg-slate-100 text-slate-600 border-slate-200";
+      return "bg-slate-100 text-slate-700 border-slate-200";
     case "de_finance":
-      return "bg-blue-50 text-blue-700 border-blue-200";
+      return "bg-blue-50 text-blue-700 border-blue-200/80";
     case "de_hqrs":
-      return "bg-purple-50 text-purple-700 border-purple-200";
+      return "bg-purple-50 text-purple-700 border-purple-200/80";
     default:
-      return "bg-slate-50 text-slate-500 border-slate-100";
+      return "bg-slate-50 text-slate-500 border-slate-200/60";
   }
 };
 
@@ -69,6 +83,7 @@ const RSPWorks = () => {
   const [works, setWorks] = useState<WorkItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [years, setYears] = useState<string[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -79,15 +94,17 @@ const RSPWorks = () => {
       const worksQuery = query(collection(db, "works"), where("type", "==", "rsp"));
       const querySnapshot = await getDocs(worksQuery);
       const fetchedWorks: WorkItem[] = [];
-      querySnapshot.forEach((doc) => {
+      querySnapshot.forEach((d) => {
         fetchedWorks.push({
-          ...doc.data(),
-          id: doc.id
+          ...d.data(),
+          id: d.id,
         } as WorkItem);
       });
       setWorks(fetchedWorks);
 
-      const uniqueYears = [...new Set(fetchedWorks.map(w => w.yearOfSanction).filter(Boolean))].sort().reverse();
+      const uniqueYears = [
+        ...new Set(fetchedWorks.map((w) => w.yearOfSanction).filter(Boolean)),
+      ].sort().reverse();
       setYears(uniqueYears);
     } catch (error) {
       console.error("Error fetching works:", error);
@@ -119,109 +136,210 @@ const RSPWorks = () => {
   };
 
   const handleEdit = (work: WorkItem) => {
-    localStorage.setItem('editWork', JSON.stringify(work));
-    navigate('/add-works');
+    localStorage.setItem("editWork", JSON.stringify(work));
+    navigate("/add-works");
   };
 
-  const filteredWorks = selectedYear === "all"
-    ? works
-    : works.filter(work => work.yearOfSanction === selectedYear);
+  // Filter works by both year and search query
+  const filteredWorks = useMemo(() => {
+    return works.filter((w) => {
+      const matchesYear = selectedYear === "all" || w.yearOfSanction === selectedYear;
+      if (!matchesYear) return false;
+
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        w.description?.toLowerCase().includes(q) ||
+        w.pbNo?.toLowerCase().includes(q) ||
+        w.yearOfSanction?.toLowerCase().includes(q) ||
+        w.status?.toLowerCase().includes(q) ||
+        w.remarks?.toLowerCase().includes(q)
+      );
+    });
+  }, [works, selectedYear, searchQuery]);
+
+  // Summary Metrics
+  const totalSanctionedCost = useMemo(() => {
+    return filteredWorks.reduce((acc, w) => acc + (parseAmount(w.rbSanctionedCost) ?? 0), 0);
+  }, [filteredWorks]);
+
+  const completedCount = useMemo(() => {
+    return filteredWorks.filter((w) => w.status === "completed").length;
+  }, [filteredWorks]);
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-5">
+      {/* Header and Action Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-            <FileText size={24} />
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center border border-teal-100 shadow-sm shrink-0">
+            <FileText size={22} />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">RSP Works</h1>
-            <p className="text-sm text-slate-500 font-medium">
-              {filteredWorks.length} records found
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
+                RSP Works Program
+              </h1>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                {filteredWorks.length} Records
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 font-medium mt-0.5">
+              Rolling Stock Program works &amp; detailed estimates &middot; Carriage Workshop LGD
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Year Filter */}
-          {years.length > 0 && (
-            <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-lg">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Quick Search */}
+          <div className="relative w-full sm:w-64">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Input
+              type="text"
+              placeholder="Search description, PB, status..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-9 pl-9 pr-8 text-xs rounded-xl border-slate-200/80 bg-white"
+            />
+            {searchQuery && (
               <button
-                onClick={() => setSelectedYear("all")}
-                className={`px-4 py-2 rounded-md text-xs font-semibold transition-colors ${
-                  selectedYear === "all" ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-700"
-                }`}
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               >
-                All
+                <X size={13} />
               </button>
-              {years.map((year) => (
-                <button
-                  key={year}
-                  onClick={() => setSelectedYear(year)}
-                  className={`px-4 py-2 rounded-md text-xs font-semibold transition-colors ${
-                    selectedYear === year ? "bg-white text-primary shadow-sm" : "text-slate-500 hover:text-slate-700"
-                  }`}
-                >
-                  {year}
-                </button>
-              ))}
-            </div>
-          )}
+            )}
+          </div>
 
+          {/* New Work Button (Admin) */}
           {isAdmin && (
             <Button
               onClick={() => {
-                localStorage.removeItem('editWork');
-                navigate('/add-works');
+                localStorage.removeItem("editWork");
+                navigate("/add-works");
               }}
-              className="btn-primary h-10 px-5"
+              className="btn-primary h-9 px-4 rounded-xl text-xs font-semibold gap-1.5 shrink-0"
             >
-              <Plus size={18} />
-              New
+              <Plus size={15} />
+              <span>Add Work</span>
             </Button>
           )}
         </div>
       </div>
 
-      {/* Table */}
-      <div className="bg-white overflow-hidden">
+      {/* Metrics Strip & Year Filter Bar */}
+      <div className="glass-card p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        {/* KPI Mini Badges */}
+        <div className="flex flex-wrap items-center gap-3 text-xs">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200/60">
+            <FileText size={13} className="text-slate-500" />
+            <span className="text-slate-500 font-medium">Total:</span>
+            <span className="font-bold text-slate-900 font-mono">{filteredWorks.length}</span>
+          </div>
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200/60">
+            <CheckCircle2 size={13} className="text-emerald-600" />
+            <span className="font-medium">Completed:</span>
+            <span className="font-bold font-mono">{completedCount}</span>
+          </div>
+
+          {totalSanctionedCost > 0 && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-50 text-teal-800 border border-teal-200/60">
+              <IndianRupee size={13} className="text-teal-600" />
+              <span className="font-medium">Sanctioned:</span>
+              <span className="font-bold font-mono">₹{totalSanctionedCost.toLocaleString("en-IN")}</span>
+            </div>
+          )}
+        </div>
+
+        {/* Year Pills Filter */}
+        {years.length > 0 && (
+          <div className="flex items-center gap-1 p-1 bg-slate-100 rounded-xl shrink-0 overflow-x-auto max-w-full">
+            <button
+              onClick={() => setSelectedYear("all")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                selectedYear === "all"
+                  ? "bg-white text-teal-700 shadow-sm"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              All Years
+            </button>
+            {years.map((year) => (
+              <button
+                key={year}
+                onClick={() => setSelectedYear(year)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  selectedYear === year
+                    ? "bg-white text-teal-700 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                {year}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Excel-Style High Density Grid */}
+      <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full table-fixed text-left text-xs border-collapse border border-slate-300">
+          <table className="w-full table-fixed text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-100 text-xs font-semibold text-slate-700">
-                <th className="w-[22%] px-3 py-2 text-left border border-slate-300">Description</th>
-                <th className="w-[8%] px-2 py-2 text-center border border-slate-300">Year</th>
-                <th className="w-[10%] px-2 py-2 text-center border border-slate-300">PB No</th>
-                <th className="w-[15%] px-2 py-2 text-right border border-slate-300">Sanctioned Cost</th>
-                <th className="w-[8%] px-2 py-2 text-center border border-slate-300">Qty</th>
-                <th className="w-[15%] px-2 py-2 text-right border border-slate-300">DE Value</th>
-                <th className="w-[12%] px-2 py-2 text-center border border-slate-300">Status</th>
-                <th className="w-[10%] px-2 py-2 text-right border border-slate-300">Actions</th>
+              <tr className="bg-slate-100/90 text-xs font-bold text-slate-700 border-b border-slate-200">
+                <th className="w-[24%] px-3.5 py-2.5 text-left border-r border-slate-200/70">
+                  Work Description
+                </th>
+                <th className="w-[8%] px-2 py-2.5 text-center border-r border-slate-200/70">
+                  Period
+                </th>
+                <th className="w-[10%] px-2 py-2.5 text-center border-r border-slate-200/70">
+                  PB No
+                </th>
+                <th className="w-[14%] px-2 py-2.5 text-right border-r border-slate-200/70">
+                  Sanctioned Cost
+                </th>
+                <th className="w-[8%] px-2 py-2.5 text-center border-r border-slate-200/70">
+                  Qty
+                </th>
+                <th className="w-[14%] px-2 py-2.5 text-right border-r border-slate-200/70">
+                  DE Total Value
+                </th>
+                <th className="w-[12%] px-2 py-2.5 text-center border-r border-slate-200/70">
+                  Status
+                </th>
+                <th className="w-[10%] px-2 py-2.5 text-center">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-16 text-center">
-                    <div className="w-8 h-8 border-2 border-slate-200 border-t-primary rounded-full animate-spin mx-auto" />
-                    <p className="text-xs text-slate-400 mt-4">Loading records...</p>
+                    <div className="w-8 h-8 border-2 border-slate-200 border-t-teal-600 rounded-full animate-spin mx-auto" />
+                    <p className="text-xs text-slate-400 mt-3 font-medium">Loading RSP records...</p>
                   </td>
                 </tr>
               ) : filteredWorks.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-16 text-center">
-                    <div className="w-14 h-14 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                      <AlertCircle size={24} className="text-slate-300" />
+                    <div className="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+                      <AlertCircle size={22} />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-700">No RSP works registered</h3>
-                    <p className="text-xs text-slate-400 mt-1 mb-4">
-                      Start by adding your first RSP work to the system.
+                    <h3 className="text-sm font-bold text-slate-800">No matching works found</h3>
+                    <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                      {searchQuery
+                        ? `No RSP works match your query "${searchQuery}".`
+                        : "No RSP works are registered for the selected period."}
                     </p>
                     {isAdmin && (
-                      <Button onClick={() => navigate('/add-works')} className="btn-primary px-6">
-                        <Plus size={16} className="mr-2" />
-                        Add Work
+                      <Button
+                        onClick={() => navigate("/add-works")}
+                        className="btn-primary h-8 px-4 text-xs font-semibold rounded-xl mt-3 mx-auto"
+                      >
+                        <Plus size={14} className="mr-1" />
+                        Add First Work
                       </Button>
                     )}
                   </td>
@@ -230,92 +348,121 @@ const RSPWorks = () => {
                 filteredWorks.map((work) => (
                   <tr
                     key={work.id}
-                    className="hover:bg-sky-50/60 transition-colors group [&>td]:border [&>td]:border-slate-300 [&>td]:overflow-hidden"
+                    className="hover:bg-teal-50/40 transition-colors group [&>td]:border-r [&>td]:border-slate-100 [&>td:last-child]:border-r-0"
                   >
-                    <TableCell className="px-3 py-1.5">
+                    {/* Description */}
+                    <TableCell className="px-3.5 py-2">
                       <div className="min-w-0">
-                        <p className="text-xs font-medium text-slate-800 truncate" title={work.description || '-'}>{work.description || '-'}</p>
+                        <p
+                          className="text-xs font-medium text-slate-800 truncate"
+                          title={work.description || "-"}
+                        >
+                          {work.description || "-"}
+                        </p>
                         {work.remarks && (
-                          <p className="text-xs text-slate-400 mt-0.5 truncate" title={work.remarks}>"{work.remarks}"</p>
+                          <p
+                            className="text-[11px] text-slate-400 italic truncate mt-0.5"
+                            title={work.remarks}
+                          >
+                            &ldquo;{work.remarks}&rdquo;
+                          </p>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="px-2 py-1.5 text-center">
-                      <span className="block truncate text-xs font-semibold text-slate-500" title={work.yearOfSanction || '-'}>{work.yearOfSanction || '-'}</span>
+
+                    {/* Year */}
+                    <TableCell className="px-2 py-2 text-center">
+                      <span className="font-mono text-xs text-slate-600 font-semibold">
+                        {work.yearOfSanction || "-"}
+                      </span>
                     </TableCell>
-                    <TableCell className="px-2 py-1.5 text-center">
-                      <span className="block truncate text-xs font-mono font-semibold text-slate-400" title={work.pbNo || '-'}>{work.pbNo || '-'}</span>
+
+                    {/* PB No */}
+                    <TableCell className="px-2 py-2 text-center">
+                      <span className="font-mono text-xs text-slate-500 font-bold bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200/50">
+                        {work.pbNo || "-"}
+                      </span>
                     </TableCell>
-                    <TableCell className="px-2 py-1.5 text-right">
-                      <span className="block truncate text-xs font-semibold text-slate-900 tabular-nums" title={formatINR(work.rbSanctionedCost)}>
+
+                    {/* Sanctioned Cost */}
+                    <TableCell className="px-2 py-2 text-right">
+                      <span className="font-mono text-xs font-semibold text-slate-900 tabular-nums">
                         {formatINR(work.rbSanctionedCost)}
                       </span>
                     </TableCell>
-                    <TableCell className="px-2 py-1.5 text-center">
-                      <span className="block truncate text-xs font-semibold text-slate-600" title={work.qtySanctioned || '-'}>{work.qtySanctioned || '-'}</span>
+
+                    {/* Quantity */}
+                    <TableCell className="px-2 py-2 text-center">
+                      <span className="font-mono text-xs text-slate-600">
+                        {work.qtySanctioned ? `${work.qtySanctioned}` : "-"}
+                      </span>
                     </TableCell>
-                    <TableCell className="px-2 py-1.5 text-right">
-                      <span className="block truncate text-xs font-medium text-slate-600 tabular-nums" title={formatINR(work.deTotalValue)}>
+
+                    {/* DE Total Value */}
+                    <TableCell className="px-2 py-2 text-right">
+                      <span className="font-mono text-xs font-semibold text-teal-700 tabular-nums">
                         {formatINR(work.deTotalValue)}
                       </span>
                     </TableCell>
-                    <TableCell className="px-2 py-1.5 text-center">
-                      <span className={`inline-block max-w-full break-words rounded-md border px-1.5 py-0.5 text-xs font-semibold leading-tight ${getStatusStyles(work.status)}`} title={getStatusLabel(work.status)}>
+
+                    {/* Status */}
+                    <TableCell className="px-2 py-2 text-center">
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border truncate max-w-full ${getStatusStyles(
+                          work.status
+                        )}`}
+                      >
                         {getStatusLabel(work.status)}
                       </span>
                     </TableCell>
-                    <TableCell className="px-2 py-1.5 text-right">
-                      {isAdmin ? (
-                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label={`Edit ${work.description || 'work'}`}
-                            className="h-6 w-6 xl:h-8 xl:w-8 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-md"
-                            onClick={() => handleEdit(work)}
-                          >
-                            <Pencil size={15} />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                aria-label={`Delete ${work.description || 'work'}`}
-                                className="h-6 w-6 xl:h-8 xl:w-8 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-md"
-                              >
-                                <Trash2 size={15} />
-                              </Button>
-                            </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-xl border-none shadow-xl max-w-md">
-                            <AlertDialogHeader>
-                              <div className="w-12 h-12 rounded-lg bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-4">
-                                <Trash2 size={24} />
-                              </div>
-                              <AlertDialogTitle className="text-xl font-bold text-slate-900 text-center">
-                                Delete this record?
-                              </AlertDialogTitle>
-                              <AlertDialogDescription className="text-slate-500 text-center">
-                                This action will permanently remove the record from the database.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter className="mt-6 gap-2">
-                              <AlertDialogCancel className="flex-1 h-11 rounded-lg border-slate-200 font-semibold">
-                                Cancel
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(work.id)}
-                                className="flex-1 h-11 bg-red-600 hover:bg-red-700 rounded-lg font-semibold"
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-slate-300">&mdash;</span>
-                      )}
+
+                    {/* Actions */}
+                    <TableCell className="px-2 py-2 text-center">
+                      <div className="flex items-center justify-center gap-1 opacity-80 group-hover:opacity-100 transition-opacity">
+                        {isAdmin ? (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleEdit(work)}
+                              className="p-1 rounded-lg text-slate-400 hover:text-teal-700 hover:bg-teal-50 transition-colors"
+                              title="Edit work record"
+                            >
+                              <Pencil size={13} />
+                            </button>
+
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <button
+                                  type="button"
+                                  className="p-1 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                  title="Delete record"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent className="rounded-2xl">
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete this RSP work?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    This action will permanently remove this record from the database.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(work.id)}
+                                    className="bg-red-600 hover:bg-red-700 text-white rounded-xl"
+                                  >
+                                    Delete Record
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </>
+                        ) : (
+                          <span className="text-[10px] text-slate-400 font-medium">Read-only</span>
+                        )}
+                      </div>
                     </TableCell>
                   </tr>
                 ))
